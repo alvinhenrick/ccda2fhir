@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = ["crates/ccda-model"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+roxmltree = "0.20"
+thiserror = "2"
