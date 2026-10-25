@@ -57,7 +57,7 @@ jobs:
               | grep -E "^\s*$level @" | grep -v "dom-6" | sed -E 's/^\s+//; s/%/%25/g' | sort -u | head -10 \
               | while IFS= read -r line; do echo "::${level,,}::${line:0:480}"; done
           done
-          grep -hE "^(Success|\*FAILURE\*)|Unable to|Error fetching" target/validation/*.validation.txt 2>/dev/null | head -5 \
+          grep -hE "^(Success|\*FAILURE\*)|Unable to|Error fetching" target/validation/*.validation.txt 2>/dev/null | head -30 \
             | while IFS= read -r line; do echo "::notice::${line:0:300}"; done
       - name: Upload validation output
         if: always()
