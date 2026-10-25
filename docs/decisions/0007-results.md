@@ -13,3 +13,7 @@ Status: accepted. Source: IG page "CF-results", ConceptMaps `CF-ResultStatus` an
 - `issued` (required by US Core for final reports) has no C-CDA source. It is taken from the latest author time, else
   the end of the effective time, when that reaches the second with an offset; reported as `results.issued.derived`.
   Without one, the US Core lab profile is not claimed.
+
+## Update (docs refresh)
+
+Done since: specimens and the organizer's specimen collection procedure (ADR 0018) and comments (ADR 0034). The category is still assumed to be laboratory and reported (`results.category.assumed-laboratory`); that remains the known gap.

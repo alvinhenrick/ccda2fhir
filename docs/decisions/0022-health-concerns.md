@@ -12,3 +12,7 @@ this follows C-CDA and US Core Condition Problems and Health Concerns.
 - Anything else inside the concern, or an empty concern, is reported (`healthconcern.nested.unsupported`, `healthconcern.empty`).
 - The concern's own code (75310-3) and statusCode are not mapped: they describe the wrapper, not a condition.
 - Not mapped yet: pointers at non-Condition entries (allergies, results, social history), and the Risk Concern Act.
+
+## Update (docs refresh)
+
+Done since: the Risk Concern Act (ADR 0034). Pointers at allergies, results and social history are still not mapped.

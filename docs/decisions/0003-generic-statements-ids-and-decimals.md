@@ -32,3 +32,7 @@ Every clinical domain in C-CDA is a nest of the same few elements (`act`, `obser
 ## Not yet done (tracked in docs/coverage.md)
 Authors to `recorder`/`recordedDate`/Provenance, Comment Activity to `note`, supporting
 observations to `evidence`, `meta.profile`, Bundle `fullUrl`s, and validator confirmation.
+
+## Update (docs refresh)
+
+Done since this was written: authors and Provenance (ADR 0004), Comment Activity to `note` (ADR 0034), `meta.profile` (ADR 0021), Bundle `fullUrl`s, and validator confirmation in CI. Supporting observations (SPRT) to `evidence` are still reported, not mapped.

@@ -16,3 +16,7 @@ Observation (4.44), Planned Act (4.39), the activity templates written with a no
 - `us-core-servicerequest` is claimed only with category, authoredOn and requester.
 - Not mapped yet: planned medications and supplies (medication mapper), Instructions (4.20), performers, `Appointment` for
   scheduled visits, `CarePlan.activity` links to these requests.
+
+## Update (docs refresh)
+
+Done since: planned medications and Instructions (ADR 0024), `Appointment` for scheduled visits and `CarePlan.activity` links (ADR 0034), referral performers (ADR 0036 onward). Planned supplies and planned immunizations are still not mapped.

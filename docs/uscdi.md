@@ -8,7 +8,7 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 | | related person name and relationship | done | guardians, participants, family contacts |
 | | tribal affiliation, sex | done | Patient extensions `us-core-tribal-affiliation` and `us-core-sex` (ADR 0046) |
 | | occupation, industry | done | social-history Observations (US Core Occupation) |
-| | sexual orientation, gender identity | partial | v3 only; v3.1 removed them; Observation or reported, no Patient extension yet |
+| | sexual orientation, gender identity | done | v3 only (v3.1 removed them); sexual orientation is an Observation (ADR 0035), gender identity a Patient extension (ADR 0011) |
 | Allergies and intolerances | substance (medication, drug class), reaction | done | |
 | Problems | problems, date of diagnosis, date of resolution | done | onset and abatement |
 | | SDOH problems/health concerns | done | `sdoh` category from ICD-10-CM Z55 to Z65; golden `sdoh` (ADR 0036) |
@@ -24,7 +24,7 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 | Provenance | author organization, author time stamp | done | |
 | Clinical notes | consultation, discharge summary, H&P, procedure, progress | done | Note Activity and unstructured documents |
 | | imaging, laboratory and pathology report narratives | partial | narrative kept as text; no DiagnosticReport presentedForm |
-| Medications | medications, dose, dose unit, indication, fill status | done | |
+| Medications | medications, dose, dose unit, indication, fill status | done | supply orders and dispenses too (ADR 0041) |
 | Implantable device UDI | UDI | done | |
 | Clinical tests | clinical test and result/report | done | Observation and DiagnosticReport |
 | Diagnostic imaging | imaging test | done | ImagingStudy from the DICOM Object Catalog (ADR 0040) |
@@ -32,4 +32,4 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 | Vital signs | all vital signs and percentiles | done | |
 | Encounter information | type, diagnosis, time, location, disposition | done | |
 | Goals | patient goals | done | |
-| Health insurance | coverage status and type, relationship, member, subscriber, group, payer | done | |
+| Health insurance | coverage status and type, relationship, member, subscriber id, group, payer | done | subscriber as a person is a known gap (`docs/coverage.md`) |

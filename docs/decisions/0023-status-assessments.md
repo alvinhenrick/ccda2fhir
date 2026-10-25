@@ -13,3 +13,7 @@ Status: accepted. No IG page covers these; this follows C-CDA and US Core (Simpl
 - `us-core-simple-observation` is claimed for functional and cognitive status when the Observation has a coded `code`, a value and a time.
 - Not mapped yet: Assessment Scale Observations (4.69) and their supporting observations, Caregiver Characteristics (4.72), Disability
   Status, and the Mental Status template OIDs 4.284 and 4.285 are taken from C-CDA 3.0 and have no sample in the test corpus yet.
+
+## Update (docs refresh)
+
+Done since: Assessment Scale Observations (ADR 0029) and Disability Status and Caregiver Characteristics (ADR 0034).

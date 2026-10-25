@@ -28,3 +28,7 @@ Status: accepted. The C-CDA on FHIR document profiles are outdated, so this foll
 - An author that is software becomes a `Device`, one that is only an organization an `Organization`.
 - `documentationOf/serviceEvent` becomes `Composition.event`: `code`, `period` from its effective time, and its performers as
   Practitioners in `detail` (`event` has no performer element; the performer's function code is not mapped yet).
+
+## Update (docs refresh)
+
+Done since: `attester` (ADR 0030), `encounter` from the encompassing encounter (ADR 0026), `event` and `relatesTo` (ADR 0030). The function code of an event performer is still not mapped. Version and set id remain unmapped.

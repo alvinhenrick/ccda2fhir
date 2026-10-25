@@ -13,3 +13,7 @@ Status: accepted. Source: IG page "CF-patient" and CSV.
   UNK for birth sex). The social mapper skips them.
 - Guardians become `contact` entries. The provider organization is not mapped yet because the Patient is built before the
   shared organization registry exists.
+
+## Update (docs refresh)
+
+Done since: `managingOrganization` from `providerOrganization` (ADR 0031), applied after the organizations are built.
