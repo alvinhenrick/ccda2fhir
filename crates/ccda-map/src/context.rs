@@ -23,6 +23,8 @@ pub struct Context<'a> {
     /// Locations and specimens already created, by identity key.
     pub(crate) locations: BTreeMap<String, String>,
     pub(crate) specimens: BTreeMap<String, String>,
+    /// Device ids by UDI, so a procedure can point at a device that is mapped later.
+    pub(crate) devices: BTreeMap<String, String>,
     /// Supporting resources (Practitioner, Organization, Provenance) created by mappers.
     extra: Vec<Value>,
 }
@@ -47,6 +49,7 @@ impl<'a> Context<'a> {
             organizations: BTreeMap::new(),
             locations: BTreeMap::new(),
             specimens: BTreeMap::new(),
+            devices: BTreeMap::new(),
             extra: Vec::new(),
         }
     }

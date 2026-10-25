@@ -197,6 +197,14 @@ fn map_activity(s: &Statement, ctx: &mut Context) -> Value {
     let authors: Vec<_> = s.authors.iter().collect();
     apply_authors(&mut r, FIELDS, &authors, ctx);
     r.remove("_authored");
+    let devices = crate::device::device_references(s, ctx);
+    if !devices.is_empty() {
+        let focal: Vec<Value> = devices
+            .into_iter()
+            .map(|d| json!({ "manipulated": { "reference": d } }))
+            .collect();
+        r.insert("focalDevice".into(), json!(focal));
+    }
     Value::Object(r)
 }
 
