@@ -479,3 +479,16 @@ status assessments, planned medications, instructions and procedure observations
   SNOMED, a robustness hack worth considering as an opt-in repair.
 - **OID table.** Entries are added as fixtures need them (NCI Thesaurus, v3 ActReason so far); the table
   still needs a full review against the HL7 OID registry.
+
+## Patient completeness
+
+See `docs/decisions/0031-patient-completeness.md`.
+
+| C-CDA | FHIR | Status | Test |
+|---|---|---|---|
+| `sdtc:deceasedInd`, `sdtc:deceasedTime` | `deceased[x]` | done | golden `patient_details` |
+| `name/validTime`, `addr/useablePeriod` | `period` | done | golden `patient_details` |
+| `religiousAffiliationCode` | `patient-religion` extension | done | golden `patient_details` |
+| `modeCode`, `proficiencyLevelCode` | `patient-proficiency` extension | done | golden `patient_details` |
+| `id@assigningAuthorityName` | `Identifier.assigner.display` | done | golden `patient_details` |
+| `providerOrganization` | `managingOrganization` | done | golden `patient_details` |

@@ -4,7 +4,7 @@ use roxmltree::Node;
 
 use crate::types::{identifiers, parse_code, Narrative};
 use crate::xml::{attr, child, children, path, text_of};
-use crate::{Code, Identifier};
+use crate::{AuthorOrganization, Code, Identifier};
 
 /// A person name (`name`) with its parts.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -15,6 +15,9 @@ pub struct PersonName {
     pub given: Vec<String>,
     pub family: Option<String>,
     pub suffix: Vec<String>,
+    /// `validTime` of the name, raw HL7 timestamps.
+    pub valid_from: Option<String>,
+    pub valid_to: Option<String>,
 }
 
 /// An address (`addr`).
@@ -26,6 +29,9 @@ pub struct Address {
     pub state: Option<String>,
     pub postal_code: Option<String>,
     pub country: Option<String>,
+    /// `useablePeriod` low and high, raw HL7 timestamps.
+    pub period_low: Option<String>,
+    pub period_high: Option<String>,
 }
 
 /// A telecom (`telecom`): `tel:`, `mailto:`, `fax:` or a URL.
@@ -40,6 +46,9 @@ pub struct Telecom {
 pub struct Language {
     pub code: Option<String>,
     pub preferred: Option<bool>,
+    /// `modeCode` (expressed spoken, written, ...) and `proficiencyLevelCode`.
+    pub mode: Option<Code>,
+    pub proficiency: Option<Code>,
 }
 
 /// A `guardian` of the patient.
@@ -73,6 +82,13 @@ pub struct Patient {
     pub ethnic_codes: Vec<Code>,
     pub languages: Vec<Language>,
     pub guardians: Vec<Guardian>,
+    /// `religiousAffiliationCode`
+    pub religion: Option<Code>,
+    /// `sdtc:deceasedInd` and `sdtc:deceasedTime`.
+    pub deceased_ind: Option<bool>,
+    pub deceased_time: Option<String>,
+    /// `patientRole/providerOrganization`
+    pub provider_organization: Option<AuthorOrganization>,
 }
 
 fn parse_name(node: &Node) -> PersonName {
@@ -84,6 +100,12 @@ fn parse_name(node: &Node) -> PersonName {
         given: texts("given"),
         family: child(node, "family").and_then(|n| text_of(&n)),
         suffix: texts("suffix"),
+        valid_from: child(node, "validTime")
+            .and_then(|v| child(&v, "low"))
+            .and_then(|n| attr(&n, "value")),
+        valid_to: child(node, "validTime")
+            .and_then(|v| child(&v, "high"))
+            .and_then(|n| attr(&n, "value")),
     }
 }
 
@@ -98,6 +120,12 @@ pub(crate) fn parse_address(node: &Node) -> Address {
         state: text("state"),
         postal_code: text("postalCode"),
         country: text("country"),
+        period_low: child(node, "useablePeriod")
+            .and_then(|v| child(&v, "low"))
+            .and_then(|n| attr(&n, "value")),
+        period_high: child(node, "useablePeriod")
+            .and_then(|v| child(&v, "high"))
+            .and_then(|n| attr(&n, "value")),
     }
 }
 
@@ -143,6 +171,14 @@ pub(crate) fn parse_patient(root: &Node) -> Patient {
             .collect()
     };
 
+    let deceased_ind = local(&patient, "deceasedInd")
+        .next()
+        .and_then(|n| attr(&n, "value"))
+        .map(|v| v == "true");
+    let deceased_time = local(&patient, "deceasedTime")
+        .next()
+        .and_then(|n| attr(&n, "value"));
+
     Patient {
         given,
         family,
@@ -163,8 +199,15 @@ pub(crate) fn parse_patient(root: &Node) -> Patient {
                 preferred: child(&l, "preferenceInd")
                     .and_then(|n| attr(&n, "value"))
                     .map(|v| v == "true"),
+                mode: child(&l, "modeCode").map(|n| parse_code(&n, &narrative)),
+                proficiency: child(&l, "proficiencyLevelCode").map(|n| parse_code(&n, &narrative)),
             })
             .collect(),
+        religion: child(&patient, "religiousAffiliationCode").map(|n| parse_code(&n, &narrative)),
+        deceased_ind,
+        deceased_time,
+        provider_organization: child(&role, "providerOrganization")
+            .map(|o| crate::body::parse_organization(&o)),
         guardians: children(&patient, "guardian")
             .map(|g| Guardian {
                 relationship: child(&g, "code").map(|n| parse_code(&n, &narrative)),

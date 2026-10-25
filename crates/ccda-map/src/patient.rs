@@ -109,6 +109,13 @@ pub fn map_patient(
         report,
     ));
     extensions.extend(sex_and_gender_identity(doc, terminology, report));
+    if let Some(r) = patient
+        .religion
+        .as_ref()
+        .and_then(|c| map_codeable_concept(c, terminology, report))
+    {
+        extensions.push(json!({ "url": RELIGION_URL, "valueCodeableConcept": r }));
+    }
     if !extensions.is_empty() {
         resource.insert("extension".into(), json!(extensions));
     }
@@ -125,6 +132,25 @@ pub fn map_patient(
             );
             if let Some(p) = l.preferred {
                 c.insert("preferred".into(), json!(p));
+            }
+            let coding_of = |code: &Option<ccda_model::Code>, report: &mut Report| {
+                code.as_ref()
+                    .and_then(|c| map_codeable_concept(c, terminology, report))
+                    .map(|cc| cc["coding"][0].clone())
+                    .filter(|c| !c.is_null())
+            };
+            let mut proficiency: Vec<Value> = Vec::new();
+            if let Some(level) = coding_of(&l.proficiency, report) {
+                proficiency.push(json!({ "url": "level", "valueCoding": level }));
+            }
+            if let Some(mode) = coding_of(&l.mode, report) {
+                proficiency.push(json!({ "url": "type", "valueCoding": mode }));
+            }
+            if !proficiency.is_empty() {
+                c.insert(
+                    "extension".into(),
+                    json!([{ "url": PROFICIENCY_URL, "extension": proficiency }]),
+                );
             }
             Some(Value::Object(c))
         })
@@ -170,6 +196,21 @@ pub fn map_patient(
         resource.insert("contact".into(), json!(contacts));
     }
 
+    if let Some(raw) = patient.deceased_time.as_deref() {
+        match crate::map_datetime(raw, report) {
+            Some(d) => {
+                resource.insert("deceasedDateTime".into(), json!(d));
+            }
+            None => {
+                if let Some(b) = patient.deceased_ind {
+                    resource.insert("deceasedBoolean".into(), json!(b));
+                }
+            }
+        }
+    } else if let Some(b) = patient.deceased_ind {
+        resource.insert("deceasedBoolean".into(), json!(b));
+    }
+
     if let Some(raw) = &patient.birth_time {
         match hl7_date_to_fhir_date(raw) {
             Some(date) => {
@@ -211,7 +252,21 @@ fn human_name(n: &PersonName) -> Option<Value> {
             out.insert(key.into(), json!(parts));
         }
     }
+    if let Some(period) = period_of(n.valid_from.as_deref(), n.valid_to.as_deref()) {
+        out.insert("period".into(), period);
+    }
     Some(Value::Object(out))
+}
+
+/// A FHIR `Period` from raw HL7 dates (a date is as precise as the document gave it).
+fn period_of(low: Option<&str>, high: Option<&str>) -> Option<Value> {
+    let mut period = Map::new();
+    for (key, raw) in [("start", low), ("end", high)] {
+        if let Some(d) = raw.and_then(hl7_date_to_fhir_date) {
+            period.insert(key.into(), json!(d));
+        }
+    }
+    (!period.is_empty()).then_some(Value::Object(period))
 }
 
 /// A header `participant` (`associatedEntity`: next of kin, emergency contact, ...) as a
@@ -259,6 +314,22 @@ fn participant_contact(
     has_detail.then_some(Value::Object(c))
 }
 
+const RELIGION_URL: &str = "http://hl7.org/fhir/StructureDefinition/patient-religion";
+const PROFICIENCY_URL: &str = "http://hl7.org/fhir/StructureDefinition/patient-proficiency";
+
+/// Link the Patient to the organization that provides the care (`providerOrganization`).
+pub fn link_managing_organization(
+    doc: &ClinicalDocument,
+    ctx: &mut crate::Context,
+    patient: &mut Value,
+) {
+    if let Some(org) = doc.patient.provider_organization.as_ref() {
+        if let Some(reference) = crate::author::register_organization(org, ctx) {
+            patient["managingOrganization"] = json!({ "reference": reference });
+        }
+    }
+}
+
 pub(crate) fn address(a: &Address) -> Option<Value> {
     let mut out = Map::new();
     match a.use_code.as_deref() {
@@ -289,7 +360,10 @@ pub(crate) fn address(a: &Address) -> Option<Value> {
             out.insert(key.into(), json!(v));
         }
     }
-    (out.keys().any(|k| k != "use")).then_some(Value::Object(out))
+    if let Some(period) = period_of(a.period_low.as_deref(), a.period_high.as_deref()) {
+        out.insert("period".into(), period);
+    }
+    (out.keys().any(|k| k != "use" && k != "period")).then_some(Value::Object(out))
 }
 
 pub(crate) fn telecom(t: &Telecom) -> Option<Value> {
@@ -500,6 +574,7 @@ mod tests {
                 root: Some("2.16.840.1.113883.19.5".into()),
                 extension: Some("MRN-1".into()),
                 null_flavor: None,
+                ..Identifier::default()
             }],
             ..Patient::default()
         });

@@ -65,7 +65,7 @@ pub use note::map_notes;
 pub use nullflavor::{
     data_absent_reason_code, data_absent_reason_extension, DATA_ABSENT_REASON_URL,
 };
-pub use patient::{map_patient, PATIENT_ID};
+pub use patient::{link_managing_organization, map_patient, PATIENT_ID};
 pub use problem::map_problems;
 pub use procedure::map_procedures;
 pub use profile::Profiles;

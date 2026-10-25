@@ -301,6 +301,7 @@ mod tests {
                 root: Some("2.16.840.1.113883.19.5".into()),
                 extension: Some("DOC-1".into()),
                 null_flavor: None,
+                ..Identifier::default()
             })
         );
         assert_eq!(doc.effective_time.as_deref(), Some("20250102120000-0500"));
