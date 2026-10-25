@@ -96,3 +96,8 @@ fn social() {
 fn demographics() {
     check("demographics");
 }
+
+#[test]
+fn notes() {
+    check("notes");
+}

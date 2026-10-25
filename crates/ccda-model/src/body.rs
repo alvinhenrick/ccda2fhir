@@ -129,6 +129,17 @@ pub struct ReferenceRange {
     pub value: Option<Value>,
 }
 
+/// The `text` element of a statement when it carries its own content (a note's body).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct TextContent {
+    /// `mediaType`, for example `application/rtf` or `text/plain`.
+    pub media_type: Option<String>,
+    /// `representation`: `B64` or `TXT`.
+    pub representation: Option<String>,
+    /// The element's own text, with no narrative reference resolved into it.
+    pub content: Option<String>,
+}
+
 /// A clinical statement and everything nested under it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Statement {
@@ -142,6 +153,8 @@ pub struct Statement {
     pub code: Option<Code>,
     /// The `text` element: written text, or resolved from the section narrative.
     pub text: Option<String>,
+    /// The `text` element's own media type, representation and content.
+    pub text_content: Option<TextContent>,
     pub status_code: Option<String>,
     pub effective_time: Option<Time>,
     /// Every `effectiveTime` in document order. Medications carry the validity interval first
@@ -363,6 +376,18 @@ fn parse_statement(
         ids: identifiers(node),
         code: child(node, "code").map(|n| parse_code(&n, narrative)),
         text,
+        text_content: child(node, "text").map(|n| TextContent {
+            media_type: attr(&n, "mediaType"),
+            representation: attr(&n, "representation"),
+            content: n
+                .children()
+                .filter(|c| c.is_text())
+                .filter_map(|c| c.text())
+                .map(str::trim)
+                .filter(|t| !t.is_empty())
+                .map(str::to_owned)
+                .reduce(|a, b| a + &b),
+        }),
         status_code: child(node, "statusCode").and_then(|n| attr(&n, "code")),
         effective_time: child(node, "effectiveTime").map(|n| parse_time(&n)),
         effective_times: children(node, "effectiveTime")

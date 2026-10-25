@@ -30,6 +30,13 @@ impl Profiles {
             "Immunization" => "us-core-immunization",
             // US Core requires authoredOn and requester; claim it only when both are present.
             "Observation" => observation_profile(resource)?,
+            "DocumentReference" => {
+                let has_data = resource["content"][0]["attachment"]["data"].is_string();
+                if !(has_data && resource["type"].is_object()) {
+                    return None;
+                }
+                "us-core-documentreference"
+            }
             "Encounter" => {
                 if !(resource["identifier"].is_array()
                     && resource["type"].is_array()
