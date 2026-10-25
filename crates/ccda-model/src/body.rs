@@ -12,7 +12,7 @@ use crate::types::{
     identifiers, is_statement_element, parse_code, parse_time, parse_value, template_ids, Narrative,
 };
 use crate::xml::{attr, child, children, is_hl7, text_of};
-use crate::{Code, Identifier, ParseError, TemplateId, Time, Value};
+use crate::{Code, Identifier, ParseError, Quantity, TemplateId, Time, Value};
 
 /// How deep statements may nest before the parser gives up. Real documents stay far below this.
 pub(crate) const MAX_DEPTH: usize = 32;
@@ -71,7 +71,8 @@ pub struct AuthorOrganization {
     pub name: Option<String>,
 }
 
-/// Who recorded a statement, and when: an `author`.
+/// Who acted on a statement: an `author` (when `time` is the authoring time) or a `performer`
+/// (`assignedEntity`; `time` is the start of `performer/time`, if any).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Author {
     /// `author/time`, raw HL7 timestamp.
@@ -85,6 +86,21 @@ pub struct Author {
     /// `assignedAuthoringDevice/softwareName`: the author is software, not a person.
     pub device_name: Option<String>,
     pub organization: Option<AuthorOrganization>,
+}
+
+/// The product of a `consumable` (a medication or vaccine).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Consumable {
+    /// Templates on `manufacturedProduct` (for example Immunization Medication Information).
+    pub template_ids: Vec<TemplateId>,
+    /// `manufacturedMaterial/code`
+    pub code: Option<Code>,
+    /// `manufacturedMaterial/name`
+    pub name: Option<String>,
+    /// `manufacturedMaterial/lotNumberText`
+    pub lot_number: Option<String>,
+    /// `manufacturerOrganization`
+    pub manufacturer: Option<AuthorOrganization>,
 }
 
 /// A `participant` (for example the allergen of an allergy, or a device).
@@ -122,6 +138,17 @@ pub struct Statement {
     pub values: Vec<Value>,
     pub participants: Vec<Participant>,
     pub authors: Vec<Author>,
+    pub performers: Vec<Author>,
+    /// `repeatNumber/@value` (dose number for immunizations, repeats for orders).
+    pub repeat_number: Option<String>,
+    pub route_code: Option<Code>,
+    pub approach_site_code: Option<Code>,
+    /// `doseQuantity` when it is a plain quantity.
+    pub dose_quantity: Option<Quantity>,
+    /// `doseQuantity` when it is a `low`/`high` interval.
+    pub dose_range: Option<(Option<Quantity>, Option<Quantity>)>,
+    pub administration_unit_code: Option<Code>,
+    pub consumable: Option<Consumable>,
     pub related: Vec<Related>,
 }
 
@@ -186,17 +213,19 @@ fn narrative_of(section: &Node) -> Narrative {
 }
 
 fn parse_author(node: &Node, narrative: &Narrative) -> Author {
-    let assigned = child(node, "assignedAuthor");
+    let time = child(node, "time").and_then(|n| attr(&n, "value"));
+    parse_agent(child(node, "assignedAuthor"), time, narrative)
+}
+
+/// An `assignedAuthor` or `assignedEntity`: ids, role, person name, device, organization.
+fn parse_agent(assigned: Option<Node>, time: Option<String>, narrative: &Narrative) -> Author {
     let person = assigned.and_then(|a| child(&a, "assignedPerson"));
     let name = person.and_then(|p| child(&p, "name"));
     let organization = assigned
         .and_then(|a| child(&a, "representedOrganization"))
-        .map(|o| AuthorOrganization {
-            ids: identifiers(&o),
-            name: child(&o, "name").and_then(|n| text_of(&n)),
-        });
+        .map(|o| parse_organization(&o));
     Author {
-        time: child(node, "time").and_then(|n| attr(&n, "value")),
+        time,
         ids: assigned.as_ref().map(identifiers).unwrap_or_default(),
         role_code: assigned
             .and_then(|a| child(&a, "code"))
@@ -215,6 +244,39 @@ fn parse_author(node: &Node, narrative: &Narrative) -> Author {
             .and_then(|n| text_of(&n)),
         organization,
     }
+}
+
+fn parse_organization(node: &Node) -> AuthorOrganization {
+    AuthorOrganization {
+        ids: identifiers(node),
+        name: child(node, "name").and_then(|n| text_of(&n)),
+    }
+}
+
+fn parse_quantity(node: &Node) -> Quantity {
+    Quantity {
+        value: attr(node, "value"),
+        unit: attr(node, "unit"),
+        null_flavor: attr(node, "nullFlavor"),
+    }
+}
+
+fn parse_consumable(node: &Node, narrative: &Narrative) -> Option<Consumable> {
+    let product = child(node, "manufacturedProduct")?;
+    let material = child(&product, "manufacturedMaterial");
+    Some(Consumable {
+        template_ids: template_ids(&product),
+        code: material
+            .and_then(|m| child(&m, "code"))
+            .map(|n| parse_code(&n, narrative)),
+        name: material
+            .and_then(|m| child(&m, "name"))
+            .and_then(|n| text_of(&n)),
+        lot_number: material
+            .and_then(|m| child(&m, "lotNumberText"))
+            .and_then(|n| text_of(&n)),
+        manufacturer: child(&product, "manufacturerOrganization").map(|o| parse_organization(&o)),
+    })
 }
 
 fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
@@ -288,6 +350,31 @@ fn parse_statement(
         values: children(node, "value")
             .map(|n| parse_value(&n, narrative))
             .collect(),
+        performers: children(node, "performer")
+            .map(|n| {
+                let time = child(&n, "time").and_then(|t| {
+                    attr(&t, "value").or_else(|| child(&t, "low").and_then(|l| attr(&l, "value")))
+                });
+                parse_agent(child(&n, "assignedEntity"), time, narrative)
+            })
+            .collect(),
+        repeat_number: child(node, "repeatNumber").and_then(|n| attr(&n, "value")),
+        route_code: child(node, "routeCode").map(|n| parse_code(&n, narrative)),
+        approach_site_code: child(node, "approachSiteCode").map(|n| parse_code(&n, narrative)),
+        dose_quantity: child(node, "doseQuantity")
+            .filter(|n| child(n, "low").is_none() && child(n, "high").is_none())
+            .map(|n| parse_quantity(&n)),
+        dose_range: child(node, "doseQuantity")
+            .filter(|n| child(n, "low").is_some() || child(n, "high").is_some())
+            .map(|n| {
+                (
+                    child(&n, "low").map(|q| parse_quantity(&q)),
+                    child(&n, "high").map(|q| parse_quantity(&q)),
+                )
+            }),
+        administration_unit_code: child(node, "administrationUnitCode")
+            .map(|n| parse_code(&n, narrative)),
+        consumable: child(node, "consumable").and_then(|n| parse_consumable(&n, narrative)),
         authors: children(node, "author")
             .map(|n| parse_author(&n, narrative))
             .collect(),

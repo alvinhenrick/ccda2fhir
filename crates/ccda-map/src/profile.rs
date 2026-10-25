@@ -27,6 +27,7 @@ impl Profiles {
         let name = match resource["resourceType"].as_str()? {
             "Patient" => "us-core-patient",
             "AllergyIntolerance" => "us-core-allergyintolerance",
+            "Immunization" => "us-core-immunization",
             "Provenance" => "us-core-provenance",
             "Organization" => {
                 if !(resource["name"].is_string() && resource["active"].is_boolean()) {

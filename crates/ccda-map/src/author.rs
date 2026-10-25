@@ -5,7 +5,7 @@
 //! each distinct person and organization becomes one resource, and every target with usable
 //! authors gets a US Core `Provenance`.
 
-use ccda_model::Author;
+use ccda_model::{Author, AuthorOrganization};
 use serde_json::{json, Map, Value};
 
 use crate::{map_datetime, map_identifier, Context};
@@ -43,13 +43,12 @@ fn person_key(author: &Author) -> Option<String> {
         })
 }
 
-fn register_organization(author: &Author, ctx: &mut Context) -> Option<String> {
-    let org = author.organization.as_ref()?;
+pub(crate) fn register_organization(org: &AuthorOrganization, ctx: &mut Context) -> Option<String> {
     if org.name.is_none() {
         // US Core Organization (required by Provenance.agent.onBehalfOf) needs a name.
         ctx.report.info(
             "author.organization.no-name",
-            "an author's organization has no name; it was not mapped",
+            "an organization has no name; it was not mapped",
         );
         return None;
     }
@@ -95,7 +94,7 @@ fn register_organization(author: &Author, ctx: &mut Context) -> Option<String> {
     Some(reference)
 }
 
-fn register_practitioner(author: &Author, ctx: &mut Context) -> Option<String> {
+pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Option<String> {
     let Some(key) = person_key(author) else {
         if author.device_name.is_some() {
             ctx.report.info(
@@ -136,12 +135,28 @@ fn register_practitioner(author: &Author, ctx: &mut Context) -> Option<String> {
     Some(reference)
 }
 
-/// Add `recorder` and `recordedDate` to `resource` and create its `Provenance`.
+/// Where a resource type keeps the author information.
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct AuthorFields {
+    /// The element for the latest author, if the resource has one (`recorder`).
+    pub recorder: Option<&'static str>,
+    /// The element for the earliest author time (`recordedDate` or `recorded`).
+    pub date: &'static str,
+}
+
+/// `Condition` and `AllergyIntolerance`.
+pub(crate) const RECORDER_FIELDS: AuthorFields = AuthorFields {
+    recorder: Some("recorder"),
+    date: "recordedDate",
+};
+
+/// Add the recorder and recorded date to `resource` and create its `Provenance`.
 ///
 /// `authors` should be the statement's own authors, or its concern's when it has none (the IG
 /// recommends that fallback).
 pub(crate) fn apply_authors(
     resource: &mut Map<String, Value>,
+    fields: AuthorFields,
     authors: &[&Author],
     ctx: &mut Context,
 ) {
@@ -153,19 +168,23 @@ pub(crate) fn apply_authors(
     let mut agents: Vec<(&Author, String, Option<String>)> = Vec::new();
     for author in authors {
         if let Some(practitioner) = register_practitioner(author, ctx) {
-            let organization = register_organization(author, ctx);
+            let organization = author
+                .organization
+                .as_ref()
+                .and_then(|org| register_organization(org, ctx));
             agents.push((author, practitioner, organization));
         }
     }
 
     // Latest author wins `recorder`; later in the document breaks ties.
-    if let Some((_, practitioner, _)) = agents
-        .iter()
-        .max_by_key(|(a, _, _)| a.time.as_deref().map(time_key).unwrap_or_default())
-        .filter(|_| !agents.is_empty())
-    {
-        // `max_by_key` returns the last maximum, which is what we want for ties.
-        resource.insert("recorder".into(), json!({ "reference": practitioner }));
+    // `max_by_key` returns the last maximum, which is what we want for ties.
+    if let (Some(field), Some((_, practitioner, _))) = (
+        fields.recorder,
+        agents
+            .iter()
+            .max_by_key(|(a, _, _)| a.time.as_deref().map(time_key).unwrap_or_default()),
+    ) {
+        resource.insert(field.into(), json!({ "reference": practitioner }));
     }
 
     // Earliest author time wins `recordedDate`; earlier in the document breaks ties.
@@ -175,7 +194,7 @@ pub(crate) fn apply_authors(
         .min_by_key(|t| time_key(t));
     let recorded = earliest.and_then(|raw| map_datetime(raw, ctx.report));
     if let Some(date) = &recorded {
-        resource.insert("recordedDate".into(), json!(date));
+        resource.insert(fields.date.into(), json!(date));
     }
 
     if agents.is_empty() {
@@ -263,7 +282,7 @@ mod tests {
         let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
         let mut resource = target();
         let refs: Vec<&Author> = authors.iter().collect();
-        apply_authors(&mut resource, &refs, &mut ctx);
+        apply_authors(&mut resource, RECORDER_FIELDS, &refs, &mut ctx);
         let extra = ctx.take_extra();
         (resource, extra, report)
     }

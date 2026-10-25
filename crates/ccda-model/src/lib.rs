@@ -13,7 +13,7 @@ use roxmltree::{Document, ParsingOptions};
 use thiserror::Error;
 
 pub use body::{
-    Author, AuthorOrganization, Entry, Link, Participant, Related, Section, Statement,
+    Author, AuthorOrganization, Consumable, Entry, Link, Participant, Related, Section, Statement,
     StatementKind,
 };
 pub use header::Patient;
@@ -440,6 +440,72 @@ mod tests {
         assert_eq!(org.ids[0].extension.as_deref(), Some("ORG"));
         assert_eq!(authors[1].device_name.as_deref(), Some("EHR 1.0"));
         assert_eq!(authors[1].ids[0].null_flavor.as_deref(), Some("NA"));
+    }
+
+    #[test]
+    fn parses_medication_style_fields() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <component><structuredBody><component><section>
+    <entry><substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+      <repeatNumber value="2"/>
+      <routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+      <approachSiteCode code="368208006" codeSystem="2.16.840.1.113883.6.96"/>
+      <doseQuantity value="0.5" unit="mL"/>
+      <administrationUnitCode code="C44278" codeSystem="2.16.840.1.113883.3.26.1.1"/>
+      <performer><time><low value="20200101"/></time><assignedEntity>
+        <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+        <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+      </assignedEntity></performer>
+      <consumable><manufacturedProduct>
+        <templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+        <manufacturedMaterial>
+          <code code="88" codeSystem="2.16.840.1.113883.12.292"/>
+          <name>Flu vaccine</name><lotNumberText>LOT1</lotNumberText>
+        </manufacturedMaterial>
+        <manufacturerOrganization><name>Maker Inc</name></manufacturerOrganization>
+      </manufacturedProduct></consumable>
+    </substanceAdministration></entry>
+    <entry><substanceAdministration classCode="SBADM" moodCode="INT">
+      <doseQuantity><low value="1" unit="mg"/><high value="2" unit="mg"/></doseQuantity>
+    </substanceAdministration></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>"#;
+        let doc = parse(xml.as_bytes()).unwrap();
+        let first = &doc.sections[0].entries[0].statement;
+        assert_eq!(first.repeat_number.as_deref(), Some("2"));
+        assert_eq!(
+            first.route_code.as_ref().unwrap().code.as_deref(),
+            Some("C28161")
+        );
+        assert_eq!(
+            first.dose_quantity.as_ref().unwrap().unit.as_deref(),
+            Some("mL")
+        );
+        assert!(first.dose_range.is_none());
+        assert!(first.administration_unit_code.is_some());
+        assert_eq!(first.performers[0].time.as_deref(), Some("20200101"));
+        assert_eq!(first.performers[0].family.as_deref(), Some("Doe"));
+        let consumable = first.consumable.as_ref().unwrap();
+        assert_eq!(consumable.lot_number.as_deref(), Some("LOT1"));
+        assert_eq!(consumable.name.as_deref(), Some("Flu vaccine"));
+        assert_eq!(
+            consumable.code.as_ref().unwrap().code.as_deref(),
+            Some("88")
+        );
+        assert_eq!(
+            consumable.manufacturer.as_ref().unwrap().name.as_deref(),
+            Some("Maker Inc")
+        );
+        assert!(consumable
+            .template_ids
+            .iter()
+            .any(|t| t.root == "2.16.840.1.113883.10.20.22.4.54"));
+
+        let second = &doc.sections[0].entries[1].statement;
+        assert!(second.dose_quantity.is_none());
+        let (low, high) = second.dose_range.as_ref().unwrap();
+        assert_eq!(low.as_ref().unwrap().value.as_deref(), Some("1"));
+        assert_eq!(high.as_ref().unwrap().value.as_deref(), Some("2"));
     }
 
     #[test]

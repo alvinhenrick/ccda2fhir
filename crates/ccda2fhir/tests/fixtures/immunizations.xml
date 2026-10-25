@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-IMMUNIZATIONS-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <effectiveTime value="20250102120000-0500"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0003"/>
+      <patient>
+        <name><given>Carol</given><family>Example</family></name>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19900520"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.2.1"/>
+    <code code="11369-6" codeSystem="2.16.840.1.113883.6.1" displayName="History of Immunization"/>
+    <title>Immunizations</title>
+    <text/>
+    <!-- 1. Completed seasonal flu vaccine with lot, manufacturer, performer and author -->
+    <entry typeCode="DRIV"><substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="false">
+      <templateId root="2.16.840.1.113883.10.20.22.4.52"/>
+      <id root="1.3.6.1.4.1.22812.5.1" extension="IMM-1"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20241010"/>
+      <repeatNumber value="1"/>
+      <routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="Intramuscular Route of Administration"/>
+      <approachSiteCode code="368208006" codeSystem="2.16.840.1.113883.6.96" displayName="Left upper arm structure"/>
+      <doseQuantity value="0.5" unit="mL"/>
+      <consumable><manufacturedProduct classCode="MANU">
+        <templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+        <manufacturedMaterial>
+          <code code="140" codeSystem="2.16.840.1.113883.12.292" displayName="Influenza, seasonal, injectable, preservative free"/>
+          <lotNumberText>LOT-0042</lotNumberText>
+        </manufacturedMaterial>
+        <manufacturerOrganization><name>Example Vaccines Inc</name></manufacturerOrganization>
+      </manufacturedProduct></consumable>
+      <performer><assignedEntity>
+        <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+        <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+        <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Clinic</name></representedOrganization>
+      </assignedEntity></performer>
+      <author>
+        <time value="20241010101500-0500"/>
+        <assignedAuthor>
+          <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+          <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+          <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Clinic</name></representedOrganization>
+        </assignedAuthor>
+      </author>
+    </substanceAdministration></entry>
+    <!-- 2. Vaccine refused for a medical precaution -->
+    <entry typeCode="DRIV"><substanceAdministration classCode="SBADM" moodCode="EVN" negationInd="true">
+      <templateId root="2.16.840.1.113883.10.20.22.4.52"/>
+      <id root="1.3.6.1.4.1.22812.5.1" extension="IMM-2"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20231001"/>
+      <consumable><manufacturedProduct classCode="MANU">
+        <templateId root="2.16.840.1.113883.10.20.22.4.54"/>
+        <manufacturedMaterial>
+          <code code="115" codeSystem="2.16.840.1.113883.12.292" displayName="Tdap"/>
+        </manufacturedMaterial>
+      </manufacturedProduct></consumable>
+      <entryRelationship typeCode="RSON"><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.53"/>
+        <code code="MEDPREC" codeSystem="2.16.840.1.113883.5.8" displayName="medical precaution"/>
+      </observation></entryRelationship>
+    </substanceAdministration></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>

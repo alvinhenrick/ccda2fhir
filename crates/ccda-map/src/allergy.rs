@@ -8,7 +8,7 @@
 use ccda_model::{ClinicalDocument, Statement, Value as Cv};
 use serde_json::{json, Map, Value};
 
-use crate::author::apply_authors;
+use crate::author::{apply_authors, RECORDER_FIELDS};
 use crate::util::{concept, is_coded, nested, start_of, LOINC, SNOMED};
 use crate::{
     data_absent_reason_extension, map_codeable_concept, map_datetime, map_identifier, Context,
@@ -381,7 +381,7 @@ fn map_observation(concern: &Statement, observation: &Statement, ctx: &mut Conte
     } else {
         observation.authors.iter().collect()
     };
-    apply_authors(&mut resource, &authors, ctx);
+    apply_authors(&mut resource, RECORDER_FIELDS, &authors, ctx);
     Value::Object(resource)
 }
 

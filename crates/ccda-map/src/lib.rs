@@ -12,6 +12,7 @@ mod author;
 mod coding;
 mod context;
 mod identifier;
+mod immunization;
 mod nullflavor;
 mod patient;
 mod problem;
@@ -25,6 +26,7 @@ pub use allergy::map_allergies;
 pub use coding::map_codeable_concept;
 pub use context::Context;
 pub use identifier::map_identifier;
+pub use immunization::map_immunizations;
 pub use nullflavor::{
     data_absent_reason_code, data_absent_reason_extension, DATA_ABSENT_REASON_URL,
 };

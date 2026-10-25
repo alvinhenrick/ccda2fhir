@@ -48,6 +48,10 @@ const BUILTIN: &[(&str, &str)] = &[
         "http://hl7.org/fhir/sid/icd-10-cm",
     ),
     ("2.16.840.1.113883.6.69", "http://hl7.org/fhir/sid/ndc"),
+    (
+        "2.16.840.1.113883.3.26.1.1",
+        "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl",
+    ),
     ("2.16.840.1.113883.6.8", "http://unitsofmeasure.org"),
     ("2.16.840.1.113883.6.12", "http://www.ama-assn.org/go/cpt"),
     (

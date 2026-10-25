@@ -56,3 +56,8 @@ fn problems() {
 fn allergies() {
     check("allergies");
 }
+
+#[test]
+fn immunizations() {
+    check("immunizations");
+}

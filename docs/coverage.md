@@ -61,3 +61,28 @@ and only the two fixtures above have been validated.
 | `assignedAuthor/code` (role/specialty) | PractitionerRole | todo | | |
 | `assignedAuthoringDevice` | Device | reported | `software_authors_are_noted_not_mapped` | |
 | Author telecom, address | Practitioner.telecom, address | todo | | |
+
+## Immunizations (Immunization Activity, mood EVN) to Immunization
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `negationInd` | `status = not-done` | done | `status_follows_negation_then_the_ig_map` | |
+| `statusCode` | `status` (CF-ImmunizationStatus) | done | same | |
+| `id` | `identifier` | done | `completed_immunization_follows_the_ig` | |
+| `effectiveTime` (value or low) | `occurrenceDateTime` (DAR if absent) | done | `occurrence_uses_low_of_an_interval_or_a_data_absent_reason` | |
+| `repeatNumber` | `protocolApplied.doseNumberPositiveInt` | done | `invalid_dose_number_is_reported` | |
+| `routeCode`, `approachSiteCode` | `route`, `site` | done | `completed_immunization_follows_the_ig` | |
+| `doseQuantity` (PQ) | `doseQuantity` | done | same | |
+| `doseQuantity` (IVL) | not supported by target (IG) | reported | `dose_range_and_reaction_are_reported` | |
+| `administrationUnitCode` | not supported by target (IG) | n/a | | |
+| Material `code` | `vaccineCode` | done | `missing_vaccine_is_marked_unknown_with_a_warning` | |
+| `lotNumberText` | `lotNumber` | done | `completed_immunization_follows_the_ig` | |
+| `manufacturerOrganization` | `manufacturer` (Organization) | done | same | |
+| `performer` | `performer` (function AP) | done | same | |
+| `author` | `recorded`, Provenance | done | `authors_set_recorded_and_create_provenance` | |
+| Not Given Reason (4.53) | `statusReason` | done | `reasons_split_by_template` | |
+| Indication (4.19) | `reasonCode` | done | same | |
+| Reaction (4.9) | `reaction` (Observation) | reported | `dose_range_and_reaction_are_reported` | |
+| mood INT (planned) | MedicationRequest | reported | `planned_immunizations_are_reported_not_mapped` | |
+| `primarySource` | not in C-CDA; omitted (R4/US Core 6.1.0 decide) | n/a | | |
+| Comment Activity | `note` | todo | | |
