@@ -404,11 +404,15 @@ fn map_activity(s: &Statement, ctx: &mut Context) -> Value {
                     reasons.push(c);
                 }
             }
-        } else if related.has_template(SUPPLY_ORDER) || related.has_template(MEDICATION_DISPENSE) {
-            ctx.report.info(
-                "medication.supply.unsupported",
-                "a supply order or dispense under a medication was not mapped yet",
-            );
+        } else if related.has_template(SUPPLY_ORDER) {
+            if dispense_request(related, &mut r, ctx) {
+                ctx.report.info(
+                    "medication.supply.multiple",
+                    "a medication has more than one supply order; the first was kept",
+                );
+            }
+        } else if related.has_template(MEDICATION_DISPENSE) {
+            map_dispense(related, &r, ctx);
         }
     }
     if !reasons.is_empty() {
@@ -427,6 +431,139 @@ fn map_activity(s: &Statement, ctx: &mut Context) -> Value {
     let authors: Vec<_> = s.authors.iter().collect();
     apply_authors(&mut r, FIELDS, &authors, ctx);
     Value::Object(r)
+}
+
+/// `SupplyOrder` (4.17) to `MedicationRequest.dispenseRequest`. Returns true if a request was
+/// already present (a second order is dropped).
+fn dispense_request(s: &Statement, request: &mut Map<String, Value>, ctx: &mut Context) -> bool {
+    if request.contains_key("dispenseRequest") {
+        return true;
+    }
+    let mut d = Map::new();
+    if let Some(q) = s
+        .quantity
+        .as_ref()
+        .and_then(|q| map_quantity(q, ctx.report))
+    {
+        d.insert("quantity".into(), q);
+    }
+    if let Some(n) = s
+        .repeat_number
+        .as_deref()
+        .and_then(|v| v.trim().parse::<u32>().ok())
+    {
+        d.insert("numberOfRepeatsAllowed".into(), json!(n));
+    }
+    if let Some(time) = s.effective_time.as_ref() {
+        let mut p = Map::new();
+        let low = time.low.as_ref().and_then(|l| l.value.as_deref());
+        let high = time.high.as_ref().and_then(|h| h.value.as_deref());
+        if let Some(v) = low.and_then(|v| map_datetime(v, ctx.report)) {
+            p.insert("start".into(), json!(v));
+        }
+        if let Some(v) = high.and_then(|v| map_datetime(v, ctx.report)) {
+            p.insert("end".into(), json!(v));
+        }
+        if !p.is_empty() {
+            d.insert("validityPeriod".into(), Value::Object(p));
+        }
+    }
+    if !d.is_empty() {
+        request.insert("dispenseRequest".into(), Value::Object(d));
+    }
+    false
+}
+
+fn dispense_status(code: Option<&str>) -> &'static str {
+    match code {
+        Some("completed") => "completed",
+        Some("active") => "in-progress",
+        Some("aborted") => "stopped",
+        Some("cancelled") => "cancelled",
+        Some("held") => "on-hold",
+        Some("nullified") => "entered-in-error",
+        Some("new" | "intended") => "preparation",
+        _ => "unknown",
+    }
+}
+
+/// `MedicationDispense` (4.18) to a `MedicationDispense` resource that points back at the
+/// request. The drug is the dispense's own product when it has one, else the request's drug.
+fn map_dispense(s: &Statement, request: &Map<String, Value>, ctx: &mut Context) {
+    let mut r = Map::new();
+    r.insert("resourceType".into(), json!("MedicationDispense"));
+    r.insert("id".into(), json!(ctx.next_id("medicationdispense")));
+    let identifiers: Vec<Value> = s
+        .ids
+        .iter()
+        .filter_map(|id| map_identifier(id, ctx.terminology, ctx.report))
+        .collect();
+    if !identifiers.is_empty() {
+        r.insert("identifier".into(), json!(identifiers));
+    }
+    let status = dispense_status(s.status_code.as_deref());
+    if status == "unknown" {
+        ctx.report.warn(
+            "dispense.status.unmapped",
+            "a dispense has no usable statusCode; status was set to unknown",
+        );
+    }
+    r.insert("status".into(), json!(status));
+    let own = s
+        .consumable
+        .as_ref()
+        .and_then(|c| c.code.as_ref())
+        .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report));
+    match own {
+        Some(c) => {
+            r.insert("medicationCodeableConcept".into(), c);
+        }
+        None => {
+            for key in ["medicationCodeableConcept", "medicationReference"] {
+                if let Some(v) = request.get(key) {
+                    r.insert(key.into(), v.clone());
+                }
+            }
+        }
+    }
+    r.insert("subject".into(), json!({ "reference": ctx.patient }));
+    if let Some(id) = request.get("id").and_then(Value::as_str) {
+        r.insert(
+            "authorizingPrescription".into(),
+            json!([{ "reference": ctx.reference("MedicationRequest", id) }]),
+        );
+    }
+    if let Some(q) = s
+        .quantity
+        .as_ref()
+        .and_then(|q| map_quantity(q, ctx.report))
+    {
+        r.insert("quantity".into(), q);
+    }
+    let handed = s.effective_time.as_ref().and_then(|t| {
+        t.value
+            .as_deref()
+            .or_else(|| t.low.as_ref().and_then(|l| l.value.as_deref()))
+    });
+    if let Some(v) = handed.and_then(|v| map_datetime(v, ctx.report)) {
+        r.insert("whenHandedOver".into(), json!(v));
+    }
+    let performers: Vec<Value> = s
+        .performers
+        .iter()
+        .filter_map(|p| {
+            register_practitioner(p, ctx).or_else(|| {
+                p.organization
+                    .as_ref()
+                    .and_then(|org| register_organization(org, ctx))
+            })
+        })
+        .map(|reference| json!({ "actor": { "reference": reference } }))
+        .collect();
+    if !performers.is_empty() {
+        r.insert("performer".into(), json!(performers));
+    }
+    ctx.push_extra(Value::Object(r));
 }
 
 #[cfg(test)]
@@ -614,5 +751,59 @@ mod tests {
         for issue in &report.issues {
             assert!(!issue.message.contains("Secret"), "{}", issue.message);
         }
+    }
+
+    const SUPPLY: &str = r#"<entryRelationship typeCode="REFR"><supply classCode="SPLY" moodCode="INT">
+  <templateId root="2.16.840.1.113883.10.20.22.4.17"/>
+  <id root="1.2.3" extension="SUP-1"/>
+  <statusCode code="completed"/>
+  <effectiveTime xsi:type="IVL_TS"><low value="20250101"/><high value="20251231"/></effectiveTime>
+  <repeatNumber value="3"/>
+  <quantity value="30" unit="1"/>
+</supply></entryRelationship>"#;
+
+    const DISPENSE: &str = r#"<entryRelationship typeCode="REFR"><supply classCode="SPLY" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.22.4.18"/>
+  <id root="1.2.3" extension="DISP-1"/>
+  <statusCode code="completed"/>
+  <effectiveTime value="20250105"/>
+  <quantity value="30" unit="1"/>
+</supply></entryRelationship>"#;
+
+    #[test]
+    fn supply_order_becomes_dispense_request() {
+        let (out, _, report) = run(&document("INT", "", &format!("{DRUG}{SUPPLY}")));
+        let d = &out[0]["dispenseRequest"];
+        assert_eq!(d["quantity"]["value"], 30);
+        assert_eq!(d["numberOfRepeatsAllowed"], 3);
+        assert_eq!(d["validityPeriod"]["start"], "2025-01-01");
+        assert!(!codes(&report).contains(&"medication.supply.unsupported"));
+    }
+
+    #[test]
+    fn dispense_becomes_a_resource_pointing_at_the_request() {
+        let (out, extra, _) = run(&document("EVN", "", &format!("{DRUG}{DISPENSE}")));
+        let d = extra
+            .iter()
+            .find(|r| r["resourceType"] == "MedicationDispense")
+            .unwrap();
+        assert_eq!(d["status"], "completed");
+        assert_eq!(d["whenHandedOver"], "2025-01-05");
+        assert_eq!(d["quantity"]["value"], 30);
+        assert_eq!(
+            d["medicationCodeableConcept"],
+            out[0]["medicationCodeableConcept"]
+        );
+        assert!(d["authorizingPrescription"][0]["reference"]
+            .as_str()
+            .unwrap()
+            .starts_with("urn:uuid:"));
+    }
+
+    #[test]
+    fn second_supply_order_is_dropped_and_reported() {
+        let (out, _, report) = run(&document("INT", "", &format!("{DRUG}{SUPPLY}{SUPPLY}")));
+        assert_eq!(out[0]["dispenseRequest"]["numberOfRepeatsAllowed"], 3);
+        assert!(codes(&report).contains(&"medication.supply.multiple"));
     }
 }
