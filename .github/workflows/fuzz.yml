@@ -41,7 +41,10 @@ jobs:
           # are readable through the API even where artifact downloads are not.
           for f in fuzz/artifacts/convert/*; do
             [ -e "$f" ] || continue
-            echo "::error title=fuzz crash $(basename "$f")::size=$(wc -c < "$f") sha1=$(sha1sum "$f" | cut -d' ' -f1) base64=$(base64 -w0 "$f" | head -c 20000)"
+            n=$(basename "$f")
+            echo "::error title=fuzz crash $n::size=$(wc -c < "$f") sha1=$(sha1sum "$f" | cut -d' ' -f1)"
+            # Annotations are cut at a few KB, so print the input in numbered chunks.
+            base64 -w0 "$f" | fold -w 2000 | awk -v n="$n" '{ printf "::error title=fuzz crash %s part %03d::%s\n", n, NR, $0 }'
           done
       - name: Keep crashing inputs
         if: failure()
