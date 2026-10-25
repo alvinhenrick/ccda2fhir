@@ -37,7 +37,12 @@ pub fn map_service_requests(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Va
     for section in doc.all_sections() {
         for entry in &section.entries {
             let s = &entry.statement;
-            if is_planned(s) {
+            if s.kind == StatementKind::Encounter
+                && s.mood_code.as_deref() == Some("APT")
+                && s.has_template(PLANNED_ENCOUNTER)
+            {
+                out.push(crate::appointment::map_appointment(s, ctx));
+            } else if is_planned(s) {
                 out.push(map_request(s, ctx));
             }
         }

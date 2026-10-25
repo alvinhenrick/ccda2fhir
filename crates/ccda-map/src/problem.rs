@@ -15,6 +15,8 @@ use crate::{
 };
 
 const CONCERN_ACT: &str = "2.16.840.1.113883.10.20.22.4.3";
+/// Risk Concern Act: a concern act that wraps Problem Observations, like the Problem Concern Act.
+const RISK_CONCERN_ACT: &str = "2.16.840.1.113883.10.20.22.4.136";
 const PROBLEM_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.4";
 
 const CLINICAL_STATUS_SYSTEM: &str = "http://terminology.hl7.org/CodeSystem/condition-clinical";
@@ -29,7 +31,9 @@ pub fn map_problems(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
     let mut out = Vec::new();
     for section in doc.all_sections() {
         for entry in &section.entries {
-            if entry.statement.has_template(CONCERN_ACT) {
+            if entry.statement.has_template(CONCERN_ACT)
+                || entry.statement.has_template(RISK_CONCERN_ACT)
+            {
                 map_concern(section, &entry.statement, ctx, &mut out);
             }
         }

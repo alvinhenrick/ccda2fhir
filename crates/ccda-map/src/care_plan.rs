@@ -65,6 +65,86 @@ pub fn map_care_plans(doc: &ClinicalDocument, ctx: &mut Context, goals: &[Value]
     out
 }
 
+/// Resource types that `CarePlan.activity.reference` can point at.
+const ACTIVITY_TYPES: &[&str] = &[
+    "Appointment",
+    "DeviceRequest",
+    "MedicationRequest",
+    "NutritionOrder",
+    "ServiceRequest",
+];
+
+/// Point each care plan at the planned activities (requests, appointments) listed in the same
+/// Plan of Treatment section. An activity is found by the ids of its entry.
+///
+/// Sections and plans are paired in order; if the numbers differ the plans cannot be paired
+/// safely, so nothing is linked and the case is reported.
+pub fn link_care_plan_activities(
+    doc: &ClinicalDocument,
+    ctx: &mut Context,
+    resources: &mut [Value],
+) {
+    let plans: Vec<usize> = resources
+        .iter()
+        .enumerate()
+        .filter(|(_, r)| r["resourceType"] == "CarePlan")
+        .map(|(i, _)| i)
+        .collect();
+    let sections: Vec<_> = doc
+        .all_sections()
+        .into_iter()
+        .filter(|s| s.has_template(PLAN_OF_TREATMENT))
+        .collect();
+    if plans.is_empty() || sections.is_empty() {
+        return;
+    }
+    if plans.len() != sections.len() {
+        ctx.report.info(
+            "careplan.activity.unpaired",
+            "the care plans could not be paired with their sections; activity links were not added",
+        );
+        return;
+    }
+
+    let mut index: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
+    for r in resources.iter() {
+        let (Some(t), Some(id)) = (r["resourceType"].as_str(), r["id"].as_str()) else {
+            continue;
+        };
+        if ACTIVITY_TYPES.contains(&t) {
+            for k in crate::health_concern::keys(&r["identifier"]) {
+                index.entry(k).or_insert_with(|| ctx.reference(t, id));
+            }
+        }
+    }
+
+    for (plan, section) in plans.into_iter().zip(sections) {
+        let mut refs: Vec<String> = Vec::new();
+        for entry in &section.entries {
+            let mut scratch = crate::Report::default();
+            let found = entry
+                .statement
+                .ids
+                .iter()
+                .filter_map(|id| crate::map_identifier(id, ctx.terminology, &mut scratch))
+                .flat_map(|i| crate::health_concern::keys(&json!([i])))
+                .find_map(|k| index.get(&k).cloned());
+            if let Some(reference) = found {
+                if !refs.contains(&reference) {
+                    refs.push(reference);
+                }
+            }
+        }
+        if !refs.is_empty() {
+            let activity: Vec<Value> = refs
+                .into_iter()
+                .map(|reference| json!({ "reference": { "reference": reference } }))
+                .collect();
+            resources[plan]["activity"] = json!(activity);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

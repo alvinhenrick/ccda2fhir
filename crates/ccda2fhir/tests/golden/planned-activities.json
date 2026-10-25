@@ -108,6 +108,28 @@
       {
         "fullUrl": "urn:uuid:4d7c148b-882c-58e8-bd44-0b228765dc86",
         "resource": {
+          "activity": [
+            {
+              "reference": {
+                "reference": "urn:uuid:b221f1e0-1e4b-5f02-8e55-a0573a3bf8a4"
+              }
+            },
+            {
+              "reference": {
+                "reference": "urn:uuid:b37a7283-9d34-59a9-8174-d130990e10e1"
+              }
+            },
+            {
+              "reference": {
+                "reference": "urn:uuid:107d1087-1ed4-5df4-9f79-b3317933f2da"
+              }
+            },
+            {
+              "reference": {
+                "reference": "urn:uuid:932af556-f784-543a-83a9-24d280130a8e"
+              }
+            }
+          ],
           "category": [
             {
               "coding": [

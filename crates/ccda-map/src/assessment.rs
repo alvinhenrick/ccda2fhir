@@ -39,6 +39,8 @@ const TEMPLATES: &[(&str, Kind, bool)] = &[
     ("2.16.840.1.113883.10.20.22.4.284", Kind::Mental, false),    // Mental Status Observation
     ("2.16.840.1.113883.10.20.22.4.125", Kind::Mental, false), // Mental Status Problem Observation
     ("2.16.840.1.113883.10.20.22.4.5", Kind::Health, false),   // Health Status Observation
+    ("2.16.840.1.113883.10.20.22.4.505", Kind::Functional, false), // Disability Status Observation
+    ("2.16.840.1.113883.10.20.22.4.72", Kind::Functional, false), // Caregiver Characteristics
 ];
 
 fn kind_of(s: &Statement) -> Option<(Kind, bool)> {

@@ -13,6 +13,7 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.1",   // Result Organizer
     "2.16.840.1.113883.10.20.22.4.2",   // Result Observation
     "2.16.840.1.113883.10.20.22.4.3",   // Problem Concern Act
+    "2.16.840.1.113883.10.20.22.4.136", // Risk Concern Act
     "2.16.840.1.113883.10.20.22.4.12",  // Procedure Activity Act
     "2.16.840.1.113883.10.20.22.4.13",  // Procedure Activity Observation
     "2.16.840.1.113883.10.20.22.4.14",  // Procedure Activity Procedure
