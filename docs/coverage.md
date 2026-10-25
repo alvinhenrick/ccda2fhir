@@ -296,6 +296,21 @@ See `docs/decisions/0016-care-team.md`.
 | `functionCode`, patient/related-person members | `role`, RelatedPerson | todo | | |
 | PractitionerRole, Location | PractitionerRole, Location | todo | | |
 
+## Insurance (Policy Activity) to Coverage
+
+See `docs/decisions/0017-coverage.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Policy Activity | `Coverage` | done | `policy_becomes_coverage` | |
+| Policy code (SOPT) | `type` | done | same | |
+| Covered party id / role | `identifier`, `relationship` | done | same | |
+| Policy holder id | `subscriberId` | done | same | |
+| Policy ids | `class` (group) | done | same | |
+| Payer performer | `payor` (Organization) | done | `missing_payer_and_role_are_reported` | |
+| Subscriber as person, plan name | `subscriber`, `class` (plan) | todo | | |
+| Authorization (4.123) | ServiceRequest / ClaimResponse | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that
