@@ -14,7 +14,7 @@ use thiserror::Error;
 
 pub use body::{
     Author, AuthorOrganization, Consumable, Entry, Link, Participant, ReferenceRange, Related,
-    Section, Statement, StatementKind,
+    Section, Statement, StatementKind, TextContent,
 };
 pub use header::{Address, Guardian, Language, Patient, PersonName, Telecom};
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};

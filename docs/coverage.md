@@ -225,6 +225,23 @@ See `docs/decisions/0011-patient-demographics.md`.
 | Sex, sexual orientation, tribal affiliation | US Core extensions / Observations | todo | | |
 | Religious affiliation, birthplace | not supported (IG) | not mapped, not yet reported | | |
 
+## Clinical notes (Note Activity) to DocumentReference
+
+See `docs/decisions/0012-notes.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `id` | `identifier` | done | golden `notes` | |
+| `code` translation (LOINC) | `type` (root 34109-9 if none) | done | `narrative_reference_becomes_plain_text_content` | |
+| fixed | `category` clinical-note, `status` current | done | same | |
+| `text` (embedded base64 + mediaType) | `content.attachment` | done | `embedded_base64_keeps_its_media_type` | |
+| `text/reference` (narrative) | `content.attachment` as text/plain | done (XHTML todo) | `narrative_reference_becomes_plain_text_content` | |
+| `effectiveTime` | `context.period` | done | `author_and_time_set_author_date_and_period` | |
+| `author` | `author`, `date`, Provenance | done | same | |
+| Encounter link | `context.encounter` | todo | | |
+| `reference/externalDocument` | `relatesTo` | todo | | |
+| The document itself | Composition / DocumentReference | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

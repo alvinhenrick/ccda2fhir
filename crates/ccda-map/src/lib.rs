@@ -15,6 +15,7 @@ mod encounter;
 mod identifier;
 mod immunization;
 mod medication;
+mod note;
 mod nullflavor;
 mod observation;
 mod patient;
@@ -36,6 +37,7 @@ pub use encounter::map_encounters;
 pub use identifier::map_identifier;
 pub use immunization::map_immunizations;
 pub use medication::map_medications;
+pub use note::map_notes;
 pub use nullflavor::{
     data_absent_reason_code, data_absent_reason_extension, DATA_ABSENT_REASON_URL,
 };

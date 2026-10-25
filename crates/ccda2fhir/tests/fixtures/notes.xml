@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-NOTES-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <effectiveTime value="20250102120000-0500"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0011"/>
+      <patient>
+        <name><given>Kai</given><family>Example</family></name>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19700615"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.65"/>
+    <code code="34109-9" codeSystem="2.16.840.1.113883.6.1" displayName="Note"/>
+    <title>Notes</title>
+    <text><paragraph ID="Note1">Seen for follow-up. Doing well on current plan.</paragraph></text>
+    <entry typeCode="DRIV"><act classCode="ACT" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.202"/>
+      <id root="1.3.6.1.4.1.22812.10.1" extension="NOTE-1"/>
+      <code code="34109-9" codeSystem="2.16.840.1.113883.6.1" displayName="Note">
+        <translation code="11488-4" codeSystem="2.16.840.1.113883.6.1" displayName="Consult note"/>
+      </code>
+      <text><reference value="#Note1"/></text>
+      <statusCode code="completed"/>
+      <effectiveTime value="20240908"/>
+      <author>
+        <time value="20240908083215-0500"/>
+        <assignedAuthor>
+          <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+          <assignedPerson><name><given>Pat</given><family>Specialist</family></name></assignedPerson>
+          <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Clinic</name></representedOrganization>
+        </assignedAuthor>
+      </author>
+    </act></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>
