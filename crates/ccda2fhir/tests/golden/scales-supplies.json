@@ -1,0 +1,358 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13",
+        "resource": {
+          "birthDate": "1995-01-01",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0027"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Hana"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:3e35ff65-72df-51ef-8452-7fef7a0187ae",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-SCALES-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "47420-5",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:8708da4c-c5c9-5edf-a300-252ca560726b"
+                },
+                {
+                  "reference": "urn:uuid:b98740d2-ddb5-5aaf-841b-f067cfce1de4"
+                },
+                {
+                  "reference": "urn:uuid:b7d52b0f-e628-5557-9455-04c20562dc84"
+                }
+              ],
+              "title": "Functional Status"
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "46264-8",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:d3f62327-eca2-5b4f-84b4-9a84effdb1a9"
+                },
+                {
+                  "reference": "urn:uuid:24ad961b-32f5-50e3-ab80-8afa6ceef681"
+                }
+              ],
+              "title": "Medical Equipment"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:0c3b781a-3546-5d71-9dda-abb49b2ad8e7",
+        "resource": {
+          "id": "device-1",
+          "patient": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "resourceType": "Device",
+          "type": {
+            "coding": [
+              {
+                "code": "87405001",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:d3f62327-eca2-5b4f-84b4-9a84effdb1a9",
+        "resource": {
+          "device": {
+            "reference": "urn:uuid:0c3b781a-3546-5d71-9dda-abb49b2ad8e7"
+          },
+          "id": "deviceusestatement-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.21.1",
+              "value": "SUP-1"
+            }
+          ],
+          "resourceType": "DeviceUseStatement",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "timingPeriod": {
+            "start": "2016-04-13"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:166be6ec-6970-5cd8-a722-f45811901261",
+        "resource": {
+          "id": "device-2",
+          "patient": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "resourceType": "Device",
+          "type": {
+            "coding": [
+              {
+                "code": "50121007",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:24ad961b-32f5-50e3-ab80-8afa6ceef681",
+        "resource": {
+          "device": {
+            "reference": "urn:uuid:166be6ec-6970-5cd8-a722-f45811901261"
+          },
+          "id": "deviceusestatement-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.21.1",
+              "value": "SUP-2"
+            }
+          ],
+          "resourceType": "DeviceUseStatement",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "timingPeriod": {
+            "start": "2016-04-13"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:8708da4c-c5c9-5edf-a300-252ca560726b",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "functional-status",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/us-core-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "35088-4",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2012-02-14",
+          "hasMember": [
+            {
+              "reference": "urn:uuid:b98740d2-ddb5-5aaf-841b-f067cfce1de4"
+            },
+            {
+              "reference": "urn:uuid:b7d52b0f-e628-5557-9455-04c20562dc84"
+            }
+          ],
+          "id": "assessment-3",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.21.3",
+              "value": "GCS"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-simple-observation"
+            ]
+          },
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "valueInteger": 9
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b98740d2-ddb5-5aaf-841b-f067cfce1de4",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "functional-status",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/us-core-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "9267-6",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "id": "assessment-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.21.3",
+              "value": "GCS-1"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "code": "LA6555-2",
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                    "valueDecimal": 3
+                  }
+                ],
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b7d52b0f-e628-5557-9455-04c20562dc84",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "functional-status",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/us-core-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "9268-4",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "id": "assessment-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.21.3",
+              "value": "GCS-2"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:66a3fca6-7ffd-50f7-9432-f3560aafad13"
+          },
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "code": "LA6564-4",
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                    "valueDecimal": 3
+                  }
+                ],
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    }
+  ]
+}

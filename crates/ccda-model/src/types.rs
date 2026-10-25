@@ -232,7 +232,7 @@ pub(crate) fn parse_value(node: &Node, narrative: &Narrative) -> Value {
     // The prefix is irrelevant (`xsi:type="cda:CD"`); only the local name matters.
     let local = xsi_type.map(|t| t.rsplit(':').next().unwrap_or(t));
     match local {
-        Some("CD" | "CE" | "CV") => Value::Coded(parse_code(node, narrative)),
+        Some("CD" | "CE" | "CV" | "CO") => Value::Coded(parse_code(node, narrative)),
         Some("PQ") => Value::Quantity(Quantity {
             value: attr(node, "value"),
             unit: attr(node, "unit"),

@@ -9,44 +9,112 @@
 use ccda_model::{ClinicalDocument, Participant, Statement};
 use serde_json::{json, Map, Value};
 
-use crate::{map_codeable_concept, Context};
+use crate::{map_codeable_concept, map_datetime, map_identifier, Context};
 
 const PRODUCT_INSTANCE: &str = "2.16.840.1.113883.10.20.22.4.37";
+const NON_MEDICINAL_SUPPLY: &str = "2.16.840.1.113883.10.20.22.4.50";
 /// The FDA UDI root used in `participantRole/id`.
 const UDI_ROOT: &str = "2.16.840.1.113883.3.3719";
 
-/// Map every Product Instance in the document, one Device per distinct UDI.
+/// Map every Product Instance in the document, one Device per distinct UDI. A Non-Medicinal
+/// Supply Activity (4.50) also gets a `DeviceUseStatement`: the patient uses this device.
 pub fn map_devices(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
-    let mut found: Vec<&Participant> = Vec::new();
+    let mut found: Vec<(&Statement, &Participant)> = Vec::new();
     for section in doc.all_sections() {
         for entry in &section.entries {
             collect(&entry.statement, &mut found);
         }
     }
-    let mut seen: Vec<String> = Vec::new();
+    let mut seen: Vec<(String, String)> = Vec::new();
     let mut out = Vec::new();
-    for p in found {
+    for (owner, p) in found {
         let hrf = udi_of(p);
-        if let Some(h) = &hrf {
-            if seen.contains(h) {
-                continue;
+        let known = hrf
+            .as_ref()
+            .and_then(|h| seen.iter().find(|(k, _)| k == h))
+            .map(|(_, id)| id.clone());
+        let device_id = if let Some(id) = known {
+            id
+        } else {
+            let device = map_device(
+                p,
+                hrf.clone(),
+                !owner.has_template(NON_MEDICINAL_SUPPLY),
+                ctx,
+            );
+            let id = device["id"].as_str().unwrap_or_default().to_owned();
+            if let Some(h) = hrf {
+                seen.push((h, id.clone()));
             }
-            seen.push(h.clone());
+            out.push(device);
+            id
+        };
+        if owner.has_template(NON_MEDICINAL_SUPPLY) {
+            out.push(device_use_statement(owner, &device_id, ctx));
         }
-        out.push(map_device(p, hrf, ctx));
     }
     out
 }
 
-fn collect<'a>(s: &'a Statement, out: &mut Vec<&'a Participant>) {
+fn collect<'a>(s: &'a Statement, out: &mut Vec<(&'a Statement, &'a Participant)>) {
     out.extend(
         s.participants
             .iter()
-            .filter(|p| p.template_ids.iter().any(|t| t.root == PRODUCT_INSTANCE)),
+            .filter(|p| p.template_ids.iter().any(|t| t.root == PRODUCT_INSTANCE))
+            .map(|p| (s, p)),
     );
     for r in &s.related {
         collect(&r.statement, out);
     }
+}
+
+/// `DeviceUseStatement` for a Non-Medicinal Supply Activity (a cane, eyeglasses, a wheelchair).
+fn device_use_statement(s: &Statement, device_id: &str, ctx: &mut Context) -> Value {
+    let mut r = Map::new();
+    r.insert("resourceType".into(), json!("DeviceUseStatement"));
+    r.insert("id".into(), json!(ctx.next_id("deviceusestatement")));
+    let identifiers: Vec<Value> = s
+        .ids
+        .iter()
+        .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
+        .collect();
+    if !identifiers.is_empty() {
+        r.insert("identifier".into(), json!(identifiers));
+    }
+    let status = match s.status_code.as_deref() {
+        Some("active") => "active",
+        Some("completed") => "completed",
+        Some("aborted") => "stopped",
+        Some("suspended") => "on-hold",
+        Some("nullified") => "entered-in-error",
+        _ => {
+            ctx.report.info(
+                "devicestatement.status.assumed",
+                "a supply has no usable statusCode; status was set to active",
+            );
+            "active"
+        }
+    };
+    r.insert("status".into(), json!(status));
+    r.insert("subject".into(), json!({ "reference": ctx.patient }));
+    r.insert(
+        "device".into(),
+        json!({ "reference": ctx.reference("Device", device_id) }),
+    );
+    if let Some(t) = &s.effective_time {
+        let mut period = Map::new();
+        let start = t.low.as_ref().and_then(|l| l.value.as_deref());
+        let end = t.high.as_ref().and_then(|h| h.value.as_deref());
+        for (key, raw) in [("start", start), ("end", end)] {
+            if let Some(d) = raw.and_then(|raw| map_datetime(raw, ctx.report)) {
+                period.insert(key.into(), json!(d));
+            }
+        }
+        if !period.is_empty() {
+            r.insert("timingPeriod".into(), Value::Object(period));
+        }
+    }
+    Value::Object(r)
 }
 
 fn udi_of(p: &Participant) -> Option<String> {
@@ -63,7 +131,12 @@ fn device_identifier(hrf: &str) -> Option<&str> {
     di.bytes().all(|b| b.is_ascii_digit()).then_some(di)
 }
 
-fn map_device(p: &Participant, hrf: Option<String>, ctx: &mut Context) -> Value {
+fn map_device(
+    p: &Participant,
+    hrf: Option<String>,
+    udi_expected: bool,
+    ctx: &mut Context,
+) -> Value {
     let mut r = Map::new();
     r.insert("resourceType".into(), json!("Device"));
     r.insert("id".into(), json!(ctx.next_id("device")));
@@ -76,10 +149,12 @@ fn map_device(p: &Participant, hrf: Option<String>, ctx: &mut Context) -> Value 
             udi.insert("carrierHRF".into(), json!(h));
             r.insert("udiCarrier".into(), json!([udi]));
         }
-        None => ctx.report.warn(
+        // Implantable devices carry a UDI; a cane or eyeglasses does not need one.
+        None if udi_expected => ctx.report.warn(
             "device.udi.missing",
             "a Product Instance has no UDI; the Device has no udiCarrier",
         ),
+        None => {}
     }
     if let Some(ty) = p
         .playing_device_code
