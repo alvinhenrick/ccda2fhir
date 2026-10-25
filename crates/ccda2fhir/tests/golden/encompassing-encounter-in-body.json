@@ -58,7 +58,7 @@
                 "coding": [
                   {
                     "code": "46240-8",
-                    "display": "History of encounters",
+                    "display": "History of Hospitalizations+Outpatient visits Narrative",
                     "system": "http://loinc.org"
                   }
                 ]

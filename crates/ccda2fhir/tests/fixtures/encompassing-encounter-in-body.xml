@@ -40,7 +40,7 @@
   </encompassingEncounter></componentOf>
   <component><structuredBody><component><section>
     <templateId root="2.16.840.1.113883.10.20.22.2.22.1"/>
-    <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="History of encounters"/>
+    <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="History of Hospitalizations+Outpatient visits Narrative"/>
     <title>Encounters</title><text/>
     <entry typeCode="DRIV"><encounter classCode="ENC" moodCode="EVN">
       <templateId root="2.16.840.1.113883.10.20.22.4.49"/>
