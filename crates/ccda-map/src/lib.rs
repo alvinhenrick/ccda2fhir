@@ -10,6 +10,7 @@
 mod allergy;
 mod author;
 mod care_plan;
+mod care_team;
 mod coding;
 mod context;
 mod device;
@@ -35,6 +36,7 @@ mod vitals;
 
 pub use allergy::map_allergies;
 pub use care_plan::map_care_plans;
+pub use care_team::map_care_teams;
 pub use coding::map_codeable_concept;
 pub use context::Context;
 pub use device::map_devices;

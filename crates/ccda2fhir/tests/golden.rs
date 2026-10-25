@@ -116,3 +116,8 @@ fn goals() {
 fn care_plan() {
     check("care-plan");
 }
+
+#[test]
+fn care_team() {
+    check("care-team");
+}

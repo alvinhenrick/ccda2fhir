@@ -1,0 +1,130 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:21e87bf3-adf5-539b-b76c-5fd8c8aca8c0",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0015"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:7055658d-1536-5123-892f-f04fd3f5f6df",
+        "resource": {
+          "id": "careteam-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.13.1",
+              "value": "TEAM-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-careteam"
+            ]
+          },
+          "participant": [
+            {
+              "member": {
+                "reference": "urn:uuid:6f39f863-a491-5463-989c-3fb502186c53"
+              },
+              "onBehalfOf": {
+                "reference": "urn:uuid:de152919-5ed8-515e-a0ba-ba477695e455"
+              },
+              "period": {
+                "start": "2024-02-01"
+              },
+              "role": [
+                {
+                  "coding": [
+                    {
+                      "code": "163W00000X",
+                      "system": "http://nucc.org/provider-taxonomy"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "period": {
+            "start": "2024-01-01"
+          },
+          "resourceType": "CareTeam",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:21e87bf3-adf5-539b-b76c-5fd8c8aca8c0"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:6f39f863-a491-5463-989c-3fb502186c53",
+        "resource": {
+          "id": "practitioner-1",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "1234567893"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Doe",
+              "given": [
+                "Ann"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:de152919-5ed8-515e-a0ba-ba477695e455",
+        "resource": {
+          "active": true,
+          "id": "organization-1",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "Example Clinic",
+          "resourceType": "Organization"
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    }
+  ]
+}
