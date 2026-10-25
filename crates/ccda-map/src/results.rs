@@ -11,7 +11,9 @@ use ccda_model::{ClinicalDocument, Statement, StatementKind};
 use serde_json::{json, Map, Value};
 
 use crate::observation::{apply_performer, base, category, insert_effective, insert_span, status};
-use crate::{data_absent_reason_extension, map_codeable_concept, map_identifier, Context};
+use crate::{
+    data_absent_reason_extension, map_codeable_concept, map_datetime, map_identifier, Context,
+};
 
 const RESULT_ORGANIZER: &str = "2.16.840.1.113883.10.20.22.4.1";
 const RESULT_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.2";
@@ -107,6 +109,28 @@ fn report(org: &Statement, ctx: &mut Context, out: &mut Vec<Value>) {
     insert_effective(&mut r, org, ctx);
     if !r.contains_key("effectiveDateTime") && !r.contains_key("effectivePeriod") {
         insert_span(&mut r, &members);
+    }
+    // `issued` is an instant. The report has no such time in C-CDA, so use the latest author
+    // time, else the end of the effective time, when either reaches the second with an offset.
+    let author_time = org
+        .authors
+        .iter()
+        .filter_map(|a| a.time.as_deref())
+        .filter_map(|t| map_datetime(t, ctx.report))
+        .filter(|t| t.contains('T'))
+        .max();
+    let effective_end = r
+        .get("effectiveDateTime")
+        .or_else(|| r.get("effectivePeriod").and_then(|p| p.get("end")))
+        .and_then(Value::as_str)
+        .filter(|t| t.contains('T'))
+        .map(str::to_owned);
+    if let Some(issued) = author_time.or(effective_end) {
+        r.insert("issued".into(), json!(issued));
+        ctx.report.info(
+            "results.issued.derived",
+            "issued was taken from the author time or the end of the effective time",
+        );
     }
     let refs: Vec<Value> = members
         .iter()

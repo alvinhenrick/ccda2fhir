@@ -63,6 +63,7 @@
               "value": "ORG-1"
             }
           ],
+          "issued": "2024-11-06T08:00:00-05:00",
           "meta": {
             "profile": [
               "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
@@ -240,7 +241,7 @@
             "coding": [
               {
                 "code": "24357-6",
-                "display": "Urinalysis macro (dipstick) panel",
+                "display": "Urinalysis macro (dipstick) panel - Urine",
                 "system": "http://loinc.org"
               }
             ]
@@ -253,6 +254,7 @@
               "value": "ORG-2"
             }
           ],
+          "issued": "2024-11-06T07:15:00-05:00",
           "meta": {
             "profile": [
               "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
@@ -602,7 +604,7 @@
       "severity": "info"
     },
     {
-      "code": "results.category.assumed-laboratory",
+      "code": "results.issued.derived",
       "severity": "info"
     },
     {
@@ -615,6 +617,14 @@
     },
     {
       "code": "results.category.assumed-laboratory",
+      "severity": "info"
+    },
+    {
+      "code": "results.category.assumed-laboratory",
+      "severity": "info"
+    },
+    {
+      "code": "results.issued.derived",
       "severity": "info"
     }
   ]

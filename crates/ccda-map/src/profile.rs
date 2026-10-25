@@ -39,7 +39,16 @@ impl Profiles {
                     .any(|c| c["code"] == "LAB");
                 let timed = resource["effectiveDateTime"].is_string()
                     || resource["effectivePeriod"].is_object();
-                if !(lab && timed && resource["code"]["coding"].is_array()) {
+                // us-core-9: issued is required for every status except the early/closed ones.
+                let needs_issued = !matches!(
+                    resource["status"].as_str(),
+                    Some("registered" | "cancelled" | "entered-in-error" | "unknown")
+                );
+                if !(lab
+                    && timed
+                    && resource["code"]["coding"].is_array()
+                    && (!needs_issued || resource["issued"].is_string()))
+                {
                     return None;
                 }
                 "us-core-diagnosticreport-lab"
