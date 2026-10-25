@@ -126,3 +126,8 @@ fn care_team() {
 fn coverage() {
     check("coverage");
 }
+
+#[test]
+fn location_and_specimen() {
+    check("location-specimen");
+}

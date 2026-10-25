@@ -20,6 +20,9 @@ pub struct Context<'a> {
     /// authored many entries becomes one resource.
     pub(crate) practitioners: BTreeMap<String, String>,
     pub(crate) organizations: BTreeMap<String, String>,
+    /// Locations and specimens already created, by identity key.
+    pub(crate) locations: BTreeMap<String, String>,
+    pub(crate) specimens: BTreeMap<String, String>,
     /// Supporting resources (Practitioner, Organization, Provenance) created by mappers.
     extra: Vec<Value>,
 }
@@ -42,6 +45,8 @@ impl<'a> Context<'a> {
             counters: BTreeMap::new(),
             practitioners: BTreeMap::new(),
             organizations: BTreeMap::new(),
+            locations: BTreeMap::new(),
+            specimens: BTreeMap::new(),
             extra: Vec::new(),
         }
     }

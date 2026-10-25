@@ -87,7 +87,7 @@ fn parse_name(node: &Node) -> PersonName {
     }
 }
 
-fn parse_address(node: &Node) -> Address {
+pub(crate) fn parse_address(node: &Node) -> Address {
     let text = |name: &str| child(node, name).and_then(|n| text_of(&n));
     Address {
         use_code: attr(node, "use"),
@@ -101,7 +101,7 @@ fn parse_address(node: &Node) -> Address {
     }
 }
 
-fn parse_telecom(node: &Node) -> Telecom {
+pub(crate) fn parse_telecom(node: &Node) -> Telecom {
     Telecom {
         use_code: attr(node, "use"),
         value: attr(node, "value"),
