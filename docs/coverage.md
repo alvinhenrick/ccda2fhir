@@ -14,7 +14,7 @@ coverage: US Core "must support" completeness is tracked in `docs/uscdi.md`.
 silently.
 
 - Planned immunization (mood INT), supply request, authorization (4.123).
-- Goal: progress toward goal (`achievementStatus`), `priority`, `addresses` links; CarePlan and health concern `addresses`.
+- CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
 - `reasonReference` from an indication to its problem; procedure instruction (`followUp`).
 - Coverage: the subscriber as a person (`subscriber`), plan name.
 - Patient and related-person members and `functionCode` of a care team; Specimen condition; Location status and organization.
@@ -280,9 +280,10 @@ See `docs/decisions/0014-goals.md`.
 | `statusCode` | `lifecycleStatus` | done | `status_map` | |
 | `effectiveTime` | `startDate`, `target.dueDate` | done | `dates_become_start_and_target` | |
 | `author` | `expressedBy`, Provenance | done | | |
-| Progress Toward Goal (4.110) | `achievementStatus` | todo (reported, `goal.progress.unsupported`) | | |
+| Progress Toward Goal (4.110) | `achievementStatus` (the document's code or text, not guessed into an R4 code) | done (ADR 0048) | `progress_and_priority_are_mapped`, golden `goals` | |
 | Goal target | `target` | done (ADR 0014) | golden `goals` | |
-| Goal priority | `priority` | todo | | |
+| Priority Preference (4.143) | `priority` | done (ADR 0048) | `progress_and_priority_are_mapped`, golden `goals` | |
+| Nested Problem Observation | `addresses` | done (ADR 0048) | golden `goals` | `goal.addresses.unresolved` when the problem is not in the document |
 | Links to Care Plan, Health Concerns | `addresses` | todo | | |
 
 ## Plan of Treatment to CarePlan

@@ -26,7 +26,7 @@ const LINKABLE: &[&str] = &[
     "CarePlan",
 ];
 
-fn statement_keys(s: &Statement, ctx: &mut Context) -> Vec<String> {
+pub(crate) fn statement_keys(s: &Statement, ctx: &mut Context) -> Vec<String> {
     let ids: Vec<Value> = s
         .ids
         .iter()

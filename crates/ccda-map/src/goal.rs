@@ -6,11 +6,16 @@
 use ccda_model::{ClinicalDocument, Statement, StatementKind, Value as Cv};
 use serde_json::{json, Map, Value};
 
+use std::collections::BTreeMap;
+
 use crate::author::{apply_authors, AuthorFields};
+use crate::encounter_link::statement_keys;
+use crate::health_concern::keys;
 use crate::{map_codeable_concept, map_datetime, map_identifier, Context};
 
 const GOAL_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.121";
 const PROGRESS_TOWARD_GOAL: &str = "2.16.840.1.113883.10.20.22.4.110";
+const PRIORITY_PREFERENCE: &str = "2.16.840.1.113883.10.20.22.4.143";
 const ACT_CODE_OID: &str = "2.16.840.1.113883.5.4";
 
 /// `Goal.expressedBy` holds the latest author. Goal has no recorded date.
@@ -31,6 +36,76 @@ pub fn map_goals(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
         }
     }
     out
+}
+
+/// Problem Observation: what a goal addresses.
+const PROBLEM_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.4";
+
+/// Set `Goal.addresses` to the Conditions that a goal's entry names with a nested Problem
+/// Observation. Matching is by identifier; an entry that names a problem outside the document is
+/// reported and left unlinked.
+pub fn link_goal_addresses(doc: &ClinicalDocument, ctx: &mut Context, resources: &mut [Value]) {
+    let mut conditions: BTreeMap<String, String> = BTreeMap::new();
+    let mut goals: BTreeMap<String, Vec<usize>> = BTreeMap::new();
+    for (i, r) in resources.iter().enumerate() {
+        match r["resourceType"].as_str().unwrap_or_default() {
+            "Condition" => {
+                if let Some(id) = r["id"].as_str() {
+                    for k in keys(&r["identifier"]) {
+                        conditions
+                            .entry(k)
+                            .or_insert_with(|| ctx.reference("Condition", id));
+                    }
+                }
+            }
+            "Goal" => {
+                for k in keys(&r["identifier"]) {
+                    goals.entry(k).or_default().push(i);
+                }
+            }
+            _ => {}
+        }
+    }
+    if goals.is_empty() {
+        return;
+    }
+    for section in doc.all_sections() {
+        for entry in &section.entries {
+            let s = &entry.statement;
+            if s.kind != StatementKind::Observation || !s.has_template(GOAL_OBSERVATION) {
+                continue;
+            }
+            let own = statement_keys(s, ctx);
+            for problem in s
+                .related
+                .iter()
+                .map(|x| &x.statement)
+                .filter(|x| x.has_template(PROBLEM_OBSERVATION))
+            {
+                let reference = statement_keys(problem, ctx)
+                    .into_iter()
+                    .find_map(|k| conditions.get(&k).cloned());
+                let Some(reference) = reference else {
+                    ctx.report.info(
+                        "goal.addresses.unresolved",
+                        "a goal names a problem that is not in the document; no link was made",
+                    );
+                    continue;
+                };
+                for k in &own {
+                    for &i in goals.get(k).into_iter().flatten() {
+                        let list = resources[i]["addresses"].as_array().cloned();
+                        let mut list = list.unwrap_or_default();
+                        let r = json!({ "reference": reference });
+                        if !list.contains(&r) {
+                            list.push(r);
+                        }
+                        resources[i]["addresses"] = json!(list);
+                    }
+                }
+            }
+        }
+    }
 }
 
 fn lifecycle(code: &str) -> Option<&'static str> {
@@ -68,6 +143,28 @@ fn description(s: &Statement, ctx: &mut Context) -> Option<Value> {
         }
     }
     Some(d)
+}
+
+/// The first value of an observation as a CodeableConcept (coded) or text.
+fn value_concept(s: &Statement, ctx: &mut Context) -> Option<Value> {
+    match s.values.first() {
+        Some(Cv::Coded(c)) => map_codeable_concept(c, ctx.terminology, ctx.report),
+        Some(Cv::Text(t)) => t
+            .value
+            .as_deref()
+            .filter(|v| !v.trim().is_empty())
+            .map(|v| json!({ "text": v })),
+        _ => None,
+    }
+}
+
+fn progress_status(s: &Statement, ctx: &mut Context) -> Option<Value> {
+    value_concept(s, ctx).or_else(|| {
+        s.text
+            .as_deref()
+            .filter(|t| !t.trim().is_empty())
+            .map(|t| json!({ "text": t }))
+    })
 }
 
 fn map_goal(s: &Statement, ctx: &mut Context) -> Value {
@@ -136,14 +233,35 @@ fn map_goal(s: &Statement, ctx: &mut Context) -> Value {
         }
     }
 
-    if s.related
+    // Progress Toward Goal: the latest coded or written progress, kept as the document states it.
+    // The R4 achievement codes are not guessed from free text.
+    if let Some(progress) = s
+        .related
         .iter()
-        .any(|x| x.statement.has_template(PROGRESS_TOWARD_GOAL))
+        .map(|x| &x.statement)
+        .find(|x| x.has_template(PROGRESS_TOWARD_GOAL))
     {
-        ctx.report.info(
-            "goal.progress.unsupported",
-            "progress toward a goal was not mapped yet (achievementStatus)",
-        );
+        match progress_status(progress, ctx) {
+            Some(v) => {
+                r.insert("achievementStatus".into(), v);
+            }
+            None => ctx.report.info(
+                "goal.progress.empty",
+                "a progress observation has no usable value; achievementStatus was not set",
+            ),
+        }
+    }
+
+    // Priority Preference: how much the patient cares about the goal.
+    if let Some(p) = s
+        .related
+        .iter()
+        .map(|x| &x.statement)
+        .find(|x| x.has_template(PRIORITY_PREFERENCE))
+    {
+        if let Some(v) = value_concept(p, ctx) {
+            r.insert("priority".into(), v);
+        }
     }
 
     let authors: Vec<_> = s.authors.iter().collect();
@@ -234,5 +352,16 @@ mod tests {
             .issues
             .iter()
             .any(|i| i.code == "goal.description.missing"));
+    }
+
+    #[test]
+    fn progress_and_priority_are_mapped() {
+        let body = r#"<statusCode code="active"/><effectiveTime><low value="20240101"/></effectiveTime>
+<value xsi:type="CD" code="1" codeSystem="2.16.840.1.113883.6.96" displayName="x"/>
+<entryRelationship typeCode="REFR"><observation classCode="OBS" moodCode="EVN"><templateId root="2.16.840.1.113883.10.20.22.4.110"/><code code="23" codeSystem="2.16.840.1.113883.6.1"/><value xsi:type="ST">Improving steadily</value></observation></entryRelationship>
+<entryRelationship typeCode="REFR"><observation classCode="OBS" moodCode="EVN"><templateId root="2.16.840.1.113883.10.20.22.4.143"/><code code="225773000" codeSystem="2.16.840.1.113883.6.96"/><value xsi:type="CD" code="394849002" codeSystem="2.16.840.1.113883.6.96"/></observation></entryRelationship>"#;
+        let (out, _) = run("active", body);
+        assert_eq!(out[0]["achievementStatus"]["text"], "Improving steadily");
+        assert_eq!(out[0]["priority"]["coding"][0]["code"], "394849002");
     }
 }
