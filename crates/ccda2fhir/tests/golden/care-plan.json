@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Lee Example</td></tr><tr><td>birthDate</td><td>1955-05-05</td></tr><tr><td>gender</td><td>female</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -92,6 +96,10 @@
           "subject": {
             "reference": "urn:uuid:41aa114a-323f-5466-8193-213a214875f4"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
+          },
           "title": "Clinical document",
           "type": {
             "coding": [
@@ -136,7 +144,11 @@
             {
               "dueDate": "2025-12-31"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Goal</p><table><tr><td>description</td><td>289169006</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -162,6 +174,10 @@
           "startDate": "2024-06-01",
           "subject": {
             "reference": "urn:uuid:41aa114a-323f-5466-8193-213a214875f4"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Goal</p><table><tr><td>description</td><td>Walk 30 minutes a day</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },

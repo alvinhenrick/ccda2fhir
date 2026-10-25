@@ -9,12 +9,12 @@
 //! The library is pure: bytes in, a [`Conversion`] out. It performs no I/O and keeps no state.
 
 use ccda_map::{
-    link_encounters, link_managing_organization, map_allergies, map_assessments, map_care_plans,
-    map_care_teams, map_composition, map_coverage, map_devices, map_encompassing_encounter,
-    map_encounters, map_family_history, map_goals, map_health_concerns, map_immunizations,
-    map_medications, map_notes, map_patient, map_problems, map_procedures, map_results,
-    map_service_requests, map_social_history, map_unstructured, map_vitals, report_unmapped,
-    Context, Profiles, Report,
+    add_generated_text, link_encounters, link_managing_organization, map_allergies,
+    map_assessments, map_care_plans, map_care_teams, map_composition, map_coverage, map_devices,
+    map_encompassing_encounter, map_encounters, map_family_history, map_goals, map_health_concerns,
+    map_immunizations, map_medications, map_notes, map_patient, map_problems, map_procedures,
+    map_results, map_service_requests, map_social_history, map_unstructured, map_vitals,
+    report_unmapped, Context, Profiles, Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -74,6 +74,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     let mut ctx = Context::new(&BuiltinTerminology, &mut report, &seed);
     let mut patient = map_patient(&document, &BuiltinTerminology, ctx.report);
     link_managing_organization(&document, &mut ctx, &mut patient);
+    add_generated_text(&mut patient);
     profiles.apply(&mut patient);
     bundle.push(patient);
 
@@ -106,13 +107,16 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     // The Composition lists the resources above, so it is built last and placed right after the
     // patient.
     let mut composition = map_composition(&document, &mut ctx, &resources);
+    add_generated_text(&mut composition);
     profiles.apply(&mut composition);
     bundle.push(composition);
     for mut resource in resources {
+        add_generated_text(&mut resource);
         profiles.apply(&mut resource);
         bundle.push(resource);
     }
     for mut resource in ctx.take_extra() {
+        add_generated_text(&mut resource);
         profiles.apply(&mut resource);
         bundle.push(resource);
     }

@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Hana Example</td></tr><tr><td>birthDate</td><td>1995-01-01</td></tr><tr><td>gender</td><td>female</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -75,6 +79,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:6b7d3afb-433b-5902-ab40-989bdeec9922"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           },
           "title": "Clinical document",
           "type": {
@@ -149,7 +157,11 @@
               }
             ]
           },
-          "status": "completed"
+          "status": "completed",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>FamilyMemberHistory</p><table><tr><td>name</td><td>Lucas Example</td></tr><tr><td>status</td><td>completed</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -179,7 +191,11 @@
             ]
           },
           "resourceType": "FamilyMemberHistory",
-          "status": "completed"
+          "status": "completed",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>FamilyMemberHistory</p><table><tr><td>status</td><td>completed</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       }
     ],

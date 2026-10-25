@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Lee Example</td></tr><tr><td>birthDate</td><td>1955-05-05</td></tr><tr><td>gender</td><td>female</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -72,6 +76,10 @@
           "subject": {
             "reference": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
+          },
           "title": "Clinical document",
           "type": {
             "coding": [
@@ -111,6 +119,10 @@
           "status": "completed",
           "subject": {
             "reference": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Procedure</p><table><tr><td>code</td><td>175135009</td></tr><tr><td>status</td><td>completed</td></tr><tr><td>performedDateTime</td><td>2023-04-20</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -127,6 +139,10 @@
             "reference": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493"
           },
           "resourceType": "Device",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Device</p><table><tr><td>type</td><td>14106009</td></tr></table></div>",
+            "status": "generated"
+          },
           "type": {
             "coding": [
               {

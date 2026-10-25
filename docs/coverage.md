@@ -501,3 +501,7 @@ See `docs/decisions/0032-unstructured-documents.md`.
 |---|---|---|---|
 | `nonXMLBody/text` (B64 or TXT) | `DocumentReference.content.attachment.data` | done | golden `unstructured` |
 | `nonXMLBody/text/reference` | `attachment.url` (reported) | done | `reference_only_becomes_a_url_and_is_reported` |
+
+## Generated narrative
+
+See `docs/decisions/0033-generated-narrative.md`. Every resource without `text` gets a generated `text.div` (status `generated`), which clears the best-practice `dom-6` warning. Resources that already have narrative (Composition sections, CarePlan) keep it. Golden: all.

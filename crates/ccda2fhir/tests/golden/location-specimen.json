@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Lee Example</td></tr><tr><td>birthDate</td><td>1955-05-05</td></tr><tr><td>gender</td><td>female</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -93,6 +97,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           },
           "title": "Clinical document",
           "type": {
@@ -161,6 +169,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>DiagnosticReport</p><table><tr><td>code</td><td>Urinalysis macro (dipstick) panel - Urine</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-06-01T09:30:00-05:00</td></tr><tr><td>issued</td><td>2024-06-01T10:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -213,6 +225,10 @@
           "subject": {
             "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Specific gravity of Urine by Test strip</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-06-01T09:30:00-05:00</td></tr><tr><td>valueQuantity</td><td>1.015</td></tr></table></div>",
+            "status": "generated"
+          },
           "valueQuantity": {
             "value": 1.015
           }
@@ -252,6 +268,10 @@
           "status": "finished",
           "subject": {
             "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Encounter</p><table><tr><td>type</td><td>99213</td></tr><tr><td>status</td><td>finished</td></tr></table></div>",
+            "status": "generated"
           },
           "type": [
             {
@@ -301,6 +321,10 @@
           "subject": {
             "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Specimen</p><table><tr><td>type</td><td>Urine specimen</td></tr></table></div>",
+            "status": "generated"
+          },
           "type": {
             "coding": [
               {
@@ -335,7 +359,11 @@
               ]
             }
           ],
-          "resourceType": "Practitioner"
+          "resourceType": "Practitioner",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Practitioner</p><table><tr><td>name</td><td>Pat Doe</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -355,7 +383,11 @@
             ]
           },
           "name": "Example Lab",
-          "resourceType": "Organization"
+          "resourceType": "Organization",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>Example Lab</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -391,7 +423,11 @@
             {
               "reference": "urn:uuid:1625ace1-3377-5cda-9497-5e40295a93e6"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -427,7 +463,11 @@
             {
               "reference": "urn:uuid:e91b5d43-0fd0-5e49-9017-c0c0321d13c9"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -464,6 +504,10 @@
               "value": "+1-555-555-1212"
             }
           ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Location</p><table><tr><td>name</td><td>Example Urgent Care</td></tr><tr><td>type</td><td>Urgent Care Center</td></tr></table></div>",
+            "status": "generated"
+          },
           "type": [
             {
               "coding": [
