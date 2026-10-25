@@ -6,6 +6,7 @@ members = [
     "crates/ccda-map",
     "crates/fhir-out",
     "crates/ccda2fhir",
+    "crates/ccda2fhir-server",
 ]
 
 [workspace.package]

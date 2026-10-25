@@ -1,0 +1,28 @@
+name: Docker
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  image:
+    name: build and smoke test the image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t ccda2fhir:ci .
+      - name: run it and convert a document
+        run: |
+          docker run -d --name svc -p 8080:8080 ccda2fhir:ci
+          for i in $(seq 1 30); do
+            curl -fs http://localhost:8080/healthz && break
+            sleep 1
+          done
+          curl -fs -X POST -H 'Content-Type: application/xml' \
+            --data-binary @crates/ccda2fhir/tests/fixtures/referral.xml \
+            http://localhost:8080/convert | grep -q '"resourceType":"Bundle"'
+          sleep 6
+          test "$(docker inspect -f '{{.State.Health.Status}}' svc)" != "unhealthy"
+      - if: failure()
+        run: docker logs svc

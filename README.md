@@ -3,9 +3,35 @@
 Convert C-CDA documents to FHIR R4, written in Rust. A pure library first; CLI, web service and web UI are
 thin layers on top.
 
-**Status: early development.** Only the document header's Patient (name, gender, birth date) is converted today.
-The goal is exhaustive USCDI v1 and v3 coverage, with every claim backed by a test and by the HL7 validator.
-See [`DESIGN.md`](DESIGN.md) for the plan.
+**Status: under active development.** Most USCDI v1 and v3 data classes are converted and checked with the HL7
+validator in CI; the remaining gaps are listed in [`docs/uscdi.md`](docs/uscdi.md) and
+[`docs/coverage.md`](docs/coverage.md). See [`DESIGN.md`](DESIGN.md) for the plan.
+
+## Run it
+
+### Docker (one command)
+
+```
+docker compose up --build
+curl -X POST -H 'Content-Type: application/xml' \
+  --data-binary @your-ccd.xml 'http://localhost:8080/convert' > bundle.json
+```
+
+`POST /convert` takes the C-CDA XML as the body and returns a FHIR R4 Bundle (`application/fhir+json`). Add
+`?report=true` to get `{ "bundle": ..., "report": [...] }`, or `?profiles=none` to leave out `meta.profile`.
+Errors are `OperationOutcome` resources. `GET /healthz` and `GET /readyz` are for orchestrators.
+
+Settings (environment variables): `BIND_ADDR` (default `0.0.0.0:8080` in the image), `MAX_BODY_BYTES`
+(10 MiB), `MAX_CONCURRENCY` (64), `REQUEST_TIMEOUT_SECS` (30), `RUST_LOG` (`info`). Request bodies are never
+logged. The service has no authentication yet: run it inside your network or behind a gateway that adds it.
+
+### Command line
+
+```
+cargo run --release -p ccda2fhir-server -- convert ccd.xml > bundle.json
+cargo run --release -p ccda2fhir-server -- convert *.xml --out-dir out/
+cargo run --release -p ccda2fhir-server -- serve --bind 127.0.0.1:8080
+```
 
 ## Quick start
 
@@ -31,6 +57,7 @@ Error and report messages never contain document content, so they are safe to lo
 | `ccda-map` | Maps the model to FHIR resources and records issues in a `Report` |
 | `fhir-out` | FHIR R4 output building blocks (Bundle) |
 | `ccda2fhir` | Public facade: `convert()` |
+| `ccda2fhir-server` | The `ccda2fhir` command line tool and HTTP service |
 
 ## Development
 

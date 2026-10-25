@@ -1,0 +1,31 @@
+[package]
+name = "ccda2fhir-server"
+description = "Command line tool and HTTP service for the C-CDA to FHIR converter"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "ccda2fhir"
+path = "src/main.rs"
+
+[dependencies]
+ccda2fhir = { path = "../ccda2fhir", version = "0.1.0" }
+ccda-map.workspace = true
+axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "json", "query"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
+tower-http = { version = "0.6", features = ["timeout", "limit", "trace"] }
+tower = { version = "0.5", features = ["limit"] }
+clap = { version = "4", features = ["derive", "env"] }
+serde = { workspace = true }
+serde_json.workspace = true
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+
+[lints]
+workspace = true
