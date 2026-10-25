@@ -78,6 +78,8 @@ pub struct ClinicalDocument {
     pub confidentiality: Option<String>,
     /// `languageCode/@code`
     pub language: Option<String>,
+    /// `componentOf/encompassingEncounter`, as an Encounter statement.
+    pub encompassing_encounter: Option<Statement>,
     /// Top-level sections of the structured body, in document order.
     pub sections: Vec<Section>,
 }
@@ -208,6 +210,9 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
             .map(|o| body::parse_organization(&o)),
         confidentiality: child(&root, "confidentialityCode").and_then(|n| xml::attr(&n, "code")),
         language: child(&root, "languageCode").and_then(|n| xml::attr(&n, "code")),
+        encompassing_encounter: child(&root, "componentOf")
+            .and_then(|c| child(&c, "encompassingEncounter"))
+            .and_then(|e| body::parse_encompassing_encounter(&e, &header_narrative)),
         sections: body::parse_body(&root)?,
     })
 }

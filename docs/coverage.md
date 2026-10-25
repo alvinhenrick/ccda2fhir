@@ -412,7 +412,7 @@ See `docs/decisions/0025-encounter-links.md`.
 |---|---|---|---|---|
 | Nested Encounter Activity (id only) in an entry | `encounter` on Condition, Observation, Procedure, DiagnosticReport, MedicationRequest, Immunization, ServiceRequest, CarePlan | done | golden `encounter_links` | |
 | Encounter id not in the document | info `encounter.link.unresolved` | done | golden `encounter_links` | |
-| `encompassingEncounter` | `Composition.encounter` | open | | |
+| `componentOf/encompassingEncounter` | `Encounter` and `Composition.encounter` (ADR 0026) | done | goldens `encompassing_encounter`, `encompassing_encounter_already_in_the_body` | |
 
 ## Running real-world samples
 

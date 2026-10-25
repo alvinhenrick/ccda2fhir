@@ -161,3 +161,13 @@ fn planned_medication() {
 fn encounter_links() {
     check("encounter-links");
 }
+
+#[test]
+fn encompassing_encounter() {
+    check("encompassing-encounter");
+}
+
+#[test]
+fn encompassing_encounter_already_in_the_body() {
+    check("encompassing-encounter-in-body");
+}

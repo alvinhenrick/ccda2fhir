@@ -52,7 +52,7 @@ pub use composition::map_composition;
 pub use context::Context;
 pub use coverage::map_coverage;
 pub use device::map_devices;
-pub use encounter::map_encounters;
+pub use encounter::{map_encompassing_encounter, map_encounters};
 pub use encounter_link::link_encounters;
 pub use goal::map_goals;
 pub use health_concern::map_health_concerns;

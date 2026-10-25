@@ -163,6 +163,12 @@ pub fn map_composition(
             );
         }
     }
+    if let Some(id) = crate::encounter::find_encounter(doc, ctx, resources) {
+        r.insert(
+            "encounter".into(),
+            json!({ "reference": ctx.reference("Encounter", &id) }),
+        );
+    }
     if let Some(l) = doc.language.as_deref() {
         r.insert("language".into(), json!(l));
     }

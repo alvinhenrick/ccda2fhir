@@ -1,8 +1,8 @@
 //! Encounter Activity (`encounter`) to FHIR `Encounter`.
 //!
 //! Rules come from the IG page "CF-encounters" and the ConceptMap `CF-EncounterStatus`.
-//! The header's `encompassingEncounter` and the merging of the same encounter seen twice are not
-//! done yet (see `docs/coverage.md`).
+//! The header's `encompassingEncounter` is mapped by `map_encompassing_encounter`. Merging the same
+//! encounter seen twice in the body is not done yet (see `docs/coverage.md`).
 
 use ccda_model::{ClinicalDocument, Statement, StatementKind, Value as Cv};
 use serde_json::{json, Map, Value};
@@ -50,6 +50,50 @@ pub fn map_encounters(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
         }
     }
     out
+}
+
+/// Map the header's `encompassingEncounter` unless the body already has an Encounter with the
+/// same identifier (then that one is the encounter, and nothing is added).
+pub fn map_encompassing_encounter(
+    doc: &ClinicalDocument,
+    ctx: &mut Context,
+    resources: &mut Vec<Value>,
+) {
+    let Some(s) = &doc.encompassing_encounter else {
+        return;
+    };
+    if find_encounter(doc, ctx, resources).is_some() {
+        return;
+    }
+    let mut out = Vec::new();
+    map_activity(s, ctx, &mut out);
+    resources.extend(out);
+}
+
+/// The id of the mapped Encounter that is the document's `encompassingEncounter`, if any.
+pub(crate) fn find_encounter(
+    doc: &ClinicalDocument,
+    ctx: &mut Context,
+    resources: &[Value],
+) -> Option<String> {
+    let s = doc.encompassing_encounter.as_ref()?;
+    // Matching must not add report entries of its own.
+    let mut scratch = crate::Report::default();
+    let wanted: Vec<String> = s
+        .ids
+        .iter()
+        .filter_map(|i| map_identifier(i, ctx.terminology, &mut scratch))
+        .flat_map(|i| crate::health_concern::keys(&json!([i])))
+        .collect();
+    resources
+        .iter()
+        .filter(|r| r["resourceType"] == "Encounter")
+        .find(|r| {
+            crate::health_concern::keys(&r["identifier"])
+                .iter()
+                .any(|k| wanted.contains(k))
+        })
+        .and_then(|r| r["id"].as_str().map(str::to_owned))
 }
 
 /// `CF-EncounterStatus`.
