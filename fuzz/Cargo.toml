@@ -1,0 +1,22 @@
+[package]
+name = "ccda2fhir-fuzz"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+ccda2fhir = { path = "../crates/ccda2fhir" }
+
+[[bin]]
+name = "convert"
+path = "fuzz_targets/convert.rs"
+test = false
+doc = false
+bench = false
+
+# Keep the fuzz crate out of the main workspace (it needs nightly and libFuzzer).
+[workspace]
