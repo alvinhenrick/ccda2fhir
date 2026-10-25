@@ -516,7 +516,7 @@ See `docs/decisions/0035-template-versions.md`. Template matching ignores versio
 | Template | FHIR | Status | Test |
 |---|---|---|---|
 | Sexual Orientation (4.501), Occupation (4.503), Industry (4.504), Tribal Affiliation (4.506), Sex (4.507), Smoking Status 3.0 (4.511), Pregnancy Intention (4.281) | `Observation` (social-history) | done | golden `social_3_0`, `every_3_0_template_becomes_a_social_history_observation` |
-| Advance Directive (4.48, 4.108), admission/discharge diagnoses and medications (4.33 to 4.36), pre/post-op diagnoses (4.51, 4.65), adherence and preferences (4.508 to 4.510), average BP (4.512), date of diagnosis (4.502), deceased (4.79) | | todo (reported as unmapped) | |
+| Advance Directive (4.48, 4.108), adherence and preferences (4.508 to 4.510), average BP (4.512), date of diagnosis (4.502), deceased (4.79) | | todo (reported as unmapped) | |
 
 ## Referral
 

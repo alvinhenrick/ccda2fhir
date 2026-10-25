@@ -35,10 +35,64 @@ pub fn map_problems(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
                 || entry.statement.has_template(RISK_CONCERN_ACT)
             {
                 map_concern(section, &entry.statement, ctx, &mut out);
+            } else if DIAGNOSIS_WRAPPERS
+                .iter()
+                .any(|t| entry.statement.has_template(t))
+            {
+                out.extend(map_diagnosis_wrapper(&entry.statement, ctx));
             }
         }
     }
     out
+}
+
+/// Hospital Admission (4.34) and Discharge (4.33) Diagnosis, Preprocedure (4.65) and
+/// Postprocedure (4.51) Diagnosis: acts that wrap Problem Observations.
+const DIAGNOSIS_WRAPPERS: &[&str] = &[
+    "2.16.840.1.113883.10.20.22.4.33",
+    "2.16.840.1.113883.10.20.22.4.34",
+    "2.16.840.1.113883.10.20.22.4.51",
+    "2.16.840.1.113883.10.20.22.4.65",
+];
+
+/// The Conditions inside a diagnosis wrapper: `encounter-diagnosis`, plus the wrapper's own code
+/// (admission, discharge, pre- or post-procedure) as a second category so the role is kept.
+fn map_diagnosis_wrapper(act: &Statement, ctx: &mut Context) -> Vec<Value> {
+    let observations: Vec<_> = act
+        .related
+        .iter()
+        .map(|r| &r.statement)
+        .filter(|s| s.has_template(PROBLEM_OBSERVATION))
+        .collect();
+    if observations.is_empty() {
+        ctx.report.warn(
+            "condition.concern.no-observation",
+            "a diagnosis act has no Problem Observation; no Condition was created",
+        );
+    }
+    let role = act
+        .code
+        .as_ref()
+        .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report));
+    observations
+        .into_iter()
+        .map(|observation| {
+            let base =
+                json!({ "coding": [{ "system": CATEGORY_SYSTEM, "code": "encounter-diagnosis" }] });
+            let mut condition = map_observation(Some(base), act, observation, ctx);
+            if let Some(role) = role.clone() {
+                if let Some(first) = condition.get("category").cloned() {
+                    let mut categories = match first {
+                        Value::Array(a) => a,
+                        other => vec![other],
+                    };
+                    categories.push(role);
+                    condition["category"] = json!(categories);
+                }
+            }
+            condition
+        })
+        .collect()
 }
 
 fn map_concern(section: &Section, concern: &Statement, ctx: &mut Context, out: &mut Vec<Value>) {
@@ -759,5 +813,25 @@ mod tests {
             &observation("", "", hypertension(), ""),
         );
         assert_eq!(run(&xml).0, run(&xml).0);
+    }
+
+    #[test]
+    fn admission_diagnosis_keeps_its_role_as_a_second_category() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<component><structuredBody><component><section><entry><act classCode="ACT" moodCode="EVN">
+<templateId root="2.16.840.1.113883.10.20.22.4.34"/>
+<code code="46241-6" codeSystem="2.16.840.1.113883.6.1"/>
+<entryRelationship typeCode="REFR"><observation classCode="OBS" moodCode="EVN">
+<templateId root="2.16.840.1.113883.10.20.22.4.4"/>
+<code code="282291009" codeSystem="2.16.840.1.113883.6.96"/><statusCode code="completed"/>
+<value xsi:type="CD" code="233604007" codeSystem="2.16.840.1.113883.6.96"/>
+</observation></entryRelationship></act></entry></section></component></structuredBody></component></ClinicalDocument>"#;
+        let (conditions, _) = run(xml);
+        assert_eq!(conditions.len(), 1);
+        assert_eq!(
+            conditions[0]["category"][0]["coding"][0]["code"],
+            "encounter-diagnosis"
+        );
+        assert_eq!(conditions[0]["category"][1]["coding"][0]["code"], "46241-6");
     }
 }

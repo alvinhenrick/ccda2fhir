@@ -18,6 +18,9 @@ const MEDICATION_ACTIVITY: &str = "2.16.840.1.113883.10.20.22.4.16";
 const PLANNED_MEDICATION: &str = "2.16.840.1.113883.10.20.22.4.42";
 const SUPPLY_ORDER: &str = "2.16.840.1.113883.10.20.22.4.17";
 const MEDICATION_DISPENSE: &str = "2.16.840.1.113883.10.20.22.4.18";
+const ADMISSION_MEDICATION: &str = "2.16.840.1.113883.10.20.22.4.36";
+const DISCHARGE_MEDICATION: &str = "2.16.840.1.113883.10.20.22.4.35";
+const CATEGORY_SYSTEM: &str = "http://terminology.hl7.org/CodeSystem/medicationrequest-category";
 const INDICATION: &str = "2.16.840.1.113883.10.20.22.4.19";
 const INSTRUCTION: &str = "2.16.840.1.113883.10.20.22.4.20";
 const FREE_TEXT_SIG: &str = "2.16.840.1.113883.10.20.22.4.147";
@@ -33,21 +36,47 @@ pub fn map_medications(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> 
     for section in doc.all_sections() {
         for entry in &section.entries {
             let s = &entry.statement;
-            if s.kind != StatementKind::SubstanceAdministration
-                || !(s.has_template(MEDICATION_ACTIVITY) || s.has_template(PLANNED_MEDICATION))
-            {
+            // Admission (4.36) and Discharge (4.35) Medication wrap Medication Activities.
+            if s.has_template(ADMISSION_MEDICATION) || s.has_template(DISCHARGE_MEDICATION) {
+                let discharge = s.has_template(DISCHARGE_MEDICATION);
+                for inner in nested(s) {
+                    if is_medication(inner) {
+                        let mut r = map_one(inner, ctx);
+                        if let (Some(r), true) = (r.as_mut(), discharge) {
+                            r["category"] = json!([{ "coding": [{
+                                "system": CATEGORY_SYSTEM,
+                                "code": "discharge",
+                            }] }]);
+                        }
+                        out.extend(r);
+                    }
+                }
                 continue;
             }
-            match s.mood_code.as_deref() {
-                Some("EVN" | "INT") | None => out.push(map_activity(s, ctx)),
-                Some(_) => ctx.report.info(
-                    "medication.mood.unsupported",
-                    "a medication with a mood other than EVN or INT was not mapped",
-                ),
+            if is_medication(s) {
+                out.extend(map_one(s, ctx));
             }
         }
     }
     out
+}
+
+fn is_medication(s: &Statement) -> bool {
+    s.kind == StatementKind::SubstanceAdministration
+        && (s.has_template(MEDICATION_ACTIVITY) || s.has_template(PLANNED_MEDICATION))
+}
+
+fn map_one(s: &Statement, ctx: &mut Context) -> Option<Value> {
+    match s.mood_code.as_deref() {
+        Some("EVN" | "INT") | None => Some(map_activity(s, ctx)),
+        Some(_) => {
+            ctx.report.info(
+                "medication.mood.unsupported",
+                "a medication with a mood other than EVN or INT was not mapped",
+            );
+            None
+        }
+    }
 }
 
 /// `CF-MedicationStatus`: v3 ActStatus to medicationrequest-status.
@@ -805,5 +834,19 @@ mod tests {
         let (out, _, report) = run(&document("INT", "", &format!("{DRUG}{SUPPLY}{SUPPLY}")));
         assert_eq!(out[0]["dispenseRequest"]["numberOfRepeatsAllowed"], 3);
         assert!(codes(&report).contains(&"medication.supply.multiple"));
+    }
+
+    #[test]
+    fn discharge_medication_wrapper_gives_discharge_category() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<component><structuredBody><component><section><entry><act classCode="ACT" moodCode="EVN">
+<templateId root="2.16.840.1.113883.10.20.22.4.35"/>
+<entryRelationship typeCode="SUBJ"><substanceAdministration classCode="SBADM" moodCode="EVN">
+<templateId root="2.16.840.1.113883.10.20.22.4.16"/><statusCode code="active"/>
+<consumable><manufacturedProduct><manufacturedMaterial><code code="314076" codeSystem="2.16.840.1.113883.6.88"/></manufacturedMaterial></manufacturedProduct></consumable>
+</substanceAdministration></entryRelationship></act></entry></section></component></structuredBody></component></ClinicalDocument>"#;
+        let (out, _, _) = run(xml);
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0]["category"][0]["coding"][0]["code"], "discharge");
     }
 }
