@@ -366,6 +366,22 @@ See `docs/decisions/0020-composition.md`.
 | `documentationOf/serviceEvent` | `event` | todo | | |
 | `relatedDocument` | `relatesTo` | todo | | |
 
+## Gaps found by running real-world samples
+
+`cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
+code `entry.unmapped`, with the template OID). On the 29 sample documents in the Medplum repository (ONC 170.315(b)(1) CCD and
+transition-of-care samples plus small unit samples), nothing failed to convert, and these templates were found but not mapped:
+
+| Template | Name | FHIR target | Status |
+|---|---|---|---|
+| 4.132 | Health Concern Act | `Condition` (category health-concern) | todo |
+| 4.5 | Health Status Observation | `Observation` | todo |
+| 4.66 / 4.67 / 4.68 | Functional Status Organizer / Observation | `Observation` (functional-status) | todo |
+| 4.74 / 4.75 | Cognitive / Mental Status Organizer / Observation | `Observation` | todo |
+| 4.42 | Planned Medication Activity | `MedicationRequest` (intent plan) | todo |
+| 4.20 | Instruction | `ServiceRequest.patientInstruction` / `Communication` | todo |
+| 4.13 | Procedure Activity Observation | `Procedure` | todo (reported today) |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that
