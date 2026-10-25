@@ -168,6 +168,26 @@ See `docs/decisions/0008-procedures.md`.
 | Procedure Activity Observation | Observation | reported, todo | | |
 | Planned procedure (mood INT) | ServiceRequest | reported, todo | | |
 
+## Encounters (Encounter Activity) to Encounter
+
+See `docs/decisions/0009-encounters.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `id` | `identifier` | done | golden `encounters` | |
+| `code` (v3 ActCode, or CPT E/M range) | `class` | done | `cpt_gives_class_and_stays_in_type`, `act_code_gives_class_and_leaves_type` | |
+| `code` (the rest) | `type` | done | same | |
+| `statusCode` / `effectiveTime` | `status` (time first, CF-EncounterStatus otherwise) | done | `time_decides_status_unless_the_status_code_says_otherwise` | |
+| `effectiveTime` | `period` | done | `point_time_is_a_period_with_both_ends` | |
+| `sdtc:dischargeDispositionCode` | `hospitalization.dischargeDisposition` | done | `discharge_disposition_is_read_from_the_sdtc_element` | |
+| `performer` | `participant.individual` | done (function code todo) | golden | |
+| Indication | `reasonCode` (`reasonReference` to a problem todo) | partial | golden | |
+| Encounter Diagnosis | Condition (encounter-diagnosis) + `diagnosis.condition` | done | `encounter_diagnoses_become_conditions_linked_both_ways` | |
+| Location participant | `location` | reported, todo (needs Location) | | |
+| Header `encompassingEncounter`, same encounter seen twice | one Encounter | todo | | |
+| Links from procedures, conditions and results to the encounter | `encounter` | todo | | |
+| Planned encounter (mood INT) | Appointment / ServiceRequest | reported, todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

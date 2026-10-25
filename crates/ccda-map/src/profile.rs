@@ -30,6 +30,15 @@ impl Profiles {
             "Immunization" => "us-core-immunization",
             // US Core requires authoredOn and requester; claim it only when both are present.
             "Observation" => observation_profile(resource)?,
+            "Encounter" => {
+                if !(resource["identifier"].is_array()
+                    && resource["type"].is_array()
+                    && resource["class"].is_object())
+                {
+                    return None;
+                }
+                "us-core-encounter"
+            }
             "Procedure" => {
                 let performed = resource["performedDateTime"].is_string()
                     || resource["_performedDateTime"].is_object()

@@ -9,8 +9,8 @@
 //! The library is pure: bytes in, a [`Conversion`] out. It performs no I/O and keeps no state.
 
 use ccda_map::{
-    map_allergies, map_immunizations, map_medications, map_patient, map_problems, map_procedures,
-    map_results, map_vitals, Context, Profiles, Report,
+    map_allergies, map_encounters, map_immunizations, map_medications, map_patient, map_problems,
+    map_procedures, map_results, map_vitals, Context, Profiles, Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -80,6 +80,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .chain(map_vitals(&document, &mut ctx))
         .chain(map_results(&document, &mut ctx))
         .chain(map_procedures(&document, &mut ctx))
+        .chain(map_encounters(&document, &mut ctx))
     {
         let mut resource = resource;
         profiles.apply(&mut resource);

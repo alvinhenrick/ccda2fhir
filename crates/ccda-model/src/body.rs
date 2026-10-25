@@ -160,6 +160,8 @@ pub struct Statement {
     pub repeat_number: Option<String>,
     pub route_code: Option<Code>,
     pub approach_site_code: Option<Code>,
+    /// `sdtc:dischargeDispositionCode` of an encounter.
+    pub discharge_disposition: Option<Code>,
     /// `doseQuantity` when it is a plain quantity.
     pub dose_quantity: Option<Quantity>,
     /// `doseQuantity` when it is a `low`/`high` interval.
@@ -389,6 +391,11 @@ fn parse_statement(
         repeat_number: child(node, "repeatNumber").and_then(|n| attr(&n, "value")),
         route_code: child(node, "routeCode").map(|n| parse_code(&n, narrative)),
         approach_site_code: child(node, "approachSiteCode").map(|n| parse_code(&n, narrative)),
+        // The extension namespace (`sdtc:`) is not HL7 v3, so match on the local name only.
+        discharge_disposition: node
+            .children()
+            .find(|c| c.is_element() && c.tag_name().name() == "dischargeDispositionCode")
+            .map(|n| parse_code(&n, narrative)),
         dose_quantity: child(node, "doseQuantity")
             .filter(|n| child(n, "low").is_none() && child(n, "high").is_none())
             .map(|n| parse_quantity(&n)),

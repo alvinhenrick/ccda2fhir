@@ -81,3 +81,8 @@ fn results() {
 fn procedures() {
     check("procedures");
 }
+
+#[test]
+fn encounters() {
+    check("encounters");
+}

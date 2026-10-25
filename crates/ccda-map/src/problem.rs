@@ -48,9 +48,31 @@ fn map_concern(section: &Section, concern: &Statement, ctx: &mut Context, out: &
             "a Problem Concern Act has no Problem Observation; no Condition was created",
         );
     }
+    let category = category(section, ctx);
     for observation in observations {
-        out.push(map_observation(section, concern, observation, ctx));
+        out.push(map_observation(category.clone(), concern, observation, ctx));
     }
+}
+
+/// The Conditions of an Encounter Diagnosis act nested in an encounter. They map like problems
+/// but are always `encounter-diagnosis`, and point back at the encounter.
+pub(crate) fn map_encounter_diagnosis(
+    act: &Statement,
+    encounter_reference: &str,
+    ctx: &mut Context,
+) -> Vec<Value> {
+    let category =
+        json!({ "coding": [{ "system": CATEGORY_SYSTEM, "code": "encounter-diagnosis" }] });
+    act.related
+        .iter()
+        .map(|r| &r.statement)
+        .filter(|s| s.has_template(PROBLEM_OBSERVATION))
+        .map(|observation| {
+            let mut condition = map_observation(Some(category.clone()), act, observation, ctx);
+            condition["encounter"] = json!({ "reference": encounter_reference });
+            condition
+        })
+        .collect()
 }
 
 /// `CF-ProblemCategory`: the section a problem sits in decides its category.
@@ -148,7 +170,7 @@ fn clinical_status(
 }
 
 fn map_observation(
-    section: &Section,
+    category: Option<Value>,
     concern: &Statement,
     observation: &Statement,
     ctx: &mut Context,
@@ -194,7 +216,7 @@ fn map_observation(
         );
     }
 
-    if let Some(category) = category(section, ctx) {
+    if let Some(category) = category {
         resource.insert("category".into(), json!([category]));
     }
 
