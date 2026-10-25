@@ -29,16 +29,22 @@ pub fn map_advance_directives(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<
     for section in doc.all_sections() {
         for entry in &section.entries {
             let s = &entry.statement;
-            if s.has_template(OBSERVATION) {
+            // The template alone is not enough: a hostile or damaged document can put the
+            // template of an observation on any kind of statement.
+            if is_directive(s) {
                 out.push(map_directive(s, ctx));
-            } else if s.has_template(ORGANIZER) {
-                for inner in nested(s).filter(|i| i.has_template(OBSERVATION)) {
+            } else if s.has_template(ORGANIZER) && s.kind == StatementKind::Organizer {
+                for inner in nested(s).filter(|i| is_directive(i)) {
                     out.push(map_directive(inner, ctx));
                 }
             }
         }
     }
     out
+}
+
+fn is_directive(s: &Statement) -> bool {
+    s.kind == StatementKind::Observation && s.has_template(OBSERVATION)
 }
 
 fn status_of(code: Option<&str>) -> Option<&'static str> {
@@ -51,7 +57,6 @@ fn status_of(code: Option<&str>) -> Option<&'static str> {
 }
 
 fn map_directive(s: &Statement, ctx: &mut Context) -> Value {
-    debug_assert!(s.kind == StatementKind::Observation);
     let mut r = Map::new();
     r.insert("resourceType".into(), json!("Consent"));
     r.insert("id".into(), json!(ctx.next_id("consent")));
@@ -202,5 +207,15 @@ mod tests {
             .issues
             .iter()
             .any(|i| i.code == "consent.category.missing"));
+    }
+
+    #[test]
+    fn the_directive_template_on_another_kind_of_statement_is_ignored() {
+        // Found by fuzzing: an encounter carrying the Advance Directive template.
+        let xml = DOC
+            .replace("<observation ", "<encounter ")
+            .replace("</observation>", "</encounter>");
+        let (out, _) = run(&xml);
+        assert!(out.is_empty());
     }
 }
