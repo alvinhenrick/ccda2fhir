@@ -131,3 +131,8 @@ fn coverage() {
 fn location_and_specimen() {
     check("location-specimen");
 }
+
+#[test]
+fn planned_activities() {
+    check("planned-activities");
+}

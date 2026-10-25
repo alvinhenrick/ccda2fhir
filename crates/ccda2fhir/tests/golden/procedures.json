@@ -168,6 +168,43 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:7f453e40-883c-58fb-b755-c781de68a2e9",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "71388002",
+                  "display": "Procedure",
+                  "system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "73761001",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "servicerequest-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.3.2009316.3.4.7",
+              "value": "PROC-4"
+            }
+          ],
+          "intent": "plan",
+          "resourceType": "ServiceRequest",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:11ef9a45-f3e9-569f-a57f-e1aa8cdb9e09"
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:b2eba801-d1c4-570b-b6e7-0c885f498afd",
         "resource": {
           "id": "practitioner-1",
@@ -259,7 +296,7 @@
       "severity": "info"
     },
     {
-      "code": "procedure.intent.unsupported",
+      "code": "servicerequest.category.assumed",
       "severity": "info"
     }
   ]

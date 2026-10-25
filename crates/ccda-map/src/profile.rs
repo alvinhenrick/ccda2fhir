@@ -31,6 +31,13 @@ impl Profiles {
             // US Core requires authoredOn and requester; claim it only when both are present.
             "Observation" => observation_profile(resource)?,
             "CarePlan" => "us-core-careplan",
+            "ServiceRequest" => {
+                let needed = ["category", "authoredOn", "requester"];
+                if needed.iter().any(|k| resource[k].is_null()) {
+                    return None;
+                }
+                "us-core-servicerequest"
+            }
             "Location" => {
                 if resource["name"].is_null() {
                     return None;

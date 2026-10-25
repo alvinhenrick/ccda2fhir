@@ -2,7 +2,7 @@
 //!
 //! Rules come from the IG page "CF-procedures", its CSV and the ConceptMap `CF-ProcedureStatus`.
 //! Procedure Activity Observation is an observation, not a procedure, and is reported. A planned
-//! procedure (mood INT) is a `ServiceRequest` in FHIR and is reported until that mapper exists.
+//! procedure (mood INT) is a `ServiceRequest` in FHIR and is mapped by `service_request.rs`.
 
 use ccda_model::{ClinicalDocument, Statement, StatementKind, Value as Cv};
 use serde_json::{json, Map, Value};
@@ -45,10 +45,8 @@ pub fn map_procedures(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
             }
             match s.mood_code.as_deref() {
                 Some("EVN") | None => out.push(map_activity(s, ctx)),
-                Some(_) => ctx.report.info(
-                    "procedure.intent.unsupported",
-                    "a planned or requested procedure (not an event) was not mapped; FHIR uses ServiceRequest",
-                ),
+                // Planned and requested procedures are ServiceRequests (see `service_request.rs`).
+                Some(_) => {}
             }
         }
     }
@@ -323,13 +321,9 @@ mod tests {
     }
 
     #[test]
-    fn planned_procedures_and_observations_are_reported_not_mapped() {
-        let (out, report) = run(&doc("procedure", PROC, r#"x="INT""#, ""));
+    fn planned_procedures_are_left_to_service_requests_and_observations_are_reported() {
+        let (out, _) = run(&doc("procedure", PROC, r#"x="INT""#, ""));
         assert!(out.is_empty());
-        assert!(report
-            .issues
-            .iter()
-            .any(|i| i.code == "procedure.intent.unsupported"));
         let (out, report) = run(&doc(
             "observation",
             "2.16.840.1.113883.10.20.22.4.13",
