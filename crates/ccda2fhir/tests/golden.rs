@@ -262,3 +262,8 @@ fn imaging() {
 fn dispense() {
     check("dispense");
 }
+
+#[test]
+fn hospital_course() {
+    check("hospital-course");
+}
