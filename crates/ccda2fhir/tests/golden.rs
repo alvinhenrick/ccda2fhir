@@ -237,3 +237,8 @@ fn template_versions_do_not_change_the_output() {
         );
     }
 }
+
+#[test]
+fn sdoh() {
+    check("sdoh");
+}

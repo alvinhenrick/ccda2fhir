@@ -39,6 +39,7 @@ mod profile;
 mod quantity;
 mod report;
 mod results;
+mod sdoh;
 mod service_request;
 mod social;
 mod specimen;
@@ -78,6 +79,7 @@ pub use profile::Profiles;
 pub use quantity::{decimal, map_age, map_quantity};
 pub use report::{Issue, Report, Severity};
 pub use results::map_results;
+pub use sdoh::tag_sdoh;
 pub use service_request::map_service_requests;
 pub use social::map_social_history;
 pub use timestamp::{

@@ -201,7 +201,7 @@ See `docs/decisions/0010-social-history.md`.
 | Estimated delivery date | component 11778-8 | done | same | |
 | Unknown pregnancy value | v3 NullFlavor UNK coding | done | `unknown_pregnancy_value_is_a_null_flavor_coding` | |
 | Birth sex, gender identity, tribal affiliation | Patient extensions | reported, todo (with Patient demographics) | `birth_sex_is_left_for_the_patient_and_reported` | |
-| SDOH categories, assessment scales | other categories / Observation panels | todo | | |
+| SDOH categories, assessment scales | `sdoh` category by code list; scales as panels | partial | golden `sdoh` | |
 
 ## Patient demographics (recordTarget) to Patient
 
