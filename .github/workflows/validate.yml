@@ -54,7 +54,7 @@ jobs:
           # Fixtures are synthetic, so findings are safe to show. Annotations are capped at 10 per level.
           for level in Error Warning; do
             cat target/validation/*.validation.txt 2>/dev/null \
-              | grep -E "^\s*$level @" | sed -E 's/^\s+//; s/%/%25/g' | sort -u | head -10 \
+              | grep -E "^\s*$level @" | grep -v "dom-6" | sed -E 's/^\s+//; s/%/%25/g' | sort -u | head -10 \
               | while IFS= read -r line; do echo "::${level,,}::${line:0:480}"; done
           done
           grep -hE "^(Success|\*FAILURE\*)|Unable to|Error fetching" target/validation/*.validation.txt 2>/dev/null | head -5 \

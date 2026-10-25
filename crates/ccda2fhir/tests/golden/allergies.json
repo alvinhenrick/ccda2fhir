@@ -2,6 +2,7 @@
   "bundle": {
     "entry": [
       {
+        "fullUrl": "urn:uuid:4c6ba7ab-ebf1-5d23-95fe-11f576724ac6",
         "resource": {
           "birthDate": "1980-03-15",
           "gender": "male",
@@ -24,6 +25,7 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:3162bcc5-84ef-505c-a445-c388e6431b8e",
         "resource": {
           "category": [
             "medication"
@@ -56,7 +58,7 @@
           ],
           "onsetDateTime": "2010-01-01",
           "patient": {
-            "reference": "Patient/patient-1"
+            "reference": "urn:uuid:4c6ba7ab-ebf1-5d23-95fe-11f576724ac6"
           },
           "reaction": [
             {
@@ -81,6 +83,7 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:cc5c73ce-d5c7-59bb-a5fb-aae25a5d12c5",
         "resource": {
           "category": [
             "food"
@@ -96,7 +99,7 @@
           "code": {
             "coding": [
               {
-                "code": "256349002",
+                "code": "762952008",
                 "display": "Peanut",
                 "system": "http://snomed.info/sct"
               }
@@ -118,7 +121,7 @@
           ],
           "onsetDateTime": "2005",
           "patient": {
-            "reference": "Patient/patient-1"
+            "reference": "urn:uuid:4c6ba7ab-ebf1-5d23-95fe-11f576724ac6"
           },
           "reaction": [
             {
@@ -141,6 +144,7 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:5d4c18aa-1b8e-5bfb-ad3d-d3c4a2de1062",
         "resource": {
           "category": [
             "medication"
@@ -169,7 +173,7 @@
             }
           ],
           "patient": {
-            "reference": "Patient/patient-1"
+            "reference": "urn:uuid:4c6ba7ab-ebf1-5d23-95fe-11f576724ac6"
           },
           "resourceType": "AllergyIntolerance",
           "type": "allergy"

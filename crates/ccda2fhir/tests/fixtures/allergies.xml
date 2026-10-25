@@ -75,7 +75,7 @@
         <effectiveTime><low value="2005"/><high value="20150605"/></effectiveTime>
         <value xsi:type="CD" code="414285001" codeSystem="2.16.840.1.113883.6.96" displayName="Food allergy"/>
         <participant typeCode="CSM"><participantRole classCode="MANU"><playingEntity classCode="MMAT">
-          <code code="256349002" codeSystem="2.16.840.1.113883.6.96" displayName="Peanut">
+          <code code="762952008" codeSystem="2.16.840.1.113883.6.96" displayName="Peanut">
             <originalText><reference value="#sub2"/></originalText>
           </code>
         </playingEntity></participantRole></participant>

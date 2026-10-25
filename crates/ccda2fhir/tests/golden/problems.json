@@ -2,6 +2,7 @@
   "bundle": {
     "entry": [
       {
+        "fullUrl": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32",
         "resource": {
           "birthDate": "1970-01-01",
           "gender": "female",
@@ -24,6 +25,7 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:a8330f78-3989-5ecf-aa84-aea5a8cfd638",
         "resource": {
           "category": [
             {
@@ -69,11 +71,12 @@
           "onsetDateTime": "2012-08-06",
           "resourceType": "Condition",
           "subject": {
-            "reference": "Patient/patient-1"
+            "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
           }
         }
       },
       {
+        "fullUrl": "urn:uuid:2cb0b7a2-88a7-5c9d-a2c6-d090adf3a244",
         "resource": {
           "abatementDateTime": "2020-01-24",
           "category": [
@@ -114,11 +117,12 @@
           "onsetDateTime": "2020-01-10",
           "resourceType": "Condition",
           "subject": {
-            "reference": "Patient/patient-1"
+            "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
           }
         }
       },
       {
+        "fullUrl": "urn:uuid:ed69c8f1-533c-5d06-9b23-f4733a11d4b8",
         "resource": {
           "_abatementDateTime": {
             "extension": [
@@ -171,7 +175,7 @@
           },
           "resourceType": "Condition",
           "subject": {
-            "reference": "Patient/patient-1"
+            "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
           }
         }
       }

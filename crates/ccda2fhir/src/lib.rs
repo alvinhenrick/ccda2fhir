@@ -48,13 +48,25 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     let document = ccda_model::parse_with_limits(xml, &options.limits)?;
 
     let mut report = Report::default();
-    let mut bundle = Bundle::new();
+    // Urls are namespaced by the document id, so bundles from different documents never collide.
+    let seed = document
+        .id
+        .as_ref()
+        .map(|id| {
+            format!(
+                "{}|{}",
+                id.root.as_deref().unwrap_or_default(),
+                id.extension.as_deref().unwrap_or_default()
+            )
+        })
+        .unwrap_or_default();
+    let mut bundle = Bundle::with_namespace_seed(&seed);
     bundle.push(map_patient(&document, &BuiltinTerminology, &mut report));
 
     let mut ctx = Context::new(
         &BuiltinTerminology,
         &mut report,
-        format!("Patient/{PATIENT_ID}"),
+        bundle.url_for("Patient", PATIENT_ID),
     );
     for resource in map_problems(&document, &mut ctx)
         .into_iter()
