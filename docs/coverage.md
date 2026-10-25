@@ -379,6 +379,20 @@ See `docs/decisions/0022-health-concerns.md`.
 | Pointer at allergy, result, social history | category / `addresses` | todo | | |
 | Risk Concern Act | Condition / RiskAssessment | todo | | |
 
+## Functional, cognitive, mental and health status
+
+See `docs/decisions/0023-status-assessments.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Functional Status Organizer (4.66) | panel `Observation` + `hasMember` | done | `organizer_is_a_panel_with_members_and_the_functional_status_category` | |
+| Functional Status / Problem Observation, Self-Care Activities | `Observation` (functional-status) | done | same | |
+| Cognitive Status Organizer / Observation (4.75 / 4.74) | `Observation` (cognitive-status) | done | `cognitive_and_mental_and_health_status_categories` | |
+| Mental Status Organizer / Observation / Problem | `Observation` (cognitive-status, assumed) | done | same | |
+| Health Status Observation (4.5) | `Observation` (survey) | done | same | |
+| Assessment Scale Observation (4.69) | `Observation` + components | todo | | |
+| Caregiver Characteristics (4.72), Disability Status | `Observation` | todo | | |
+
 ## Gaps found by running real-world samples
 
 `cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
@@ -387,9 +401,6 @@ transition-of-care samples plus small unit samples), nothing failed to convert, 
 
 | Template | Name | FHIR target | Status |
 |---|---|---|---|
-| 4.5 | Health Status Observation | `Observation` | todo |
-| 4.66 / 4.67 / 4.68 | Functional Status Organizer / Observation | `Observation` (functional-status) | todo |
-| 4.74 / 4.75 | Cognitive / Mental Status Organizer / Observation | `Observation` | todo |
 | 4.42 | Planned Medication Activity | `MedicationRequest` (intent plan) | todo |
 | 4.20 | Instruction | `ServiceRequest.patientInstruction` / `Communication` | todo |
 | 4.13 | Procedure Activity Observation | `Procedure` | todo (reported today) |

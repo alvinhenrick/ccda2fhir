@@ -44,10 +44,10 @@ pub fn report_unmapped(doc: &ClinicalDocument, ctx: &mut Context) {
     for section in doc.all_sections() {
         for entry in &section.entries {
             let s = &entry.statement;
-            if s.template_ids
-                .iter()
-                .any(|t| HANDLED.contains(&t.root.as_str()))
-            {
+            if s.template_ids.iter().any(|t| {
+                HANDLED.contains(&t.root.as_str())
+                    || crate::assessment::handled_templates().any(|h| h == t.root)
+            }) {
                 continue;
             }
             // The root goes in the message only if it is an OID; anything else could be document text.
@@ -95,10 +95,10 @@ mod tests {
     #[test]
     fn unhandled_template_is_reported_by_oid() {
         let out = run(
-            r#"<entry><act><templateId root="2.16.840.1.113883.10.20.22.4.66"/></act></entry>"#,
+            r#"<entry><act><templateId root="2.16.840.1.113883.10.20.22.4.13"/></act></entry>"#,
         );
         assert_eq!(out.len(), 1);
-        assert!(out[0].contains("2.16.840.1.113883.10.20.22.4.66"));
+        assert!(out[0].contains("2.16.840.1.113883.10.20.22.4.13"));
     }
 
     #[test]

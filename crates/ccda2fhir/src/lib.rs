@@ -9,10 +9,11 @@
 //! The library is pure: bytes in, a [`Conversion`] out. It performs no I/O and keeps no state.
 
 use ccda_map::{
-    map_allergies, map_care_plans, map_care_teams, map_composition, map_coverage, map_devices,
-    map_encounters, map_goals, map_health_concerns, map_immunizations, map_medications, map_notes,
-    map_patient, map_problems, map_procedures, map_results, map_service_requests,
-    map_social_history, map_vitals, report_unmapped, Context, Profiles, Report,
+    map_allergies, map_assessments, map_care_plans, map_care_teams, map_composition, map_coverage,
+    map_devices, map_encounters, map_goals, map_health_concerns, map_immunizations,
+    map_medications, map_notes, map_patient, map_problems, map_procedures, map_results,
+    map_service_requests, map_social_history, map_vitals, report_unmapped, Context, Profiles,
+    Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -90,6 +91,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .chain(map_care_teams(&document, &mut ctx))
         .chain(map_coverage(&document, &mut ctx))
         .chain(map_service_requests(&document, &mut ctx))
+        .chain(map_assessments(&document, &mut ctx))
         .collect();
     // Health concerns mark or add Conditions, so they run after everything else is mapped.
     let concerns = map_health_concerns(&document, &mut ctx, &mut resources);
