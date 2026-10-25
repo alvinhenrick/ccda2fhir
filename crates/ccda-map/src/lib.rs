@@ -36,6 +36,7 @@ mod service_request;
 mod social;
 mod specimen;
 mod timestamp;
+mod unmapped;
 mod util;
 mod vitals;
 
@@ -68,4 +69,5 @@ pub use social::map_social_history;
 pub use timestamp::{
     hl7_date_to_fhir_date, hl7_ts_to_fhir_datetime, map_datetime, Converted, InvalidTimestamp, Loss,
 };
+pub use unmapped::report_unmapped;
 pub use vitals::map_vitals;
