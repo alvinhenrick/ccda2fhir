@@ -1,0 +1,19 @@
+[package]
+name = "ccda2fhir"
+description = "Convert C-CDA documents to FHIR R4 bundles"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ccda-model.workspace = true
+ccda-map.workspace = true
+fhir-out.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

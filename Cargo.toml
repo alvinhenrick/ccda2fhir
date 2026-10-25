@@ -1,12 +1,38 @@
 [workspace]
 resolver = "2"
-members = ["crates/ccda-model"]
+members = [
+    "crates/ccda-model",
+    "crates/ccda-terminology",
+    "crates/ccda-map",
+    "crates/fhir-out",
+    "crates/ccda2fhir",
+]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+repository = "https://github.com/alvinhenrick/ccda2fhir"
 
 [workspace.dependencies]
 roxmltree = "0.20"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 thiserror = "2"
+
+# Internal crates
+ccda-model = { path = "crates/ccda-model" }
+ccda-terminology = { path = "crates/ccda-terminology" }
+ccda-map = { path = "crates/ccda-map" }
+fhir-out = { path = "crates/fhir-out" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+dbg_macro = "warn"
+todo = "warn"

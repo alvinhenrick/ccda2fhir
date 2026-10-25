@@ -4,7 +4,11 @@ description = "Typed, version-neutral model and safe parser for C-CDA documents"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
 roxmltree.workspace = true
 thiserror.workspace = true
+
+[lints]
+workspace = true

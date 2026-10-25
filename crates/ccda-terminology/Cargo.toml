@@ -1,0 +1,12 @@
+[package]
+name = "ccda-terminology"
+description = "Code system helpers for C-CDA to FHIR conversion (OID to URI mapping)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true
