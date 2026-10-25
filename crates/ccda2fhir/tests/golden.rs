@@ -267,3 +267,8 @@ fn dispense() {
 fn hospital_course() {
     check("hospital-course");
 }
+
+#[test]
+fn advance_directive() {
+    check("advance-directive");
+}
