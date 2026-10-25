@@ -31,6 +31,13 @@ impl Profiles {
             // US Core requires authoredOn and requester; claim it only when both are present.
             "Observation" => observation_profile(resource)?,
             "CarePlan" => "us-core-careplan",
+            "Coverage" => {
+                let needed = ["payor", "relationship", "subscriberId"];
+                if needed.iter().any(|k| resource[k].is_null()) {
+                    return None;
+                }
+                "us-core-coverage"
+            }
             "CareTeam" => {
                 // US Core needs at least one participant with a role and a member.
                 let ok = resource["participant"].as_array().is_some_and(|ps| {

@@ -121,3 +121,8 @@ fn care_plan() {
 fn care_team() {
     check("care-team");
 }
+
+#[test]
+fn coverage() {
+    check("coverage");
+}
