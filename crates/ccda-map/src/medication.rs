@@ -16,6 +16,10 @@ use crate::{
 
 const MEDICATION_ACTIVITY: &str = "2.16.840.1.113883.10.20.22.4.16";
 const PLANNED_MEDICATION: &str = "2.16.840.1.113883.10.20.22.4.42";
+/// Planned Immunization Activity, and Immunization Activity (4.52) when it is not an event: the
+/// IG maps both to MedicationRequest.
+const PLANNED_IMMUNIZATION: &str = "2.16.840.1.113883.10.20.22.4.120";
+const IMMUNIZATION_ACTIVITY: &str = "2.16.840.1.113883.10.20.22.4.52";
 const SUPPLY_ORDER: &str = "2.16.840.1.113883.10.20.22.4.17";
 const MEDICATION_DISPENSE: &str = "2.16.840.1.113883.10.20.22.4.18";
 const ADMISSION_MEDICATION: &str = "2.16.840.1.113883.10.20.22.4.36";
@@ -63,7 +67,11 @@ pub fn map_medications(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> 
 
 fn is_medication(s: &Statement) -> bool {
     s.kind == StatementKind::SubstanceAdministration
-        && (s.has_template(MEDICATION_ACTIVITY) || s.has_template(PLANNED_MEDICATION))
+        && (s.has_template(MEDICATION_ACTIVITY)
+            || s.has_template(PLANNED_MEDICATION)
+            || s.has_template(PLANNED_IMMUNIZATION)
+            || (s.has_template(IMMUNIZATION_ACTIVITY)
+                && matches!(s.mood_code.as_deref(), Some(m) if m != "EVN")))
 }
 
 fn map_one(s: &Statement, ctx: &mut Context) -> Option<Value> {
@@ -848,5 +856,23 @@ mod tests {
         let (out, _, _) = run(xml);
         assert_eq!(out.len(), 1);
         assert_eq!(out[0]["category"][0]["coding"][0]["code"], "discharge");
+    }
+
+    #[test]
+    fn planned_immunization_becomes_a_medication_request() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<component><structuredBody><component><section><entry><substanceAdministration classCode="SBADM" moodCode="INT">
+<templateId root="2.16.840.1.113883.10.20.22.4.120"/><statusCode code="active"/>
+<effectiveTime value="20251101"/>
+<consumable><manufacturedProduct><manufacturedMaterial><code code="140" codeSystem="2.16.840.1.113883.12.292"/></manufacturedMaterial></manufacturedProduct></consumable>
+</substanceAdministration></entry></section></component></structuredBody></component></ClinicalDocument>"#;
+        let (out, _, _) = run(xml);
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0]["resourceType"], "MedicationRequest");
+        assert_eq!(out[0]["intent"], "order");
+        assert_eq!(
+            out[0]["medicationCodeableConcept"]["coding"][0]["system"],
+            "http://hl7.org/fhir/sid/cvx"
+        );
     }
 }

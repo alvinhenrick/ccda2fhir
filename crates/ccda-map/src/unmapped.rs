@@ -52,6 +52,7 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.61",  // Policy Activity
     "2.16.840.1.113883.10.20.22.4.78",  // Smoking Status
     "2.16.840.1.113883.10.20.22.4.85",  // Tobacco Use
+    "2.16.840.1.113883.10.20.22.4.120", // Planned Immunization Activity
     "2.16.840.1.113883.10.20.22.4.121", // Goal Observation
     "2.16.840.1.113883.10.20.22.4.132", // Health Concern Act
     "2.16.840.1.113883.10.20.22.4.200", // Birth Sex (Patient)
