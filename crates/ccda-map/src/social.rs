@@ -19,6 +19,24 @@ const EDD: &str = "2.16.840.1.113883.10.20.15.3.1";
 const BIRTH_SEX: &str = "2.16.840.1.113883.10.20.22.4.200";
 const GENDER_IDENTITY: &str = "2.16.840.1.113883.10.20.34.3.45";
 
+/// Social-history observations added by C-CDA 3.0 (USCDI v3 and later), mapped like any other
+/// social history observation: sexual orientation, occupation, industry, tribal affiliation,
+/// sex, smoking status (3.0 version) and pregnancy intention.
+const SOCIAL_3_0: &[&str] = &[
+    "2.16.840.1.113883.10.20.22.4.501",
+    "2.16.840.1.113883.10.20.22.4.503",
+    "2.16.840.1.113883.10.20.22.4.504",
+    "2.16.840.1.113883.10.20.22.4.506",
+    "2.16.840.1.113883.10.20.22.4.507",
+    "2.16.840.1.113883.10.20.22.4.511",
+    "2.16.840.1.113883.10.20.22.4.281",
+];
+
+/// The 3.0 templates, for the "not mapped" check.
+pub(crate) fn handled_templates() -> impl Iterator<Item = &'static str> {
+    SOCIAL_3_0.iter().copied()
+}
+
 const LOINC_URI: &str = "http://loinc.org";
 const NULL_FLAVOR_URI: &str = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
 
@@ -40,6 +58,7 @@ pub fn map_social_history(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Valu
             } else if s.has_template(SOCIAL_HISTORY)
                 || s.has_template(SMOKING_STATUS)
                 || s.has_template(TOBACCO_USE)
+                || SOCIAL_3_0.iter().any(|t| s.has_template(t))
             {
                 out.push(social(s, ctx));
             }
@@ -220,5 +239,32 @@ mod tests {
         let (out, report) = run(&doc(BIRTH_SEX, "", ""));
         assert!(out.is_empty());
         assert!(report.issues.is_empty());
+    }
+}
+
+#[cfg(test)]
+mod tests_3_0 {
+    use super::*;
+    use crate::Report;
+    use ccda_terminology::BuiltinTerminology;
+
+    #[test]
+    fn every_3_0_template_becomes_a_social_history_observation() {
+        for template in SOCIAL_3_0 {
+            let xml = format!(
+                r#"<ClinicalDocument xmlns="urn:hl7-org:v3"><component><structuredBody><component><section><entry>
+<observation classCode="OBS" moodCode="EVN"><templateId root="{template}" extension="2023-05-01"/>
+<id root="1.2.3" extension="X"/><code code="76690-7" codeSystem="2.16.840.1.113883.6.1"/>
+<statusCode code="completed"/><effectiveTime value="20240301"/>
+<value xsi:type="CD" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" code="20430005" codeSystem="2.16.840.1.113883.6.96"/>
+</observation></entry></section></component></structuredBody></component></ClinicalDocument>"#
+            );
+            let doc = ccda_model::parse(xml.as_bytes()).unwrap();
+            let mut report = Report::default();
+            let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
+            let out = map_social_history(&doc, &mut ctx);
+            assert_eq!(out.len(), 1, "{template}");
+            assert_eq!(out[0]["category"][0]["coding"][0]["code"], "social-history");
+        }
     }
 }

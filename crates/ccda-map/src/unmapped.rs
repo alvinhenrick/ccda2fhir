@@ -53,6 +53,7 @@ pub fn report_unmapped(doc: &ClinicalDocument, ctx: &mut Context) {
             if s.template_ids.iter().any(|t| {
                 HANDLED.contains(&t.root.as_str())
                     || crate::assessment::handled_templates().any(|h| h == t.root)
+                    || crate::social::handled_templates().any(|h| h == t.root)
             }) {
                 continue;
             }
