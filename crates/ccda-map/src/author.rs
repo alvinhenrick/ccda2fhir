@@ -135,6 +135,57 @@ pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Optio
     Some(reference)
 }
 
+/// The resource that stands for an author who may be software or an organization, for places
+/// (Composition.author) where those are allowed: a person becomes a Practitioner, software a
+/// Device, and an author with only an organization that Organization.
+pub(crate) fn register_author_agent(author: &Author, ctx: &mut Context) -> Option<String> {
+    if person_key(author).is_some() {
+        return register_practitioner(author, ctx);
+    }
+    if let Some(name) = &author.device_name {
+        let key = format!(
+            "device:{}|{}",
+            author
+                .ids
+                .iter()
+                .find_map(|id| Some(format!(
+                    "{}|{}",
+                    id.root.as_deref()?,
+                    id.extension.as_deref()?
+                )))
+                .unwrap_or_default(),
+            name
+        );
+        if let Some(existing) = ctx.practitioners.get(&key) {
+            return Some(existing.clone());
+        }
+        let id = ctx.next_id("device");
+        let mut resource = Map::new();
+        resource.insert("resourceType".into(), json!("Device"));
+        resource.insert("id".into(), json!(id));
+        let identifiers: Vec<Value> = author
+            .ids
+            .iter()
+            .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
+            .collect();
+        if !identifiers.is_empty() {
+            resource.insert("identifier".into(), json!(identifiers));
+        }
+        resource.insert(
+            "deviceName".into(),
+            json!([{ "name": name, "type": "user-friendly-name" }]),
+        );
+        let reference = ctx.reference("Device", &id);
+        ctx.practitioners.insert(key, reference.clone());
+        ctx.push_extra(Value::Object(resource));
+        return Some(reference);
+    }
+    author
+        .organization
+        .as_ref()
+        .and_then(|o| register_organization(o, ctx))
+}
+
 /// Where a resource type keeps the author information.
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct AuthorFields {

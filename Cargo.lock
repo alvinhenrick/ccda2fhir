@@ -38,6 +38,7 @@ dependencies = [
  "ccda-model",
  "ccda-terminology",
  "fhir-out",
+ "roxmltree",
  "serde_json",
  "thiserror",
 ]

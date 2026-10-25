@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use ccda_model::{ClinicalDocument, Section, Statement};
 use serde_json::{json, Map, Value};
 
-use crate::author::{register_organization, register_practitioner};
+use crate::author::{register_author_agent, register_organization};
 use crate::util::narrative_div;
 use crate::{map_codeable_concept, map_datetime, map_identifier, Context, Report};
 
@@ -58,12 +58,12 @@ pub fn map_composition(
     let authors: Vec<String> = doc
         .authors
         .iter()
-        .filter_map(|a| register_practitioner(a, ctx))
+        .filter_map(|a| register_author_agent(a, ctx))
         .collect();
     if authors.is_empty() {
         ctx.report.warn(
             "composition.author.missing",
-            "the document has no author that is a person; no Composition was created (author is required)",
+            "the document has no author that is a person, software or organization; no Composition was created (author is required)",
         );
         return None;
     }
