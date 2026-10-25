@@ -414,6 +414,19 @@ See `docs/decisions/0025-encounter-links.md`.
 | Encounter id not in the document | info `encounter.link.unresolved` | done | golden `encounter_links` | |
 | `componentOf/encompassingEncounter` | `Encounter` and `Composition.encounter` (ADR 0026) | done | goldens `encompassing_encounter`, `encompassing_encounter_already_in_the_body` | |
 
+## Data-loss audit
+
+`cargo run --release -p ccda2fhir --example audit -- <files>` checks every attribute and text value of the source documents (outside
+section narrative) for presence in the converted bundle, and prints counts by element path (no values). Misses are candidates, not
+proof: a status mapped to another vocabulary is expected. On the 29 sample documents the first run found:
+
+- 19 of 29 documents have no header author, so no Composition is built and the header and section structure are lost (next PR).
+- Not mapped at all: `documentationOf/serviceEvent`, `authenticator`, `legalAuthenticator`, `dataEnterer`, `informant`,
+  `participant/associatedEntity` (contacts), and the `telecom` of authors and organizations.
+- Section titles and codes (they go with the Composition), `originalText` references, translations on observation codes.
+
+Authors that are software or an organization now become a Device or Organization for `Composition.author` (they were skipped).
+
 ## Running real-world samples
 
 `cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
