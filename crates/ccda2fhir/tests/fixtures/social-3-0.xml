@@ -70,6 +70,24 @@
               <value xsi:type="CD" code="8517006" codeSystem="2.16.840.1.113883.6.96"/>
             </observation>
           </entry>
+          <entry>
+            <observation classCode="OBS" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.22.4.506" extension="2023-05-01"/>
+              <id root="1.3.6.1.4.1.22812.3.5" extension="TR-1"/>
+              <code code="95370-3" codeSystem="2.16.840.1.113883.6.1"/>
+              <statusCode code="completed"/>
+              <value xsi:type="CD" code="68" codeSystem="2.16.840.1.113883.5.140"/>
+            </observation>
+          </entry>
+          <entry>
+            <observation classCode="OBS" moodCode="EVN">
+              <templateId root="2.16.840.1.113883.10.20.22.4.507" extension="2023-05-01"/>
+              <id root="1.3.6.1.4.1.22812.3.5" extension="SX-1"/>
+              <code code="46098-0" codeSystem="2.16.840.1.113883.6.1"/>
+              <statusCode code="completed"/>
+              <value xsi:type="CD" code="248152002" codeSystem="2.16.840.1.113883.6.96"/>
+            </observation>
+          </entry>
         </section>
       </component>
     </structuredBody>

@@ -39,6 +39,10 @@ const BUILTIN: &[(&str, &str)] = &[
     ("2.16.840.1.113883.6.96", "http://snomed.info/sct"),
     ("2.16.840.1.113883.6.1", "http://loinc.org"),
     (
+        "2.16.840.1.113883.5.140",
+        "http://terminology.hl7.org/CodeSystem/v3-TribalEntityUS",
+    ),
+    (
         "2.16.840.1.113883.5.1076",
         "http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation",
     ),
