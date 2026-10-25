@@ -414,6 +414,17 @@ See `docs/decisions/0025-encounter-links.md`.
 | Encounter id not in the document | info `encounter.link.unresolved` | done | golden `encounter_links` | |
 | `componentOf/encompassingEncounter` | `Encounter` and `Composition.encounter` (ADR 0026) | done | goldens `encompassing_encounter`, `encompassing_encounter_already_in_the_body` | |
 
+## Family history
+
+See `docs/decisions/0028-family-history.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Family History Organizer (4.45) | `FamilyMemberHistory` | done | golden `family_history` | |
+| Family History Observation (4.46) | `condition` (`code`, `onsetAge`, `contributedToDeath`) | done | golden `family_history` | |
+| Age Observation (4.31), Death Observation (4.47) | `onsetAge`, `contributedToDeath` | done | golden `family_history` | |
+| Negated family history | `note` + report | done | golden `family_history` | |
+
 ## Data-loss audit
 
 `cargo run --release -p ccda2fhir --example audit -- <files>` checks every attribute and text value of the source documents (outside

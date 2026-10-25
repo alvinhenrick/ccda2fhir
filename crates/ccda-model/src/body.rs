@@ -89,6 +89,72 @@ pub struct Author {
     pub organization: Option<AuthorOrganization>,
 }
 
+/// The `subject/relatedSubject` of a statement: a person related to the patient (a family member).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct RelatedSubject {
+    /// `relatedSubject/code`: the relationship to the patient (HL7 RoleCode, for example `FTH`).
+    pub code: Option<Code>,
+    /// `sdtc:id` of the person.
+    pub ids: Vec<Identifier>,
+    pub name: Option<String>,
+    /// `administrativeGenderCode/@code`
+    pub gender_code: Option<String>,
+    /// `birthTime/@value`
+    pub birth_time: Option<String>,
+    /// `sdtc:deceasedInd/@value`
+    pub deceased_ind: Option<bool>,
+    /// `sdtc:deceasedTime/@value`
+    pub deceased_time: Option<String>,
+}
+
+fn parse_related_subject(node: &Node, narrative: &Narrative) -> Option<RelatedSubject> {
+    let related = child(node, "subject").and_then(|s| child(&s, "relatedSubject"))?;
+    let person = child(&related, "subject");
+    // The extension namespace (`sdtc:`) is not HL7 v3, so match on the local name only.
+    let ext = |name: &str| -> Option<Node> {
+        person.and_then(|p| {
+            p.children()
+                .find(|c| c.is_element() && c.tag_name().name() == name)
+        })
+    };
+    Some(RelatedSubject {
+        code: child(&related, "code").map(|n| parse_code(&n, narrative)),
+        ids: person
+            .iter()
+            .flat_map(|p| {
+                p.children()
+                    .filter(|c| c.is_element() && c.tag_name().name() == "id")
+            })
+            .map(|n| crate::types::identifier(&n))
+            .collect(),
+        name: person.and_then(|p| child(&p, "name")).and_then(|n| {
+            let given: Vec<String> = children(&n, "given").filter_map(|g| text_of(&g)).collect();
+            let family = child(&n, "family").and_then(|f| text_of(&f));
+            if given.is_empty() && family.is_none() {
+                text_of(&n)
+            } else {
+                Some(
+                    given
+                        .into_iter()
+                        .chain(family)
+                        .collect::<Vec<_>>()
+                        .join(" "),
+                )
+            }
+        }),
+        gender_code: person
+            .and_then(|p| child(&p, "administrativeGenderCode"))
+            .and_then(|n| attr(&n, "code")),
+        birth_time: person
+            .and_then(|p| child(&p, "birthTime"))
+            .and_then(|n| attr(&n, "value")),
+        deceased_ind: ext("deceasedInd")
+            .and_then(|n| attr(&n, "value"))
+            .map(|v| v == "true"),
+        deceased_time: ext("deceasedTime").and_then(|n| attr(&n, "value")),
+    })
+}
+
 /// The product of a `consumable` (a medication or vaccine).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Consumable {
@@ -184,6 +250,8 @@ pub struct Statement {
     /// `value` elements (observations normally have one).
     pub values: Vec<Value>,
     pub participants: Vec<Participant>,
+    /// `subject/relatedSubject`, for family history organizers.
+    pub subject: Option<RelatedSubject>,
     pub specimens: Vec<Specimen>,
     pub interpretation_codes: Vec<Code>,
     pub method_codes: Vec<Code>,
@@ -592,6 +660,7 @@ fn parse_statement_as(
         participants: children(node, "participant")
             .map(|n| parse_participant(&n, narrative))
             .collect(),
+        subject: parse_related_subject(node, narrative),
         specimens: children(node, "specimen")
             .map(|n| parse_specimen(&n, narrative))
             .collect(),

@@ -27,6 +27,7 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.41",  // Planned Procedure
     "2.16.840.1.113883.10.20.22.4.42",  // Planned Medication Activity
     "2.16.840.1.113883.10.20.22.4.44",  // Planned Observation
+    "2.16.840.1.113883.10.20.22.4.45",  // Family History Organizer
     "2.16.840.1.113883.10.20.22.4.49",  // Encounter Activity
     "2.16.840.1.113883.10.20.22.4.52",  // Immunization Activity
     "2.16.840.1.113883.10.20.22.4.60",  // Coverage Activity
