@@ -8,7 +8,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use ccda_model::{ClinicalDocument, Section, Statement};
 use serde_json::{json, Map, Value};
 
-use crate::author::{register_author_agent, register_organization, register_practitioner};
+use crate::author::{
+    register_author_agent, register_organization, register_practitioner, register_related_person,
+};
 use crate::util::narrative_div;
 use crate::{
     data_absent_reason_extension, map_codeable_concept, map_datetime, map_identifier, Context,
@@ -191,6 +193,23 @@ pub fn map_composition(doc: &ClinicalDocument, ctx: &mut Context, resources: &[V
         r.insert("custodian".into(), json!({ "reference": c }));
     }
 
+    let attesters = attesters(doc, ctx);
+    if !attesters.is_empty() {
+        r.insert("attester".into(), json!(attesters));
+    }
+    let relates: Vec<Value> = doc
+        .related_documents
+        .iter()
+        .filter_map(|d| relates_to(d, ctx))
+        .collect();
+    if !relates.is_empty() {
+        r.insert("relatesTo".into(), json!(relates));
+    }
+    if let (Some(id), Some(date)) = (r["id"].as_str(), &date) {
+        let target = ctx.reference("Composition", id);
+        header_provenance(doc, &target, date, ctx);
+    }
+
     let events: Vec<Value> = doc
         .service_events
         .iter()
@@ -209,6 +228,97 @@ pub fn map_composition(doc: &ClinicalDocument, ctx: &mut Context, resources: &[V
         r.insert("section".into(), json!(sections));
     }
     Value::Object(r)
+}
+
+/// `legalAuthenticator` (legal) and `authenticator`s (professional) as `Composition.attester`.
+fn attesters(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
+    let mut out = Vec::new();
+    let parties = doc
+        .legal_authenticator
+        .iter()
+        .map(|a| ("legal", a))
+        .chain(doc.authenticators.iter().map(|a| ("professional", a)));
+    for (mode, a) in parties {
+        let Some(party) = register_author_agent(a, ctx) else {
+            continue;
+        };
+        let mut attester = Map::new();
+        attester.insert("mode".into(), json!(mode));
+        if let Some(t) = a.time.as_deref().and_then(|t| map_datetime(t, ctx.report)) {
+            attester.insert("time".into(), json!(t));
+        }
+        attester.insert("party".into(), json!({ "reference": party }));
+        out.push(Value::Object(attester));
+    }
+    out
+}
+
+/// `relatedDocument` to `Composition.relatesTo`.
+fn relates_to(d: &ccda_model::RelatedDocument, ctx: &mut Context) -> Option<Value> {
+    let code = match d.type_code.as_deref()? {
+        "RPLC" => "replaces",
+        "APND" => "appends",
+        "XFRM" => "transforms",
+        "SIGN" => "signs",
+        _ => {
+            ctx.report.info(
+                "composition.relatesto.unknown-type",
+                "a relatedDocument has a type code FHIR has no equivalent for; it was not mapped",
+            );
+            return None;
+        }
+    };
+    let id = d
+        .ids
+        .iter()
+        .find_map(|i| map_identifier(i, ctx.terminology, ctx.report))?;
+    Some(json!({ "code": code, "targetIdentifier": id }))
+}
+
+/// The data enterer and informants have no element in Composition; they are recorded as
+/// Provenance agents of the Composition.
+fn header_provenance(doc: &ClinicalDocument, target: &str, date: &str, ctx: &mut Context) {
+    let parties = doc
+        .data_enterer
+        .iter()
+        .map(|a| ("enterer", a))
+        .chain(doc.informants.iter().map(|a| ("informant", a)));
+    let mut agents: Vec<Value> = Vec::new();
+    for (code, a) in parties {
+        let who = if a.is_related_person {
+            register_related_person(a, ctx)
+        } else {
+            register_author_agent(a, ctx)
+        };
+        if let Some(who) = who {
+            agents.push(json!({
+                "type": { "coding": [{
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                    "code": code,
+                }] },
+                "who": { "reference": who },
+            }));
+        }
+    }
+    if agents.is_empty() {
+        return;
+    }
+    // Provenance.recorded is an instant: it needs a time and an offset.
+    if !date.contains('T') {
+        ctx.report.warn(
+            "provenance.recorded.unavailable",
+            "the document date has no time with an offset, so no Provenance was created for the data enterer and informants (recorded is required)",
+        );
+        return;
+    }
+    let id = ctx.next_id("provenance");
+    ctx.push_extra(json!({
+        "resourceType": "Provenance",
+        "id": id,
+        "target": [{ "reference": target }],
+        "recorded": date,
+        "agent": agents,
+    }));
 }
 
 /// `documentationOf/serviceEvent` to `Composition.event`. The performers (who took part) have no

@@ -14,7 +14,8 @@ use thiserror::Error;
 
 pub use body::{
     Author, AuthorOrganization, Consumable, Entry, Link, Participant, ReferenceRange, Related,
-    Section, ServiceEvent, Specimen, Statement, StatementKind, TextContent,
+    RelatedDocument, RelatedSubject, Section, ServiceEvent, Specimen, Statement, StatementKind,
+    TextContent,
 };
 pub use header::{Address, Guardian, Language, Patient, PersonName, Telecom};
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
@@ -78,6 +79,13 @@ pub struct ClinicalDocument {
     pub confidentiality: Option<String>,
     /// `languageCode/@code`
     pub language: Option<String>,
+    /// `legalAuthenticator`, `authenticator`s, `dataEnterer`, `informant`s and `participant`s.
+    pub legal_authenticator: Option<Author>,
+    pub authenticators: Vec<Author>,
+    pub data_enterer: Option<Author>,
+    pub informants: Vec<Author>,
+    pub participants: Vec<Author>,
+    pub related_documents: Vec<RelatedDocument>,
     /// `documentationOf/serviceEvent`s.
     pub service_events: Vec<ServiceEvent>,
     /// `componentOf/encompassingEncounter`, as an Encounter statement.
@@ -212,6 +220,22 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
             .map(|o| body::parse_organization(&o)),
         confidentiality: child(&root, "confidentialityCode").and_then(|n| xml::attr(&n, "code")),
         language: child(&root, "languageCode").and_then(|n| xml::attr(&n, "code")),
+        legal_authenticator: child(&root, "legalAuthenticator")
+            .map(|n| body::parse_header_party(&n, &header_narrative)),
+        authenticators: xml::children(&root, "authenticator")
+            .map(|n| body::parse_header_party(&n, &header_narrative))
+            .collect(),
+        data_enterer: child(&root, "dataEnterer")
+            .map(|n| body::parse_header_party(&n, &header_narrative)),
+        informants: xml::children(&root, "informant")
+            .map(|n| body::parse_header_party(&n, &header_narrative))
+            .collect(),
+        participants: xml::children(&root, "participant")
+            .map(|n| body::parse_header_party(&n, &header_narrative))
+            .collect(),
+        related_documents: xml::children(&root, "relatedDocument")
+            .map(|n| body::parse_related_document(&n))
+            .collect(),
         service_events: xml::children(&root, "documentationOf")
             .filter_map(|d| child(&d, "serviceEvent"))
             .map(|e| body::parse_service_event(&e, &header_narrative))

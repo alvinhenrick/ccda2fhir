@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-HEADER-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" displayName="Summary of Episode Note"/>
+  <title>Continuity of Care Document</title>
+  <effectiveTime value="20250102120000-0500"/>
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
+  <languageCode code="en-US"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0028"/>
+      <patient>
+        <name><given>Lee</given><family>Example</family></name>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19550505"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <author><time value="20250102115500-0500"/><assignedAuthor>
+    <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+    <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+    <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="CLINIC-1"/><name>Example Clinic</name></representedOrganization>
+  </assignedAuthor></author>
+  <dataEnterer><time value="20250102110000-0500"/>
+    <assignedEntity>
+      <id root="2.16.840.1.113883.4.6" extension="1111111112"/>
+      <telecom use="WP" value="tel:+1-555-0100"/>
+      <assignedPerson><name><given>Dana</given><family>Enter</family></name></assignedPerson>
+    </assignedEntity>
+  </dataEnterer>
+  <informant>
+    <relatedEntity classCode="PRS">
+      <code code="MTH" codeSystem="2.16.840.1.113883.5.111"/>
+      <relatedPerson><name><given>Mia</given><family>Example</family></name></relatedPerson>
+    </relatedEntity>
+  </informant>
+  <custodian><assignedCustodian><representedCustodianOrganization>
+    <id root="1.3.6.1.4.1.22812.9" extension="CLINIC-1"/><name>Example Clinic</name>
+  </representedCustodianOrganization></assignedCustodian></custodian>
+  <legalAuthenticator><time value="20250102130000-0500"/><signatureCode code="S"/>
+    <assignedEntity>
+      <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+      <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+    </assignedEntity>
+  </legalAuthenticator>
+  <authenticator><time value="20250102123000-0500"/><signatureCode code="S"/>
+    <assignedEntity>
+      <id root="2.16.840.1.113883.4.6" extension="2222222223"/>
+      <assignedPerson><name><given>Sam</given><family>Check</family></name></assignedPerson>
+    </assignedEntity>
+  </authenticator>
+  <participant typeCode="IND">
+    <associatedEntity classCode="ECON">
+      <code code="MTH" codeSystem="2.16.840.1.113883.5.111"/>
+      <addr use="HP"><streetAddressLine>1 Example Way</streetAddressLine><city>Anytown</city><state>NY</state><postalCode>12345</postalCode></addr>
+      <telecom use="HP" value="tel:+1-555-0111"/>
+      <associatedPerson><name><given>Mia</given><family>Example</family></name></associatedPerson>
+    </associatedEntity>
+  </participant>
+  <documentationOf><serviceEvent classCode="PCPR">
+    <effectiveTime><low value="20240101"/><high value="20241231"/></effectiveTime>
+    <performer typeCode="PRF"><functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88"/>
+      <assignedEntity>
+        <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+        <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+      </assignedEntity></performer>
+  </serviceEvent></documentationOf>
+  <relatedDocument typeCode="RPLC"><parentDocument><id root="2.16.840.1.113883.19.5" extension="OLD-DOC-1"/></parentDocument></relatedDocument>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.10"/>
+    <code code="18776-5" codeSystem="2.16.840.1.113883.6.1" displayName="Plan of Care Note"/>
+    <title>Plan of Treatment</title>
+    <text>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</text>
+  </section></component>
+  <component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.60"/>
+    <code code="61146-7" codeSystem="2.16.840.1.113883.6.1" displayName="Goals"/>
+    <title>Goals</title>
+    <text/>
+    <entry><observation classCode="OBS" moodCode="INT">
+      <templateId root="2.16.840.1.113883.10.20.22.4.121"/>
+      <id root="1.3.6.1.4.1.22812.12.1" extension="GOAL-1"/>
+      <code code="289169006" codeSystem="2.16.840.1.113883.6.96"/>
+      <statusCode code="active"/>
+      <effectiveTime><low value="20250101"/><high value="20251231"/></effectiveTime>
+    </observation></entry>
+    <entry><observation classCode="OBS" moodCode="INT">
+      <templateId root="2.16.840.1.113883.10.20.22.4.121"/>
+      <id root="1.3.6.1.4.1.22812.12.1" extension="GOAL-2"/>
+      <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20240601"/>
+      <value xsi:type="ST">Walk 30 minutes a day</value>
+    </observation></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>

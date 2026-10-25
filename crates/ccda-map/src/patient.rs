@@ -160,6 +160,12 @@ pub fn map_patient(
             has_detail.then_some(Value::Object(c))
         })
         .collect();
+    let mut contacts = contacts;
+    contacts.extend(
+        doc.participants
+            .iter()
+            .filter_map(|p| participant_contact(p, terminology, report)),
+    );
     if !contacts.is_empty() {
         resource.insert("contact".into(), json!(contacts));
     }
@@ -206,6 +212,51 @@ fn human_name(n: &PersonName) -> Option<Value> {
         }
     }
     Some(Value::Object(out))
+}
+
+/// A header `participant` (`associatedEntity`: next of kin, emergency contact, ...) as a
+/// `Patient.contact`.
+fn participant_contact(
+    p: &ccda_model::Author,
+    terminology: &dyn Terminology,
+    report: &mut Report,
+) -> Option<Value> {
+    let mut c = Map::new();
+    let mut relationship: Vec<Value> = Vec::new();
+    if let Some(class) = &p.class_code {
+        relationship.push(json!({ "coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/v3-RoleClass",
+            "code": class,
+        }] }));
+    }
+    if let Some(rel) = p
+        .role_code
+        .as_ref()
+        .and_then(|r| map_codeable_concept(r, terminology, report))
+    {
+        relationship.push(rel);
+    }
+    if !relationship.is_empty() {
+        c.insert("relationship".into(), json!(relationship));
+    }
+    let name = PersonName {
+        given: p.given.clone(),
+        family: p.family.clone(),
+        ..PersonName::default()
+    };
+    if let Some(n) = human_name(&name) {
+        c.insert("name".into(), n);
+    }
+    let t: Vec<Value> = p.telecoms.iter().filter_map(telecom).collect();
+    if !t.is_empty() {
+        c.insert("telecom".into(), json!(t));
+    }
+    if let Some(a) = p.addresses.iter().find_map(address) {
+        c.insert("address".into(), a);
+    }
+    let has_detail =
+        c.contains_key("name") || c.contains_key("telecom") || c.contains_key("address");
+    has_detail.then_some(Value::Object(c))
 }
 
 pub(crate) fn address(a: &Address) -> Option<Value> {
@@ -420,6 +471,12 @@ mod tests {
             custodian: None,
             confidentiality: None,
             language: None,
+            legal_authenticator: None,
+            authenticators: Vec::new(),
+            data_enterer: None,
+            informants: Vec::new(),
+            participants: Vec::new(),
+            related_documents: Vec::new(),
             service_events: Vec::new(),
             encompassing_encounter: None,
             sections: Vec::new(),

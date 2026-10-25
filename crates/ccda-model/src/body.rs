@@ -70,6 +70,8 @@ pub struct Related {
 pub struct AuthorOrganization {
     pub ids: Vec<Identifier>,
     pub name: Option<String>,
+    pub telecoms: Vec<Telecom>,
+    pub addresses: Vec<Address>,
 }
 
 /// Who acted on a statement: an `author` (when `time` is the authoring time) or a `performer`
@@ -87,6 +89,51 @@ pub struct Author {
     /// `assignedAuthoringDevice/softwareName`: the author is software, not a person.
     pub device_name: Option<String>,
     pub organization: Option<AuthorOrganization>,
+    /// `telecom` and `addr` of the assigned/associated/related entity.
+    pub telecoms: Vec<Telecom>,
+    pub addresses: Vec<Address>,
+    /// `typeCode` of the header element (for a `participant`: `IND`, `HLD`, ...).
+    pub type_code: Option<String>,
+    /// `classCode` of an `associatedEntity` (`NOK`, `ECON`, `CAREGIVER`, ...).
+    pub class_code: Option<String>,
+    /// `signatureCode/@code` of an authenticator.
+    pub signature_code: Option<String>,
+    /// The party is a `relatedEntity` or `associatedEntity`: a person related to the patient,
+    /// not a care provider.
+    pub is_related_person: bool,
+}
+
+/// A `relatedDocument` of the header: this document replaces, appends to or transforms another.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct RelatedDocument {
+    /// `RPLC`, `APND`, `XFRM` (or `SIGN`).
+    pub type_code: Option<String>,
+    /// `parentDocument/id`
+    pub ids: Vec<Identifier>,
+}
+
+/// A header party: `legalAuthenticator`, `authenticator`, `dataEnterer`, `informant` or
+/// `participant`, whichever of `assignedEntity`, `relatedEntity` or `associatedEntity` it has.
+pub(crate) fn parse_header_party(node: &Node, narrative: &Narrative) -> Author {
+    let time = child(node, "time").and_then(|n| attr(&n, "value"));
+    let entity = ["assignedEntity", "relatedEntity", "associatedEntity"]
+        .iter()
+        .find_map(|n| child(node, n));
+    let mut a = parse_agent(entity, time, narrative);
+    a.is_related_person = child(node, "assignedEntity").is_none() && entity.is_some();
+    a.type_code = attr(node, "typeCode");
+    a.class_code = entity.and_then(|e| attr(&e, "classCode"));
+    a.signature_code = child(node, "signatureCode").and_then(|n| attr(&n, "code"));
+    a
+}
+
+pub(crate) fn parse_related_document(node: &Node) -> RelatedDocument {
+    RelatedDocument {
+        type_code: attr(node, "typeCode"),
+        ids: child(node, "parentDocument")
+            .map(|p| identifiers(&p))
+            .unwrap_or_default(),
+    }
 }
 
 /// The `subject/relatedSubject` of a statement: a person related to the patient (a family member).
@@ -348,7 +395,11 @@ pub(crate) fn parse_author(node: &Node, narrative: &Narrative) -> Author {
 
 /// An `assignedAuthor` or `assignedEntity`: ids, role, person name, device, organization.
 fn parse_agent(assigned: Option<Node>, time: Option<String>, narrative: &Narrative) -> Author {
-    let person = assigned.and_then(|a| child(&a, "assignedPerson"));
+    let person = assigned.and_then(|a| {
+        ["assignedPerson", "associatedPerson", "relatedPerson"]
+            .iter()
+            .find_map(|n| child(&a, n))
+    });
     let name = person.and_then(|p| child(&p, "name"));
     let organization = assigned
         .and_then(|a| child(&a, "representedOrganization"))
@@ -372,6 +423,20 @@ fn parse_agent(assigned: Option<Node>, time: Option<String>, narrative: &Narrati
             .and_then(|d| child(&d, "softwareName"))
             .and_then(|n| text_of(&n)),
         organization,
+        telecoms: assigned
+            .iter()
+            .flat_map(|a| children(a, "telecom"))
+            .map(|n| crate::header::parse_telecom(&n))
+            .collect(),
+        addresses: assigned
+            .iter()
+            .flat_map(|a| children(a, "addr"))
+            .map(|n| crate::header::parse_address(&n))
+            .collect(),
+        type_code: None,
+        class_code: None,
+        signature_code: None,
+        is_related_person: false,
     }
 }
 
@@ -379,6 +444,12 @@ pub(crate) fn parse_organization(node: &Node) -> AuthorOrganization {
     AuthorOrganization {
         ids: identifiers(node),
         name: child(node, "name").and_then(|n| text_of(&n)),
+        telecoms: children(node, "telecom")
+            .map(|n| crate::header::parse_telecom(&n))
+            .collect(),
+        addresses: children(node, "addr")
+            .map(|n| crate::header::parse_address(&n))
+            .collect(),
     }
 }
 
