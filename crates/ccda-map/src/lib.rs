@@ -7,6 +7,7 @@
 //! The shared building blocks (timestamps, `nullFlavor`, identifiers, coded values) follow the
 //! IG's general mapping guidance and are reused by every resource mapper.
 
+mod allergy;
 mod coding;
 mod context;
 mod identifier;
@@ -16,7 +17,9 @@ mod problem;
 mod quantity;
 mod report;
 mod timestamp;
+mod util;
 
+pub use allergy::map_allergies;
 pub use coding::map_codeable_concept;
 pub use context::Context;
 pub use identifier::map_identifier;

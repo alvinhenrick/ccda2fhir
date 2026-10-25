@@ -64,6 +64,22 @@ pub struct Related {
     pub statement: Statement,
 }
 
+/// A `participant` (for example the allergen of an allergy, or a device).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Participant {
+    /// `typeCode`: `CSM` (consumable), `PRD` (product), `LOC` (location), ...
+    pub type_code: Option<String>,
+    pub template_ids: Vec<TemplateId>,
+    /// `participantRole/id`
+    pub ids: Vec<Identifier>,
+    /// `participantRole/code`
+    pub role_code: Option<Code>,
+    /// `participantRole/playingEntity/code`
+    pub playing_entity_code: Option<Code>,
+    /// `participantRole/playingDevice/code`
+    pub playing_device_code: Option<Code>,
+}
+
 /// A clinical statement and everything nested under it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Statement {
@@ -81,6 +97,7 @@ pub struct Statement {
     pub effective_time: Option<Time>,
     /// `value` elements (observations normally have one).
     pub values: Vec<Value>,
+    pub participants: Vec<Participant>,
     pub related: Vec<Related>,
 }
 
@@ -144,6 +161,26 @@ fn narrative_of(section: &Node) -> Narrative {
     map
 }
 
+fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
+    let role = child(node, "participantRole");
+    let code_of = |parent: Option<Node>, name: &str| {
+        parent
+            .and_then(|p| child(&p, name))
+            .and_then(|n| child(&n, "code"))
+            .map(|n| parse_code(&n, narrative))
+    };
+    Participant {
+        type_code: attr(node, "typeCode"),
+        template_ids: template_ids(node),
+        ids: role.as_ref().map(identifiers).unwrap_or_default(),
+        role_code: role
+            .and_then(|r| child(&r, "code"))
+            .map(|n| parse_code(&n, narrative)),
+        playing_entity_code: code_of(role, "playingEntity"),
+        playing_device_code: code_of(role, "playingDevice"),
+    }
+}
+
 fn parse_statement(
     node: &Node,
     narrative: &Narrative,
@@ -194,6 +231,9 @@ fn parse_statement(
         effective_time: child(node, "effectiveTime").map(|n| parse_time(&n)),
         values: children(node, "value")
             .map(|n| parse_value(&n, narrative))
+            .collect(),
+        participants: children(node, "participant")
+            .map(|n| parse_participant(&n, narrative))
             .collect(),
         related,
     })

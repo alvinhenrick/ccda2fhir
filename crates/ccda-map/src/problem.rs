@@ -7,6 +7,7 @@
 use ccda_model::{ClinicalDocument, Section, Statement, Value as Cv};
 use serde_json::{json, Map, Value};
 
+use crate::util::{concept, is_coded, LOINC, SNOMED};
 use crate::{
     data_absent_reason_extension, map_age, map_codeable_concept, map_datetime, map_identifier,
     Context,
@@ -14,8 +15,6 @@ use crate::{
 
 const CONCERN_ACT: &str = "2.16.840.1.113883.10.20.22.4.3";
 const PROBLEM_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.4";
-const LOINC: &str = "2.16.840.1.113883.6.1";
-const SNOMED: &str = "2.16.840.1.113883.6.96";
 
 const CLINICAL_STATUS_SYSTEM: &str = "http://terminology.hl7.org/CodeSystem/condition-clinical";
 const VERIFICATION_STATUS_SYSTEM: &str =
@@ -51,14 +50,6 @@ fn map_concern(section: &Section, concern: &Statement, ctx: &mut Context, out: &
     for observation in observations {
         out.push(map_observation(section, concern, observation, ctx));
     }
-}
-
-/// True if the statement's code is `code` in the code system `oid`.
-fn is_coded(statement: &Statement, code: &str, oid: &str) -> bool {
-    statement
-        .code
-        .as_ref()
-        .is_some_and(|c| c.code.as_deref() == Some(code) && c.code_system.as_deref() == Some(oid))
 }
 
 /// `CF-ProblemCategory`: the section a problem sits in decides its category.
@@ -153,10 +144,6 @@ fn clinical_status(
         "no problem status or concern statusCode; clinicalStatus defaulted to active as the IG directs",
     );
     "active"
-}
-
-fn concept(system: &str, code: &str) -> Value {
-    json!({ "coding": [{ "system": system, "code": code }] })
 }
 
 fn map_observation(

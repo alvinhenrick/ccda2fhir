@@ -51,3 +51,8 @@ fn check(name: &str) {
 fn problems() {
     check("problems");
 }
+
+#[test]
+fn allergies() {
+    check("allergies");
+}

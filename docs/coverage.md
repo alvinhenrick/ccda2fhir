@@ -24,3 +24,23 @@ Source of each rule: the IG page and CSV under `ccda-on-fhir` (`CF-*.md`, `mappi
 | Author | `recorder`, `recordedDate`, Provenance | todo (needs author model) | | |
 | Comment Activity | `note` | todo | | |
 | Prognosis, Priority Preference | not supported by target (IG) | n/a | | |
+
+## Allergies (Allergy Concern Act / Allergy Intolerance Observation) to AllergyIntolerance
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Concern `id`, `effectiveTime`, `statusCode` | `statusCode` only as fallback for `clinicalStatus` (IG); others not supported by target | done | `status_precedence_and_defaults` | |
+| Observation `id` | `identifier` | done | `drug_allergy_with_reaction_severity_and_criticality` | |
+| `effectiveTime/low` | `onsetDateTime` | done | same | |
+| `effectiveTime/high` | `allergyintolerance-abatement` extension | done | `end_date_becomes_the_abatement_extension` | |
+| `value` | `type`, `category` (CF-AllergyIntoleranceType/Category) | done | `type_and_category_follow_the_ig_maps` | |
+| `participant/.../playingEntity/code` | `code` | done | `drug_allergy_...` | |
+| Negated, null substance | `code` via CF-NoKnownAllergies, else `code.text` | done | `negated_with_null_substance_uses_the_no_known_allergy_map` | |
+| Negated, coded substance | `substanceExposureRisk` extension (no `code`; not US Core conformant, per IG) | done | `negated_with_a_coded_substance_uses_the_exposure_risk_extension` | |
+| Allergy Status Observation | `clinicalStatus` (CF-AllergyStatus); absent = active | done | `status_precedence_and_defaults` | |
+| Reaction Observation `value`, `effectiveTime` | `reaction.manifestation`, `reaction.onset` | done | `drug_allergy_...` | |
+| Reaction `id` | `reaction.id` (IG: source value) | skipped: an element id cannot carry root+extension | | |
+| Severity (reaction level, else allergy level) | `reaction.severity` (CF-Severity) | done | `reaction_severity_wins_over_...` | |
+| Criticality Observation (82606-5) | `criticality` (CF-Criticality) | done | `drug_allergy_...` | |
+| Author | `recorder`, `recordedDate`, Provenance | todo (author model) | | |
+| Comment Activity | `note` | todo | | |

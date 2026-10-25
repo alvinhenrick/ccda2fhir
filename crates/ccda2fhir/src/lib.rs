@@ -8,7 +8,7 @@
 //!
 //! The library is pure: bytes in, a [`Conversion`] out. It performs no I/O and keeps no state.
 
-use ccda_map::{map_patient, map_problems, Context, Report, PATIENT_ID};
+use ccda_map::{map_allergies, map_patient, map_problems, Context, Report, PATIENT_ID};
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
 use fhir_out::Bundle;
@@ -56,8 +56,11 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         &mut report,
         format!("Patient/{PATIENT_ID}"),
     );
-    for condition in map_problems(&document, &mut ctx) {
-        bundle.push(condition);
+    for resource in map_problems(&document, &mut ctx)
+        .into_iter()
+        .chain(map_allergies(&document, &mut ctx))
+    {
+        bundle.push(resource);
     }
 
     Ok(Conversion { bundle, report })

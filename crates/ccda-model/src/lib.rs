@@ -12,7 +12,7 @@ mod xml;
 use roxmltree::{Document, ParsingOptions};
 use thiserror::Error;
 
-pub use body::{Entry, Link, Related, Section, Statement, StatementKind};
+pub use body::{Entry, Link, Participant, Related, Section, Statement, StatementKind};
 pub use header::Patient;
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
 
@@ -406,6 +406,37 @@ mod tests {
             }
         );
         assert_eq!(values[5], Value::Other { xsi_type: None });
+    }
+
+    #[test]
+    fn parses_participants() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <component><structuredBody><component><section>
+    <entry><observation classCode="OBS" moodCode="EVN">
+      <participant typeCode="CSM"><participantRole classCode="MANU">
+        <id root="1.2" extension="P1"/>
+        <playingEntity classCode="MMAT"><code code="7980" codeSystem="2.16.840.1.113883.6.88"/></playingEntity>
+      </participantRole></participant>
+      <participant typeCode="LOC"><participantRole><playingDevice><code code="D1" codeSystem="1.2.3"/></playingDevice></participantRole></participant>
+    </observation></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>"#;
+        let doc = parse(xml.as_bytes()).unwrap();
+        let participants = &doc.sections[0].entries[0].statement.participants;
+        assert_eq!(participants.len(), 2);
+        assert_eq!(participants[0].type_code.as_deref(), Some("CSM"));
+        assert_eq!(participants[0].ids[0].extension.as_deref(), Some("P1"));
+        assert_eq!(
+            participants[0]
+                .playing_entity_code
+                .as_ref()
+                .unwrap()
+                .code
+                .as_deref(),
+            Some("7980")
+        );
+        assert!(participants[1].playing_entity_code.is_none());
+        assert!(participants[1].playing_device_code.is_some());
     }
 
     #[test]
