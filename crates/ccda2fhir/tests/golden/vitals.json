@@ -633,12 +633,51 @@
           "code": {
             "coding": [
               {
-                "code": "8480-6",
-                "display": "Systolic blood pressure",
+                "code": "85354-9",
+                "display": "Blood pressure panel with all children optional",
                 "system": "http://loinc.org"
               }
-            ]
+            ],
+            "text": "Blood pressure"
           },
+          "component": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "8480-6",
+                    "display": "Systolic blood pressure",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "valueQuantity": {
+                "code": "mm[Hg]",
+                "system": "http://unitsofmeasure.org",
+                "unit": "mm[Hg]",
+                "value": 132
+              }
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "8462-4",
+                    "display": "Diastolic blood pressure",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "dataAbsentReason": {
+                "coding": [
+                  {
+                    "code": "unknown",
+                    "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason"
+                  }
+                ]
+              }
+            }
+          ],
           "effectiveDateTime": "2024-11-05T08:30:00-05:00",
           "id": "vitalsign-8",
           "identifier": [
@@ -649,19 +688,13 @@
           ],
           "meta": {
             "profile": [
-              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs"
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-blood-pressure"
             ]
           },
           "resourceType": "Observation",
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
-          },
-          "valueQuantity": {
-            "code": "mm[Hg]",
-            "system": "http://unitsofmeasure.org",
-            "unit": "mm[Hg]",
-            "value": 132
           }
         }
       },

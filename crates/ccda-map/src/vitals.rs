@@ -66,24 +66,34 @@ fn map_group(
     let mut used = vec![false; members.len()];
     let mut produced: Vec<Value> = Vec::new();
 
-    // Blood pressure needs both readings.
-    match (find(SYSTOLIC), find(DIASTOLIC)) {
-        (Some(sys), Some(dia)) => {
-            used[sys] = true;
-            used[dia] = true;
-            produced.push(combined(
-                members[sys],
-                &[members[sys], members[dia]],
-                blood_pressure_code(),
-                organizer,
-                ctx,
-            ));
+    // Blood pressure needs both readings. A lone reading is still a blood pressure observation
+    // (a validator treats the systolic and diastolic codes as blood pressure however they are
+    // used), so the missing component is added with a data absent reason.
+    if let Some(sys) = find(SYSTOLIC) {
+        used[sys] = true;
+        let dia = find(DIASTOLIC);
+        if let Some(d) = dia {
+            used[d] = true;
         }
-        (Some(_), None) | (None, Some(_)) => ctx.report.info(
-            "vitals.blood-pressure.incomplete",
-            "only one of systolic and diastolic pressure is present, so they were mapped separately",
-        ),
-        (None, None) => {}
+        let parts: Vec<&Statement> = std::iter::once(members[sys])
+            .chain(dia.map(|d| members[d]))
+            .collect();
+        produced.push(combined(
+            members[sys],
+            &parts,
+            blood_pressure_code(),
+            organizer,
+            ctx,
+        ));
+    } else if let Some(dia) = find(DIASTOLIC) {
+        used[dia] = true;
+        produced.push(combined(
+            members[dia],
+            &[members[dia]],
+            blood_pressure_code(),
+            organizer,
+            ctx,
+        ));
     }
 
     // Pulse oximetry: the saturation is the value; oxygen concentration and flow are components.
@@ -157,7 +167,31 @@ fn combined(
     if !identifiers.is_empty() {
         r.insert("identifier".into(), json!(identifiers));
     }
-    let components: Vec<Value> = parts.iter().map(|p| component(p, ctx)).collect();
+    let mut components: Vec<Value> = parts.iter().map(|p| component(p, ctx)).collect();
+    if parts.len() == 1 {
+        ctx.report.info(
+            "vitals.blood-pressure.incomplete",
+            "only one of systolic and diastolic pressure is present; the other component was marked unknown",
+        );
+        let have_systolic = loinc_code(parts[0]) == Some(SYSTOLIC);
+        let (code, display) = if have_systolic {
+            (DIASTOLIC, "Diastolic blood pressure")
+        } else {
+            (SYSTOLIC, "Systolic blood pressure")
+        };
+        let missing = json!({
+            "code": { "coding": [{ "system": LOINC_URI, "code": code, "display": display }] },
+            "dataAbsentReason": { "coding": [{
+                "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+                "code": "unknown"
+            }] }
+        });
+        if have_systolic {
+            components.push(missing);
+        } else {
+            components.insert(0, missing);
+        }
+    }
     r.insert("component".into(), json!(components));
     apply_performer(&mut r, primary, organizer, ctx);
     Value::Object(r)
@@ -330,9 +364,15 @@ mod tests {
     }
 
     #[test]
-    fn a_lone_pressure_stays_separate_and_is_reported() {
+    fn a_lone_pressure_is_a_blood_pressure_with_an_unknown_component() {
         let (out, report) = run(&organizer(&vital("8480-6", "120", "mm[Hg]")));
-        assert!(by_code(&out, "8480-6").get("component").is_none());
+        let comps = by_code(&out, "85354-9")["component"]
+            .as_array()
+            .unwrap()
+            .clone();
+        assert_eq!(comps.len(), 2);
+        assert_eq!(comps[1]["code"]["coding"][0]["code"], "8462-4");
+        assert_eq!(comps[1]["dataAbsentReason"]["coding"][0]["code"], "unknown");
         assert!(report
             .issues
             .iter()

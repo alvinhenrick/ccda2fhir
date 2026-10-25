@@ -16,6 +16,7 @@ Status: accepted. Source: IG pages "CF-vitals" and "CF-results", ConceptMap `CF-
 - The organizer is a panel Observation (85353-1) with `hasMember`. Without an organizer time, the panel takes the span of
   its members' times.
 - Blood pressure (8480-6 + 8462-4) is one Observation (85354-9) with two components and no value of its own. One reading
-  alone is mapped on its own and reported. Pulse oximetry (59408-5 or 2708-6) carries 3150-0 and 3151-8 as components.
+  alone is still a blood pressure Observation, with the other component marked `unknown` and the case reported: the
+  validator treats the systolic and diastolic codes as blood pressure however they are used. Pulse oximetry (59408-5 or 2708-6) carries 3150-0 and 3151-8 as components.
 - US Core profile claims are made per vital, and only when the unit is one the profile allows; otherwise the general
   `us-core-vital-signs` profile is claimed if the Observation is complete enough for it.

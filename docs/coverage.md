@@ -124,7 +124,7 @@ See `docs/decisions/0006-vital-signs-and-observations.md`.
 | Organizer | panel Observation 85353-1 + `hasMember` | done | `panel_links_every_member_and_takes_the_span_of_their_times` | |
 | `id`, `statusCode`, `effectiveTime` | `identifier`, `status`, `effective[x]` | done | golden `vitals` | |
 | `code`, `value` PQ | `code`, `valueQuantity` (UCUM normalized) | done | `non_ucum_units_are_replaced_in_code_and_kept_in_unit` | |
-| Systolic + diastolic | blood pressure with components | done | `blood_pressure_is_one_observation_with_two_components` | |
+| Systolic + diastolic (or one alone) | blood pressure with components (a missing one is marked unknown) | done | `blood_pressure_is_one_observation_with_two_components` | |
 | Pulse oximetry + O2 flow/concentration | pulse oximetry with components | done | `pulse_oximetry_carries_flow_and_concentration_as_components` | |
 | `interpretationCode`, `methodCode`, `targetSiteCode` | `interpretation`, `method`, `bodySite` | done | golden | |
 | `referenceRange` | `referenceRange` (normal only) | done | golden | |
