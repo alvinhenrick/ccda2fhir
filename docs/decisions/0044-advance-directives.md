@@ -14,4 +14,6 @@ Status: accepted
 - A missing type code uses the generic advance directive LOINC 42348-3 and is reported.
 - Verifier, witness and custodian participants are not mapped yet and are reported once per
   directive (`consent.participants.unsupported`).
+- R4 requires `policy` or `policyRule` (ppc-1). The document names none, so `policyRule` carries
+  the data-absent-reason extension (unknown); no rule is invented.
 - No US Core profile is claimed (US Core 6.1.0 has none for Consent).

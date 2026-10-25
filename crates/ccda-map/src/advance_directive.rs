@@ -10,7 +10,9 @@ use serde_json::{json, Map, Value};
 
 use crate::author::{apply_authors, AuthorFields};
 use crate::util::nested;
-use crate::{map_codeable_concept, map_datetime, map_identifier, Context};
+use crate::{
+    data_absent_reason_extension, map_codeable_concept, map_datetime, map_identifier, Context,
+};
 
 const OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.48";
 const ORGANIZER: &str = "2.16.840.1.113883.10.20.22.4.108";
@@ -88,6 +90,11 @@ fn map_directive(s: &Statement, ctx: &mut Context) -> Value {
         })]),
     );
     r.insert("patient".into(), json!({ "reference": ctx.patient }));
+    // R4 requires a policy or a policyRule (ppc-1). C-CDA names none, so it is marked unknown.
+    r.insert(
+        "policyRule".into(),
+        json!({ "extension": [data_absent_reason_extension("UNK", ctx.report)] }),
+    );
 
     let authors: Vec<_> = s.authors.iter().collect();
     apply_authors(&mut r, FIELDS, &authors, ctx);

@@ -260,6 +260,14 @@
           "patient": {
             "reference": "urn:uuid:578cf59c-2ee2-5a60-b39b-8327a7ab494c"
           },
+          "policyRule": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          },
           "provision": {
             "code": [
               {
