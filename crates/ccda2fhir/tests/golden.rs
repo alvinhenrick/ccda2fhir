@@ -276,3 +276,8 @@ fn hospital_course() {
 fn advance_directive() {
     check("advance-directive");
 }
+
+#[test]
+fn reasons() {
+    check("reasons");
+}
