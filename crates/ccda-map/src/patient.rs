@@ -6,6 +6,9 @@ use serde_json::{json, Map, Value};
 
 use crate::{hl7_date_to_fhir_date, map_identifier, Report};
 
+/// The `id` of the one Patient a document describes. Other resources refer to it.
+pub const PATIENT_ID: &str = "patient-1";
+
 /// Map the document's patient to a FHIR `Patient` resource.
 ///
 /// Scope today: identifiers, name, gender and birth date. Address, telecom, race, ethnicity and
@@ -18,6 +21,7 @@ pub fn map_patient(
     let patient = &doc.patient;
     let mut resource = Map::new();
     resource.insert("resourceType".into(), json!("Patient"));
+    resource.insert("id".into(), json!(PATIENT_ID));
 
     let identifiers: Vec<Value> = patient
         .identifiers
@@ -171,7 +175,10 @@ mod tests {
     #[test]
     fn empty_patient_yields_a_bare_resource() {
         let (resource, report) = map(Patient::default());
-        assert_eq!(resource, json!({ "resourceType": "Patient" }));
+        assert_eq!(
+            resource,
+            json!({ "resourceType": "Patient", "id": PATIENT_ID })
+        );
         assert!(report.issues.is_empty());
     }
 }

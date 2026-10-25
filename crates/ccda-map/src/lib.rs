@@ -8,18 +8,24 @@
 //! IG's general mapping guidance and are reused by every resource mapper.
 
 mod coding;
+mod context;
 mod identifier;
 mod nullflavor;
 mod patient;
+mod problem;
+mod quantity;
 mod report;
 mod timestamp;
 
 pub use coding::map_codeable_concept;
+pub use context::Context;
 pub use identifier::map_identifier;
 pub use nullflavor::{
     data_absent_reason_code, data_absent_reason_extension, DATA_ABSENT_REASON_URL,
 };
-pub use patient::map_patient;
+pub use patient::{map_patient, PATIENT_ID};
+pub use problem::map_problems;
+pub use quantity::{decimal, map_age, map_quantity};
 pub use report::{Issue, Report, Severity};
 pub use timestamp::{
     hl7_date_to_fhir_date, hl7_ts_to_fhir_datetime, map_datetime, Converted, InvalidTimestamp, Loss,

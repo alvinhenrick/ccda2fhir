@@ -48,7 +48,7 @@ pub fn map_codeable_concept(
     if code.original_text.is_none() && code.original_text_reference.is_some() {
         report.info(
             "coding.original-text.reference-unresolved",
-            "originalText points into the section narrative, which is not resolved yet; text was omitted",
+            "an originalText reference was not found in the section narrative; text was omitted",
         );
     }
 

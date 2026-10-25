@@ -65,6 +65,22 @@ pub struct ClinicalDocument {
     pub sections: Vec<Section>,
 }
 
+impl ClinicalDocument {
+    /// Every section, including nested subsections, in document order (parents first).
+    #[must_use]
+    pub fn all_sections(&self) -> Vec<&Section> {
+        fn walk<'a>(sections: &'a [Section], out: &mut Vec<&'a Section>) {
+            for section in sections {
+                out.push(section);
+                walk(&section.sections, out);
+            }
+        }
+        let mut out = Vec::new();
+        walk(&self.sections, &mut out);
+        out
+    }
+}
+
 /// Parse a C-CDA document with the default [`Limits`].
 ///
 /// # Errors
@@ -435,6 +451,17 @@ mod tests {
 </section></component></structuredBody></component></ClinicalDocument>"#
         );
         assert_eq!(parse(xml.as_bytes()), Err(ParseError::TooDeep));
+    }
+
+    #[test]
+    fn all_sections_includes_subsections_in_order() {
+        let doc = parse(PROBLEMS.as_bytes()).unwrap();
+        let titles: Vec<_> = doc
+            .all_sections()
+            .iter()
+            .map(|s| s.title.clone().unwrap())
+            .collect();
+        assert_eq!(titles, ["Problems", "Sub"]);
     }
 
     #[test]
