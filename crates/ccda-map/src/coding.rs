@@ -132,13 +132,13 @@ mod tests {
 
     #[test]
     fn display_text_and_translations_are_kept() {
-        let mut c = code("34133-9", "2.16.840.1.113883.6.1");
-        c.display_name = Some("Summarization of episode note".into());
+        let mut c = code("8480-6", "2.16.840.1.113883.6.1");
+        c.display_name = Some("Systolic blood pressure".into());
         c.original_text = Some("CCD".into());
         c.translations = vec![code("CCD", "1.2.3.4")];
         let (v, _) = map(&c);
         let v = v.unwrap();
-        assert_eq!(v["coding"][0]["display"], "Summarization of episode note");
+        assert_eq!(v["coding"][0]["display"], "Systolic blood pressure");
         assert_eq!(v["coding"][1]["system"], "urn:oid:1.2.3.4");
         assert_eq!(v["text"], "CCD");
     }
