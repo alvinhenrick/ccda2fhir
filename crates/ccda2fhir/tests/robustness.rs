@@ -220,17 +220,14 @@ fn deep_nesting_is_an_error_not_a_stack_overflow() {
             "</entryRelationship></observation>",
             depth,
         );
-        eprintln!("statements {depth}");
         check(&format!("nest-statements-{depth}"), nested.as_bytes());
         let sections = format!(
             r#"<ClinicalDocument xmlns="urn:hl7-org:v3"><component><structuredBody>{}{}</structuredBody></component></ClinicalDocument>"#,
             "<component><section>".repeat(depth),
             "</section></component>".repeat(depth)
         );
-        eprintln!("sections {depth}");
         check(&format!("nest-sections-{depth}"), sections.as_bytes());
         let plain = format!("{}{}", "<a>".repeat(depth), "</a>".repeat(depth));
-        eprintln!("plain {depth}");
         check(&format!("nest-plain-{depth}"), plain.as_bytes());
     }
 }

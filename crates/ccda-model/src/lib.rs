@@ -238,6 +238,26 @@ mod tests {
 </ClinicalDocument>"#;
 
     #[test]
+    fn depth_scan_counts_elements_and_ignores_comments_cdata_and_quotes() {
+        assert!(!exceeds_depth(b"<a><b><c/></b></a>", 3));
+        assert!(exceeds_depth(b"<a><b><c></c></b></a>", 2));
+        // Tags inside comments, CDATA, PIs and attribute values do not count.
+        assert!(!exceeds_depth(b"<a><!-- <b><c><d> --></a>", 1));
+        assert!(!exceeds_depth(b"<a><![CDATA[<b><c>]]></a>", 1));
+        assert!(!exceeds_depth(b"<a><?pi <b><c> ?></a>", 1));
+        assert!(!exceeds_depth(b"<a x=\"<b><c>\" y='>'/>", 1));
+        // Unterminated constructs end the scan instead of looping.
+        assert!(!exceeds_depth(b"<a><!-- <b><c>", 1));
+        assert!(exceeds_depth(&b"<a>".repeat(1000), 256));
+    }
+
+    #[test]
+    fn deeply_nested_input_is_refused_before_parsing() {
+        let xml = format!("{}{}", "<a>".repeat(100_000), "</a>".repeat(100_000));
+        assert_eq!(parse(xml.as_bytes()), Err(ParseError::TooDeep));
+    }
+
+    #[test]
     fn parses_header_and_patient() {
         let doc = parse(SAMPLE.as_bytes()).expect("sample should parse");
         assert_eq!(

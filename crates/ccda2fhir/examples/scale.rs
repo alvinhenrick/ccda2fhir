@@ -16,7 +16,12 @@ fn main() {
     let start = xml.find("<structuredBody>").unwrap() + "<structuredBody>".len();
     let end = xml.find("</structuredBody>").unwrap();
     for n in args.map(|a| a.parse::<usize>().unwrap()) {
-        let doc = format!("{}{}{}", &xml[..start], xml[start..end].repeat(n), &xml[end..]);
+        let doc = format!(
+            "{}{}{}",
+            &xml[..start],
+            xml[start..end].repeat(n),
+            &xml[end..]
+        );
         let t = Instant::now();
         let c = convert(doc.as_bytes(), &Options::default()).unwrap();
         let dt = t.elapsed();
