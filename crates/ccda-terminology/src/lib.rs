@@ -43,6 +43,20 @@ const BUILTIN: &[(&str, &str)] = &[
         "http://www.nlm.nih.gov/research/umls/rxnorm",
     ),
     ("2.16.840.1.113883.12.292", "http://hl7.org/fhir/sid/cvx"),
+    // CDC's own OID for CVX; real documents use both.
+    ("2.16.840.1.113883.6.59", "http://hl7.org/fhir/sid/cvx"),
+    (
+        "2.16.840.1.113883.6.101",
+        "http://nucc.org/provider-taxonomy",
+    ),
+    (
+        "2.16.840.1.113883.5.83",
+        "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+    ),
+    (
+        "2.16.840.1.113883.5.4",
+        "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    ),
     (
         "2.16.840.1.113883.6.90",
         "http://hl7.org/fhir/sid/icd-10-cm",
@@ -131,6 +145,16 @@ mod tests {
     fn identifier_systems_all_have_uris() {
         for oid in IDENTIFIER_SYSTEMS {
             assert!(BuiltinTerminology.oid_to_uri(oid).is_some(), "{oid}");
+        }
+    }
+
+    #[test]
+    fn both_cvx_oids_map_to_cvx() {
+        for oid in ["2.16.840.1.113883.12.292", "2.16.840.1.113883.6.59"] {
+            assert_eq!(
+                BuiltinTerminology.oid_to_uri(oid),
+                Some("http://hl7.org/fhir/sid/cvx")
+            );
         }
     }
 

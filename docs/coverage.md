@@ -93,5 +93,9 @@ and only the two fixtures above have been validated.
   differ from the code system's official display, and the validator reports those as errors on our
   output (found with a deliberately realistic Immunization fixture). Options for later, as configuration:
   keep (lossless, current), drop when the system is known, or replace from a terminology source.
+- **Prior art on codes** (read from source): Medplum and Microsoft both pass `displayName` through
+  unchanged. Medplum uses `displayName` or the raw `#ref` string as `text`; Microsoft emits no `text`
+  and drops most translations. Microsoft also maps a value-set OID mistakenly used as a code system to
+  SNOMED, a robustness hack worth considering as an opt-in repair.
 - **OID table.** Entries are added as fixtures need them (NCI Thesaurus, v3 ActReason so far); the table
   still needs a full review against the HL7 OID registry.
