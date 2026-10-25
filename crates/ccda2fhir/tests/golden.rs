@@ -171,3 +171,8 @@ fn encompassing_encounter() {
 fn encompassing_encounter_already_in_the_body() {
     check("encompassing-encounter-in-body");
 }
+
+#[test]
+fn family_history() {
+    check("family-history");
+}

@@ -11,9 +11,9 @@
 use ccda_map::{
     link_encounters, map_allergies, map_assessments, map_care_plans, map_care_teams,
     map_composition, map_coverage, map_devices, map_encompassing_encounter, map_encounters,
-    map_goals, map_health_concerns, map_immunizations, map_medications, map_notes, map_patient,
-    map_problems, map_procedures, map_results, map_service_requests, map_social_history,
-    map_vitals, report_unmapped, Context, Profiles, Report,
+    map_family_history, map_goals, map_health_concerns, map_immunizations, map_medications,
+    map_notes, map_patient, map_problems, map_procedures, map_results, map_service_requests,
+    map_social_history, map_vitals, report_unmapped, Context, Profiles, Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -84,6 +84,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .chain(map_results(&document, &mut ctx))
         .chain(map_procedures(&document, &mut ctx))
         .chain(map_encounters(&document, &mut ctx))
+        .chain(map_family_history(&document, &mut ctx))
         .chain(map_social_history(&document, &mut ctx))
         .chain(map_notes(&document, &mut ctx))
         .chain(map_devices(&document, &mut ctx))

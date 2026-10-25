@@ -141,6 +141,7 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
         return None;
     }
     Some(match code {
+        "10157-6" => "History of family member diseases note",
         "10160-0" => "History of Medication use Narrative",
         "11369-6" => "History of Immunization note",
         "11450-4" => "Problem list - Reported",

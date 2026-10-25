@@ -1,0 +1,215 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:6b7d3afb-433b-5902-ab40-989bdeec9922",
+        "resource": {
+          "birthDate": "1995-01-01",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0026"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Hana"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:8465c8a1-75eb-5fb8-a2be-9eafdaa3eb14",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-FAMILY-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "10157-6",
+                    "display": "History of family member diseases note",
+                    "system": "http://loinc.org"
+                  }
+                ],
+                "text": "History of family member diseases Narrative"
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:bd9284c0-dedf-5abe-a7fa-d79eaa5ec4f2"
+                },
+                {
+                  "reference": "urn:uuid:6fd30b0b-68b4-5d29-8fed-00d756eb6224"
+                }
+              ],
+              "title": "Family History"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:6b7d3afb-433b-5902-ab40-989bdeec9922"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:bd9284c0-dedf-5abe-a7fa-d79eaa5ec4f2",
+        "resource": {
+          "bornDate": "1930-04-15",
+          "condition": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "230690007",
+                    "system": "http://snomed.info/sct"
+                  }
+                ]
+              },
+              "contributedToDeath": true,
+              "onsetAge": {
+                "code": "a",
+                "system": "http://unitsofmeasure.org",
+                "unit": "a",
+                "value": 72
+              }
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "38341003",
+                    "system": "http://snomed.info/sct"
+                  }
+                ]
+              }
+            }
+          ],
+          "deceasedDate": "2003-01",
+          "id": "familymemberhistory-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.20.1",
+              "value": "FH-1"
+            }
+          ],
+          "name": "Lucas Example",
+          "patient": {
+            "reference": "urn:uuid:6b7d3afb-433b-5902-ab40-989bdeec9922"
+          },
+          "relationship": {
+            "coding": [
+              {
+                "code": "FTH",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+              }
+            ]
+          },
+          "resourceType": "FamilyMemberHistory",
+          "sex": {
+            "coding": [
+              {
+                "code": "male",
+                "system": "http://hl7.org/fhir/administrative-gender"
+              }
+            ]
+          },
+          "status": "completed"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:6fd30b0b-68b4-5d29-8fed-00d756eb6224",
+        "resource": {
+          "id": "familymemberhistory-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.20.1",
+              "value": "FH-2"
+            }
+          ],
+          "note": [
+            {
+              "text": "Does not have: 195967001"
+            }
+          ],
+          "patient": {
+            "reference": "urn:uuid:6b7d3afb-433b-5902-ab40-989bdeec9922"
+          },
+          "relationship": {
+            "coding": [
+              {
+                "code": "FAMMEMB",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+              }
+            ]
+          },
+          "resourceType": "FamilyMemberHistory",
+          "status": "completed"
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "familyhistory.subject-id.not-mapped",
+      "severity": "info"
+    },
+    {
+      "code": "familyhistory.condition.negated",
+      "severity": "info"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
+      "severity": "info"
+    }
+  ]
+}
