@@ -151,3 +151,8 @@ fn health_concerns() {
 fn assessments() {
     check("assessments");
 }
+
+#[test]
+fn planned_medication() {
+    check("planned-medication");
+}

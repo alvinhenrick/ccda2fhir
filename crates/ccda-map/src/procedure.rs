@@ -30,11 +30,14 @@ pub fn map_procedures(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
     for section in doc.all_sections() {
         for entry in &section.entries {
             let s = &entry.statement;
+            // The IG maps a Procedure Activity Observation to an Observation (see Results).
+            // A planned or requested one is a ServiceRequest (see `service_request.rs`).
             if s.has_template(PROCEDURE_ACTIVITY_OBSERVATION) {
-                ctx.report.info(
-                    "procedure.observation.unsupported",
-                    "a Procedure Activity Observation is an observation and was not mapped as a Procedure",
-                );
+                if s.kind == StatementKind::Observation
+                    && matches!(s.mood_code.as_deref(), Some("EVN") | None)
+                {
+                    out.push(map_procedure_observation(s, ctx));
+                }
                 continue;
             }
             let is_procedure = s.kind == StatementKind::Procedure
@@ -51,6 +54,17 @@ pub fn map_procedures(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
         }
     }
     out
+}
+
+/// A Procedure Activity Observation: an Observation in the `procedure` category.
+fn map_procedure_observation(s: &Statement, ctx: &mut Context) -> Value {
+    let mut r = crate::observation::base(s, "procedure-observation", ctx);
+    r.insert(
+        "category".into(),
+        crate::observation::category("procedure", "Procedure"),
+    );
+    crate::observation::apply_performer(&mut r, s, None, ctx);
+    Value::Object(r)
 }
 
 /// `CF-ProcedureStatus` (ActStatus to event-status), extended for the codes the map omits.
@@ -321,20 +335,31 @@ mod tests {
     }
 
     #[test]
-    fn planned_procedures_are_left_to_service_requests_and_observations_are_reported() {
+    fn planned_procedures_are_left_to_service_requests() {
         let (out, _) = run(&doc("procedure", PROC, r#"x="INT""#, ""));
         assert!(out.is_empty());
-        let (out, report) = run(&doc(
+        let (out, _) = run(&doc(
             "observation",
             "2.16.840.1.113883.10.20.22.4.13",
-            "",
+            r#"x="INT""#,
             "",
         ));
         assert!(out.is_empty());
-        assert!(report
-            .issues
-            .iter()
-            .any(|i| i.code == "procedure.observation.unsupported"));
+    }
+
+    #[test]
+    fn procedure_activity_observation_is_an_observation_in_the_procedure_category() {
+        let (out, _) = run(&doc(
+            "observation",
+            "2.16.840.1.113883.10.20.22.4.13",
+            "",
+            r#"<statusCode code="completed"/><effectiveTime value="20240101"/>
+<value xsi:type="CD" code="1" codeSystem="2.16.840.1.113883.6.96"/>"#,
+        ));
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0]["resourceType"], "Observation");
+        assert_eq!(out[0]["category"][0]["coding"][0]["code"], "procedure");
+        assert_eq!(out[0]["status"], "final");
     }
 
     #[test]
