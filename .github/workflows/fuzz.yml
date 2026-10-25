@@ -34,6 +34,18 @@ jobs:
         env:
           SECONDS_TO_RUN: ${{ github.event.inputs.seconds || (github.event_name == 'schedule' && '600') || '60' }}
         run: cargo fuzz run convert -- -max_len=65536 -timeout=10 -rss_limit_mb=2048 -max_total_time="$SECONDS_TO_RUN"
+      - name: Show crashing inputs
+        if: failure()
+        run: |
+          # Inputs are mutations of synthetic fixtures, so they are safe to print. Annotations
+          # are readable through the API even where artifact downloads are not.
+          for f in fuzz/artifacts/convert/*; do
+            [ -e "$f" ] || continue
+            n=$(basename "$f")
+            echo "::error title=fuzz crash $n::size=$(wc -c < "$f") sha1=$(sha1sum "$f" | cut -d' ' -f1)"
+            # Annotations are cut at a few KB, so print the input in numbered chunks.
+            base64 -w0 "$f" | fold -w 2000 | awk -v n="$n" '{ printf "::error title=fuzz crash %s part %03d::%s\n", n, NR, $0 }'
+          done
       - name: Keep crashing inputs
         if: failure()
         uses: actions/upload-artifact@v4

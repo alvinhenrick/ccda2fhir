@@ -6,7 +6,8 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 |---|---|---|---|
 | Patient demographics | names, previous name, DOB, date of death, race, ethnicity, preferred language, current/previous address, phone and type, email, birth sex | done | previous name and address via `period`; goldens `demographics`, `patient_details` |
 | | related person name and relationship | done | guardians, participants, family contacts |
-| | tribal affiliation, sex, occupation, industry | partial | mapped as social-history Observations (3.0 templates), not Patient extensions |
+| | tribal affiliation, sex | done | Patient extensions `us-core-tribal-affiliation` and `us-core-sex` (ADR 0046) |
+| | occupation, industry | done | social-history Observations (US Core Occupation) |
 | | sexual orientation, gender identity | partial | v3 only; v3.1 removed them; Observation or reported, no Patient extension yet |
 | Allergies and intolerances | substance (medication, drug class), reaction | done | |
 | Problems | problems, date of diagnosis, date of resolution | done | onset and abatement |

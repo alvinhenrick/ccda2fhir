@@ -53,6 +53,18 @@ pub fn map_social_history(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Valu
             if s.has_template(BIRTH_SEX) || s.has_template(GENDER_IDENTITY) {
                 continue;
             }
+            // Tribal affiliation and sex become Patient extensions when their value allows it.
+            if (s.has_template(crate::patient::TRIBAL_AFFILIATION_TEMPLATE)
+                || s.has_template(crate::patient::SEX_TEMPLATE))
+                && crate::patient::observation_extension(
+                    s,
+                    ctx.terminology,
+                    &mut crate::Report::default(),
+                )
+                .is_some()
+            {
+                continue;
+            }
             if s.has_template(PREGNANCY) {
                 out.push(pregnancy(s, ctx));
             } else if s.has_template(SOCIAL_HISTORY)
@@ -250,7 +262,11 @@ mod tests_3_0 {
 
     #[test]
     fn every_3_0_template_becomes_a_social_history_observation() {
-        for template in SOCIAL_3_0 {
+        // Tribal affiliation becomes a Patient extension (see `tribal_and_sex_*` below).
+        for template in SOCIAL_3_0
+            .iter()
+            .filter(|t| **t != crate::patient::TRIBAL_AFFILIATION_TEMPLATE)
+        {
             let xml = format!(
                 r#"<ClinicalDocument xmlns="urn:hl7-org:v3"><component><structuredBody><component><section><entry>
 <observation classCode="OBS" moodCode="EVN"><templateId root="{template}" extension="2023-05-01"/>
@@ -266,5 +282,46 @@ mod tests_3_0 {
             assert_eq!(out.len(), 1, "{template}");
             assert_eq!(out[0]["category"][0]["coding"][0]["code"], "social-history");
         }
+    }
+
+    fn run_one(template: &str, value_code: &str, system: &str) -> (Vec<Value>, Report) {
+        let xml = format!(
+            r#"<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><component><structuredBody><component><section><entry>
+<observation classCode="OBS" moodCode="EVN"><templateId root="{template}"/>
+<code code="x" codeSystem="2.16.840.1.113883.6.1"/><statusCode code="completed"/>
+<value xsi:type="CD" code="{value_code}" codeSystem="{system}"/>
+</observation></entry></section></component></structuredBody></component></ClinicalDocument>"#
+        );
+        let doc = ccda_model::parse(xml.as_bytes()).unwrap();
+        let mut report = Report::default();
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
+        let out = map_social_history(&doc, &mut ctx);
+        (out, report)
+    }
+
+    #[test]
+    fn tribal_and_sex_with_usable_values_are_not_observations() {
+        let (out, _) = run_one(
+            crate::patient::TRIBAL_AFFILIATION_TEMPLATE,
+            "1",
+            "2.16.840.1.113883.5.140",
+        );
+        assert!(out.is_empty());
+        let (out, _) = run_one(
+            crate::patient::SEX_TEMPLATE,
+            "248152002",
+            "2.16.840.1.113883.6.96",
+        );
+        assert!(out.is_empty());
+    }
+
+    #[test]
+    fn a_sex_value_outside_the_us_core_set_stays_an_observation() {
+        let (out, _) = run_one(
+            crate::patient::SEX_TEMPLATE,
+            "999",
+            "2.16.840.1.113883.6.96",
+        );
+        assert_eq!(out.len(), 1);
     }
 }

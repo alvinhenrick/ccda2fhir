@@ -15,6 +15,13 @@ const GENDER_IDENTITY_URL: &str =
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-genderIdentity";
 const CDC_RACE_SYSTEM: &str = "urn:oid:2.16.840.1.113883.6.238";
 const CDC_RACE_OID: &str = "2.16.840.1.113883.6.238";
+const TRIBAL_AFFILIATION_URL: &str =
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-tribal-affiliation";
+const SEX_URL: &str = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex";
+/// Tribal Affiliation Observation (C-CDA 3.0).
+pub(crate) const TRIBAL_AFFILIATION_TEMPLATE: &str = "2.16.840.1.113883.10.20.22.4.506";
+/// Sex Observation (C-CDA 3.0).
+pub(crate) const SEX_TEMPLATE: &str = "2.16.840.1.113883.10.20.22.4.507";
 const BIRTH_SEX_TEMPLATE: &str = "2.16.840.1.113883.10.20.22.4.200";
 const GENDER_IDENTITY_TEMPLATE: &str = "2.16.840.1.113883.10.20.34.3.45";
 
@@ -503,10 +510,50 @@ fn sex_and_gender_identity(
                 if let Some(c) = map_codeable_concept(value, terminology, report) {
                     out.push(json!({ "url": GENDER_IDENTITY_URL, "valueCodeableConcept": c }));
                 }
+            } else if let Some(ext) = observation_extension(s, terminology, report) {
+                out.push(ext);
             }
         }
     }
     out
+}
+
+/// The Patient extension for a Tribal Affiliation (4.506) or Sex (4.507) Observation, if its
+/// value can be expressed. Those observations are then Patient data, not social history.
+pub(crate) fn observation_extension(
+    s: &ccda_model::Statement,
+    terminology: &dyn Terminology,
+    report: &mut Report,
+) -> Option<Value> {
+    let Some(Cv::Coded(value)) = s.values.first() else {
+        return None;
+    };
+    if s.has_template(TRIBAL_AFFILIATION_TEMPLATE) {
+        let c = map_codeable_concept(value, terminology, report)?;
+        return Some(json!({
+            "url": TRIBAL_AFFILIATION_URL,
+            "extension": [{ "url": "tribalAffiliation", "valueCodeableConcept": c }],
+        }));
+    }
+    if s.has_template(SEX_TEMPLATE) {
+        // The US Core Sex value set: SNOMED female, male, unknown and nonbinary. Administrative
+        // codes are translated; anything else is reported and left as an Observation.
+        let code = match value.code.as_deref() {
+            Some(c @ ("248152002" | "248153007" | "184115007" | "33791000087105")) => c,
+            Some("F") => "248152002",
+            Some("M") => "248153007",
+            Some("UN" | "UNK") => "184115007",
+            _ => {
+                report.info(
+                    "patient.sex.unrecognized",
+                    "a sex value is not in the US Core Sex value set; it stays a social history Observation",
+                );
+                return None;
+            }
+        };
+        return Some(json!({ "url": SEX_URL, "valueCode": code }));
+    }
+    None
 }
 
 /// HL7 v3 AdministrativeGender to FHIR `Patient.gender`.
@@ -750,6 +797,30 @@ mod tests {
         assert!(ext
             .iter()
             .any(|e| e["valueCodeableConcept"]["coding"][0]["code"] == "446141000124107"));
+    }
+
+    #[test]
+    fn tribal_affiliation_and_sex_become_patient_extensions() {
+        let body = r#"<entry><observation classCode="OBS" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.22.4.506"/>
+  <code code="95370-3" codeSystem="2.16.840.1.113883.6.1"/>
+  <value xsi:type="CD" code="1" codeSystem="2.16.840.1.113883.5.140"/>
+</observation></entry>
+<entry><observation classCode="OBS" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.22.4.507"/>
+  <code code="46098-0" codeSystem="2.16.840.1.113883.6.1"/>
+  <value xsi:type="CD" code="F" codeSystem="2.16.840.1.113883.5.1"/>
+</observation></entry>"#;
+        let (r, _) = parse_doc("<patient/>", body);
+        let ext = r["extension"].as_array().unwrap();
+        let tribal = ext
+            .iter()
+            .find(|e| e["url"] == TRIBAL_AFFILIATION_URL)
+            .unwrap();
+        assert_eq!(tribal["extension"][0]["url"], "tribalAffiliation");
+        assert!(tribal["extension"][0]["valueCodeableConcept"]["coding"][0]["code"] == "1");
+        let sex = ext.iter().find(|e| e["url"] == SEX_URL).unwrap();
+        assert_eq!(sex["valueCode"], "248152002");
     }
 
     #[test]
