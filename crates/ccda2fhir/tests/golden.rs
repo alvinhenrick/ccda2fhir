@@ -252,3 +252,8 @@ fn referral() {
 fn sdoh_interventions() {
     check("sdoh-interventions");
 }
+
+#[test]
+fn imaging() {
+    check("imaging");
+}
