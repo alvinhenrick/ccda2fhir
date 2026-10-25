@@ -147,9 +147,12 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
         "18776-5" => "Plan of Care Note",
         "29762-2" => "Social history note",
         "30954-2" => "Relevant diagnostic tests/laboratory data note",
+        "34133-9" => "Summary of Episode Note",
         "46240-8" => "History of Hospitalizations+Outpatient visits Narrative",
         "47420-5" => "Functional Status Assessment Note",
         "47519-4" => "History of Procedures Document",
+        "48765-2" => "Allergies and adverse reactions Document",
+        "8716-3" => "Vital signs note",
         _ => return None,
     })
 }

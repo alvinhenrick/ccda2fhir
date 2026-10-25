@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "48765-2",
-                    "display": "Allergies",
+                    "display": "Allergies and adverse reactions Document",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Allergies"
               },
               "entry": [
                 {
@@ -368,6 +369,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

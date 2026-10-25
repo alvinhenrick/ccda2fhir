@@ -83,15 +83,16 @@
           "subject": {
             "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
           },
-          "title": "Summarization of episode note",
+          "title": "Summary of Episode Note",
           "type": {
             "coding": [
               {
                 "code": "34133-9",
-                "display": "Summarization of episode note",
+                "display": "Summary of Episode Note",
                 "system": "http://loinc.org"
               }
-            ]
+            ],
+            "text": "Summarization of episode note"
           }
         }
       },
@@ -370,6 +371,10 @@
     },
     {
       "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     },
     {

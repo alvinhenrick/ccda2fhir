@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "8716-3",
-                    "display": "Vital signs",
+                    "display": "Vital signs note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Vital signs"
               },
               "entry": [
                 {
@@ -1148,6 +1149,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]
