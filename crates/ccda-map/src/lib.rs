@@ -18,6 +18,7 @@ mod nullflavor;
 mod observation;
 mod patient;
 mod problem;
+mod procedure;
 mod profile;
 mod quantity;
 mod report;
@@ -37,6 +38,7 @@ pub use nullflavor::{
 };
 pub use patient::{map_patient, PATIENT_ID};
 pub use problem::map_problems;
+pub use procedure::map_procedures;
 pub use profile::Profiles;
 pub use quantity::{decimal, map_age, map_quantity};
 pub use report::{Issue, Report, Severity};

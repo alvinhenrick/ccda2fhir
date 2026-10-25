@@ -73,6 +73,14 @@ const BUILTIN: &[(&str, &str)] = &[
     ("2.16.840.1.113883.6.8", "http://unitsofmeasure.org"),
     ("2.16.840.1.113883.6.12", "http://www.ama-assn.org/go/cpt"),
     (
+        "2.16.840.1.113883.6.4",
+        "http://www.cms.gov/Medicare/Coding/ICD10",
+    ),
+    (
+        "2.16.840.1.113883.6.285",
+        "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+    ),
+    (
         "2.16.840.1.113883.5.1",
         "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender",
     ),

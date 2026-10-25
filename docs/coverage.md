@@ -148,6 +148,26 @@ See `docs/decisions/0007-results.md`.
 | `author` | `performer` + Provenance | done | golden | |
 | Specimen, specimen collection procedure | Specimen | reported, todo | | |
 
+## Procedures (Procedure Activity Procedure / Act) to Procedure
+
+See `docs/decisions/0008-procedures.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `id`, `code` | `identifier`, `code` | done | golden `procedures` | |
+| `statusCode`, `negationInd` | `status` (CF-ProcedureStatus; negation is not-done) | done | `status_map_and_negation` | |
+| `effectiveTime` | `performedDateTime` / `performedPeriod` / data absent reason | done | `point_period_and_missing_times` | |
+| `targetSiteCode` | `bodySite` | done | golden | |
+| `performer` | `performer.actor` (Practitioner / Organization) | done | golden | |
+| `author` | `recorder` + Provenance | done | golden | |
+| Indication | `reasonCode` | done | golden | |
+| Act variant | Procedure | done | `the_act_variant_maps_the_same_way` | |
+| `methodCode`, `priorityCode`, approach | not supported (IG) | reported | | |
+| Service Delivery Location | `location` | reported, todo (needs Location) | | |
+| Encounter link, comment, instruction (`followUp`) | `encounter`, `note`, `followUp` | todo | | |
+| Procedure Activity Observation | Observation | reported, todo | | |
+| Planned procedure (mood INT) | ServiceRequest | reported, todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

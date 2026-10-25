@@ -76,3 +76,8 @@ fn vitals() {
 fn results() {
     check("results");
 }
+
+#[test]
+fn procedures() {
+    check("procedures");
+}

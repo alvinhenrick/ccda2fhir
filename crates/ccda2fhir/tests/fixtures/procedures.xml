@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-PROCEDURES-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <effectiveTime value="20250102120000-0500"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0007"/>
+      <patient>
+        <name><given>Gus</given><family>Example</family></name>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19620817"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.7.1"/>
+    <code code="47519-4" codeSystem="2.16.840.1.113883.6.1" displayName="History of Procedures"/>
+    <title>Procedures</title>
+    <text/>
+    <!-- 1. Completed procedure with period, site, performer, indication, author -->
+    <entry typeCode="DRIV"><procedure classCode="PROC" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.14"/>
+      <id root="1.3.6.1.4.1.22812.3.2009316.3.4.7" extension="PROC-1"/>
+      <code code="80146002" codeSystem="2.16.840.1.113883.6.96" displayName="Excision of appendix">
+        <translation code="0DTJ4ZZ" codeSystem="2.16.840.1.113883.6.4"/>
+      </code>
+      <statusCode code="completed"/>
+      <effectiveTime><low value="20240315093000-0500"/><high value="20240315111500-0500"/></effectiveTime>
+      <targetSiteCode code="66754008" codeSystem="2.16.840.1.113883.6.96"/>
+      <performer><assignedEntity>
+        <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+        <assignedPerson><name><given>Sam</given><family>Surgeon</family></name></assignedPerson>
+        <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Hospital</name></representedOrganization>
+      </assignedEntity></performer>
+      <author>
+        <time value="20240315120000-0500"/>
+        <assignedAuthor>
+          <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+          <assignedPerson><name><given>Sam</given><family>Surgeon</family></name></assignedPerson>
+          <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Hospital</name></representedOrganization>
+        </assignedAuthor>
+      </author>
+      <entryRelationship typeCode="RSON"><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.19"/>
+        <code code="404684003" codeSystem="2.16.840.1.113883.6.96"/>
+        <value xsi:type="CD" code="74400008" codeSystem="2.16.840.1.113883.6.96"/>
+      </observation></entryRelationship>
+    </procedure></entry>
+    <!-- 2. Not done -->
+    <entry typeCode="DRIV"><procedure classCode="PROC" moodCode="EVN" negationInd="true">
+      <templateId root="2.16.840.1.113883.10.20.22.4.14"/>
+      <id root="1.3.6.1.4.1.22812.3.2009316.3.4.7" extension="PROC-2"/>
+      <code code="73761001" codeSystem="2.16.840.1.113883.6.96"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20230720"/>
+    </procedure></entry>
+    <!-- 3. Procedure Activity Act with no date -->
+    <entry typeCode="DRIV"><act classCode="ACT" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.12"/>
+      <id root="1.3.6.1.4.1.22812.3.2009316.3.4.7" extension="PROC-3"/>
+      <code code="29303009" codeSystem="2.16.840.1.113883.6.96"/>
+      <statusCode code="completed"/>
+      <effectiveTime nullFlavor="UNK"/>
+    </act></entry>
+    <!-- 4. Planned: not mapped here -->
+    <entry typeCode="DRIV"><procedure classCode="PROC" moodCode="INT">
+      <templateId root="2.16.840.1.113883.10.20.22.4.14"/>
+      <id root="1.3.6.1.4.1.22812.3.2009316.3.4.7" extension="PROC-4"/>
+      <code code="73761001" codeSystem="2.16.840.1.113883.6.96"/>
+      <statusCode code="active"/>
+    </procedure></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>
