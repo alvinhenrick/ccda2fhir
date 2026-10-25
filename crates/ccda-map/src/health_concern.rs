@@ -32,7 +32,7 @@ fn has_health_concern_category(condition: &Value) -> bool {
 }
 
 /// `system|value` keys of a resource's identifiers.
-fn keys(identifiers: &Value) -> Vec<String> {
+pub(crate) fn keys(identifiers: &Value) -> Vec<String> {
     identifiers
         .as_array()
         .into_iter()
