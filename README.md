@@ -25,6 +25,19 @@ Settings (environment variables): `BIND_ADDR` (default `0.0.0.0:8080` in the ima
 (10 MiB), `MAX_CONCURRENCY` (64), `REQUEST_TIMEOUT_SECS` (30), `RUST_LOG` (`info`). Request bodies are never
 logged. The service has no authentication yet: run it inside your network or behind a gateway that adds it.
 
+### Check your own documents with the HL7 validator
+
+An opt-in test rig starts the service and the official HL7 validator, converts every `.xml` in a folder and
+validates the bundles against FHIR R4 and US Core 6.1.0:
+
+```
+INPUT_DIR=./my-documents docker compose --profile validate up --build \
+  --abort-on-container-exit --exit-code-from validator
+docker compose --profile validate down -v      # tear everything down
+```
+
+The default input is the repository's synthetic fixtures. A normal `docker compose up` does not start it.
+
 ### Command line
 
 ```
