@@ -492,3 +492,12 @@ See `docs/decisions/0031-patient-completeness.md`.
 | `modeCode`, `proficiencyLevelCode` | `patient-proficiency` extension | done | golden `patient_details` |
 | `id@assigningAuthorityName` | `Identifier.assigner.display` | done | golden `patient_details` |
 | `providerOrganization` | `managingOrganization` | done | golden `patient_details` |
+
+## Unstructured documents (nonXMLBody)
+
+See `docs/decisions/0032-unstructured-documents.md`.
+
+| C-CDA | FHIR | Status | Test |
+|---|---|---|---|
+| `nonXMLBody/text` (B64 or TXT) | `DocumentReference.content.attachment.data` | done | golden `unstructured` |
+| `nonXMLBody/text/reference` | `attachment.url` (reported) | done | `reference_only_becomes_a_url_and_is_reported` |
