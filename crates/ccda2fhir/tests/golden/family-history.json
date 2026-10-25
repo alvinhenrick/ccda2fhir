@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "10157-6",
-                    "display": "History of family member diseases Narrative",
+                    "display": "History of family member diseases note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "History of family member diseases Narrative"
               },
               "entry": [
                 {
@@ -204,6 +205,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]
