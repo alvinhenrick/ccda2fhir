@@ -115,7 +115,7 @@
             "coding": [
               {
                 "code": "105504002",
-                "display": "Dependence on cane",
+                "display": "Dependence on walking stick",
                 "system": "http://snomed.info/sct"
               }
             ]
@@ -139,7 +139,7 @@
             "coding": [
               {
                 "code": "373930000",
-                "display": "Cognitive function",
+                "display": "Cognitive function finding",
                 "system": "http://snomed.info/sct"
               }
             ]
