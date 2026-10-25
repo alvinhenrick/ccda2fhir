@@ -21,10 +21,10 @@ serde_json = "1"
 thiserror = "2"
 
 # Internal crates
-ccda-model = { path = "crates/ccda-model" }
-ccda-terminology = { path = "crates/ccda-terminology" }
-ccda-map = { path = "crates/ccda-map" }
-fhir-out = { path = "crates/fhir-out" }
+ccda-model = { path = "crates/ccda-model", version = "0.1.0" }
+ccda-terminology = { path = "crates/ccda-terminology", version = "0.1.0" }
+ccda-map = { path = "crates/ccda-map", version = "0.1.0" }
+fhir-out = { path = "crates/fhir-out", version = "0.1.0" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
