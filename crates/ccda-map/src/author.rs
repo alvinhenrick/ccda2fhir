@@ -8,7 +8,7 @@
 use ccda_model::{Author, AuthorOrganization};
 use serde_json::{json, Map, Value};
 
-use crate::{map_datetime, map_identifier, Context};
+use crate::{map_codeable_concept, map_datetime, map_identifier, Context};
 
 const PARTICIPANT_TYPE_SYSTEM: &str =
     "http://terminology.hl7.org/CodeSystem/provenance-participant-type";
@@ -88,6 +88,22 @@ pub(crate) fn register_organization(org: &AuthorOrganization, ctx: &mut Context)
     if let Some(name) = &org.name {
         resource.insert("name".into(), json!(name));
     }
+    let telecoms: Vec<Value> = org
+        .telecoms
+        .iter()
+        .filter_map(crate::patient::telecom)
+        .collect();
+    if !telecoms.is_empty() {
+        resource.insert("telecom".into(), json!(telecoms));
+    }
+    let addresses: Vec<Value> = org
+        .addresses
+        .iter()
+        .filter_map(crate::patient::address)
+        .collect();
+    if !addresses.is_empty() {
+        resource.insert("address".into(), json!(addresses));
+    }
     let reference = ctx.reference("Organization", &id);
     ctx.organizations.insert(key, reference.clone());
     ctx.push_extra(Value::Object(resource));
@@ -129,9 +145,86 @@ pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Optio
         }
         resource.insert("name".into(), json!([name]));
     }
+    let telecoms: Vec<Value> = author
+        .telecoms
+        .iter()
+        .filter_map(crate::patient::telecom)
+        .collect();
+    if !telecoms.is_empty() {
+        resource.insert("telecom".into(), json!(telecoms));
+    }
+    let addresses: Vec<Value> = author
+        .addresses
+        .iter()
+        .filter_map(crate::patient::address)
+        .collect();
+    if !addresses.is_empty() {
+        resource.insert("address".into(), json!(addresses));
+    }
     let reference = ctx.reference("Practitioner", &id);
     ctx.practitioners.insert(key, reference.clone());
     ctx.push_extra(Value::Object(resource));
+    Some(reference)
+}
+
+/// A person related to the patient who is named in the header (an informant who is a relative or
+/// friend) becomes a `RelatedPerson`.
+pub(crate) fn register_related_person(a: &Author, ctx: &mut Context) -> Option<String> {
+    if a.family.is_none() && a.given.is_empty() {
+        return None;
+    }
+    let key = format!(
+        "related:{}|{}|{}",
+        a.given.join(" "),
+        a.family.as_deref().unwrap_or_default(),
+        a.role_code
+            .as_ref()
+            .and_then(|c| c.code.as_deref())
+            .unwrap_or_default()
+    );
+    if let Some(existing) = ctx.practitioners.get(&key) {
+        return Some(existing.clone());
+    }
+    let id = ctx.next_id("relatedperson");
+    let mut r = Map::new();
+    r.insert("resourceType".into(), json!("RelatedPerson"));
+    r.insert("id".into(), json!(id));
+    r.insert("active".into(), json!(true));
+    r.insert("patient".into(), json!({ "reference": ctx.patient }));
+    if let Some(rel) = a
+        .role_code
+        .as_ref()
+        .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
+    {
+        r.insert("relationship".into(), json!([rel]));
+    }
+    let mut name = Map::new();
+    if let Some(f) = &a.family {
+        name.insert("family".into(), json!(f));
+    }
+    if !a.given.is_empty() {
+        name.insert("given".into(), json!(a.given));
+    }
+    r.insert("name".into(), json!([name]));
+    let telecoms: Vec<Value> = a
+        .telecoms
+        .iter()
+        .filter_map(crate::patient::telecom)
+        .collect();
+    if !telecoms.is_empty() {
+        r.insert("telecom".into(), json!(telecoms));
+    }
+    let addresses: Vec<Value> = a
+        .addresses
+        .iter()
+        .filter_map(crate::patient::address)
+        .collect();
+    if !addresses.is_empty() {
+        r.insert("address".into(), json!(addresses));
+    }
+    let reference = ctx.reference("RelatedPerson", &id);
+    ctx.practitioners.insert(key, reference.clone());
+    ctx.push_extra(Value::Object(r));
     Some(reference)
 }
 
@@ -415,6 +508,7 @@ mod tests {
                     null_flavor: None,
                 }],
                 name: Some("Example Clinic".into()),
+                ..AuthorOrganization::default()
             });
         }
         let (_, extra, _) = run(&[a, b]);
@@ -466,6 +560,7 @@ mod tests {
         author.organization = Some(AuthorOrganization {
             ids: vec![npi("9")],
             name: None,
+            ..AuthorOrganization::default()
         });
         let (_, extra, report) = run(&[author]);
         assert!(of_type(&extra, "Organization").is_empty());

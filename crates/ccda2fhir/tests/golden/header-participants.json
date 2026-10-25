@@ -1,0 +1,483 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:6ac723f5-5d12-50f4-aa12-99ce17e878ba",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "contact": [
+            {
+              "address": {
+                "city": "Anytown",
+                "line": [
+                  "1 Example Way"
+                ],
+                "postalCode": "12345",
+                "state": "NY",
+                "use": "home"
+              },
+              "name": {
+                "family": "Example",
+                "given": [
+                  "Mia"
+                ]
+              },
+              "relationship": [
+                {
+                  "coding": [
+                    {
+                      "code": "ECON",
+                      "system": "http://terminology.hl7.org/CodeSystem/v3-RoleClass"
+                    }
+                  ]
+                },
+                {
+                  "coding": [
+                    {
+                      "code": "MTH",
+                      "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                    }
+                  ]
+                }
+              ],
+              "telecom": [
+                {
+                  "system": "phone",
+                  "use": "home",
+                  "value": "+1-555-0111"
+                }
+              ]
+            }
+          ],
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0028"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:6a6d2138-8a6a-56d4-8a61-9db5bd7ff102",
+        "resource": {
+          "attester": [
+            {
+              "mode": "legal",
+              "party": {
+                "reference": "urn:uuid:b9ab44e7-59e9-5481-b7c0-1385db08d1cc"
+              },
+              "time": "2025-01-02T13:00:00-05:00"
+            },
+            {
+              "mode": "professional",
+              "party": {
+                "reference": "urn:uuid:6bed13a6-02c3-5455-8e1c-2cd1d251d2f7"
+              },
+              "time": "2025-01-02T12:30:00-05:00"
+            }
+          ],
+          "author": [
+            {
+              "reference": "urn:uuid:b9ab44e7-59e9-5481-b7c0-1385db08d1cc"
+            }
+          ],
+          "confidentiality": "N",
+          "custodian": {
+            "reference": "urn:uuid:f1c9daa4-10b5-5f12-9dc3-5809fc434b47"
+          },
+          "date": "2025-01-02T12:00:00-05:00",
+          "event": [
+            {
+              "detail": [
+                {
+                  "reference": "urn:uuid:b9ab44e7-59e9-5481-b7c0-1385db08d1cc"
+                }
+              ],
+              "period": {
+                "end": "2024-12-31",
+                "start": "2024-01-01"
+              }
+            }
+          ],
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-HEADER-1"
+          },
+          "language": "en-US",
+          "relatesTo": [
+            {
+              "code": "replaces",
+              "targetIdentifier": {
+                "system": "urn:oid:2.16.840.1.113883.19.5",
+                "value": "OLD-DOC-1"
+              }
+            }
+          ],
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "18776-5",
+                    "display": "Plan of Care Note",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
+                "status": "generated"
+              },
+              "title": "Plan of Treatment"
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "61146-7",
+                    "display": "Goals",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:4bf1041e-7c27-5385-9dc2-e64df40dbded"
+                },
+                {
+                  "reference": "urn:uuid:8011a33a-b291-5439-87c4-899ac43b21eb"
+                }
+              ],
+              "title": "Goals"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:6ac723f5-5d12-50f4-aa12-99ce17e878ba"
+          },
+          "title": "Continuity of Care Document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "display": "Summary of Episode Note",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:4bf1041e-7c27-5385-9dc2-e64df40dbded",
+        "resource": {
+          "description": {
+            "coding": [
+              {
+                "code": "289169006",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "goal-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-1"
+            }
+          ],
+          "lifecycleStatus": "active",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2025-01-01",
+          "subject": {
+            "reference": "urn:uuid:6ac723f5-5d12-50f4-aa12-99ce17e878ba"
+          },
+          "target": [
+            {
+              "dueDate": "2025-12-31"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:8011a33a-b291-5439-87c4-899ac43b21eb",
+        "resource": {
+          "description": {
+            "text": "Walk 30 minutes a day"
+          },
+          "id": "goal-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-2"
+            }
+          ],
+          "lifecycleStatus": "completed",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2024-06-01",
+          "subject": {
+            "reference": "urn:uuid:6ac723f5-5d12-50f4-aa12-99ce17e878ba"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:bb0c3c43-f702-533a-a9ed-fad1e6905561",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "assess-plan",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/careplan-category"
+                }
+              ]
+            }
+          ],
+          "goal": [
+            {
+              "reference": "urn:uuid:4bf1041e-7c27-5385-9dc2-e64df40dbded"
+            },
+            {
+              "reference": "urn:uuid:8011a33a-b291-5439-87c4-899ac43b21eb"
+            }
+          ],
+          "id": "careplan-1",
+          "intent": "plan",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-careplan"
+            ]
+          },
+          "resourceType": "CarePlan",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:6ac723f5-5d12-50f4-aa12-99ce17e878ba"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
+            "status": "generated"
+          },
+          "title": "Plan of Treatment"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b9ab44e7-59e9-5481-b7c0-1385db08d1cc",
+        "resource": {
+          "id": "practitioner-1",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "1234567893"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Doe",
+              "given": [
+                "Pat"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:f1c9daa4-10b5-5f12-9dc3-5809fc434b47",
+        "resource": {
+          "active": true,
+          "id": "organization-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.9",
+              "value": "CLINIC-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "Example Clinic",
+          "resourceType": "Organization"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:6bed13a6-02c3-5455-8e1c-2cd1d251d2f7",
+        "resource": {
+          "id": "practitioner-2",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "2222222228"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Check",
+              "given": [
+                "Sam"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:a7b33916-09c8-5820-b72b-17e9095d6c06",
+        "resource": {
+          "id": "practitioner-3",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "1111111112"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Enter",
+              "given": [
+                "Dana"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner",
+          "telecom": [
+            {
+              "system": "phone",
+              "use": "work",
+              "value": "+1-555-0100"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:854c34dc-e3c3-561f-b747-e9ca1c97e01c",
+        "resource": {
+          "active": true,
+          "id": "relatedperson-1",
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Mia"
+              ]
+            }
+          ],
+          "patient": {
+            "reference": "urn:uuid:6ac723f5-5d12-50f4-aa12-99ce17e878ba"
+          },
+          "relationship": [
+            {
+              "coding": [
+                {
+                  "code": "MTH",
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                }
+              ]
+            }
+          ],
+          "resourceType": "RelatedPerson"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:1b82b9f3-36c5-54d5-a7ce-7374933488eb",
+        "resource": {
+          "agent": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "enterer",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:a7b33916-09c8-5820-b72b-17e9095d6c06"
+              }
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "informant",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:854c34dc-e3c3-561f-b747-e9ca1c97e01c"
+              }
+            }
+          ],
+          "id": "provenance-1",
+          "recorded": "2025-01-02T12:00:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:6a6d2138-8a6a-56d4-8a61-9db5bd7ff102"
+            }
+          ]
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "careplan.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    }
+  ]
+}

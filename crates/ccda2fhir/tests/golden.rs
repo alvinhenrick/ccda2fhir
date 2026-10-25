@@ -181,3 +181,8 @@ fn family_history() {
 fn scales_and_supplies() {
     check("scales-supplies");
 }
+
+#[test]
+fn header_participants() {
+    check("header-participants");
+}
