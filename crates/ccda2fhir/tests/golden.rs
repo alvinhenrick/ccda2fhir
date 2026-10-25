@@ -27,7 +27,11 @@ fn check(name: &str) {
             "code": i.code,
         })).collect::<Vec<_>>(),
     });
-    let mut text = serde_json::to_string_pretty(&actual).unwrap();
+    // The converter Device carries the crate version; keep goldens stable across releases.
+    let mut text = serde_json::to_string_pretty(&actual).unwrap().replace(
+        &format!("\"value\": \"{}\"", env!("CARGO_PKG_VERSION")),
+        "\"value\": \"<crate-version>\"",
+    );
     text.push('\n');
 
     let golden = dir("golden").join(format!("{name}.json"));
