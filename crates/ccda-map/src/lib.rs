@@ -7,6 +7,7 @@
 //! The shared building blocks (timestamps, `nullFlavor`, identifiers, coded values) follow the
 //! IG's general mapping guidance and are reused by every resource mapper.
 
+mod advance_directive;
 mod allergy;
 mod appointment;
 mod assessment;
@@ -50,6 +51,7 @@ mod unstructured;
 mod util;
 mod vitals;
 
+pub use advance_directive::map_advance_directives;
 pub use allergy::map_allergies;
 pub use assessment::map_assessments;
 pub use care_plan::{link_care_plan_activities, map_care_plans};
