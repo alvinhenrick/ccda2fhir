@@ -297,6 +297,10 @@
     {
       "code": "timestamp.precision-extended",
       "severity": "info"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
     }
   ]
 }

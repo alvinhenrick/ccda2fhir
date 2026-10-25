@@ -193,5 +193,10 @@
     "resourceType": "Bundle",
     "type": "collection"
   },
-  "report": []
+  "report": [
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
+    }
+  ]
 }

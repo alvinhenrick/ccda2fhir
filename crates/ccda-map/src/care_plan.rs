@@ -6,17 +6,11 @@
 use ccda_model::ClinicalDocument;
 use serde_json::{json, Map, Value};
 
+use crate::util::narrative_div;
 use crate::Context;
 
 const PLAN_OF_TREATMENT: &str = "2.16.840.1.113883.10.20.22.2.10";
 const CATEGORY_SYSTEM: &str = "http://hl7.org/fhir/us/core/CodeSystem/careplan-category";
-
-/// Escape text for an XHTML narrative.
-fn escape(t: &str) -> String {
-    t.replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
-}
 
 /// One `CarePlan` per Plan of Treatment section that has narrative or goals.
 ///
@@ -60,17 +54,8 @@ pub fn map_care_plans(doc: &ClinicalDocument, ctx: &mut Context, goals: &[Value]
             r.insert("title".into(), json!(t));
         }
         // Narrative is required by US Core; it is the section text, flattened.
-        let body = narrative.map_or_else(
-            || "<p>See goals.</p>".to_owned(),
-            |t| format!("<p>{}</p>", escape(t)),
-        );
-        r.insert(
-            "text".into(),
-            json!({
-                "status": "generated",
-                "div": format!("<div xmlns=\"http://www.w3.org/1999/xhtml\">{body}</div>")
-            }),
-        );
+        let div = narrative_div(narrative.unwrap_or("See goals."));
+        r.insert("text".into(), json!({ "status": "generated", "div": div }));
         r.insert("subject".into(), json!({ "reference": ctx.patient }));
         if !goal_refs.is_empty() {
             r.insert("goal".into(), json!(goal_refs));

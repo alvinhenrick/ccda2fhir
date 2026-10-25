@@ -298,6 +298,10 @@
     {
       "code": "servicerequest.category.assumed",
       "severity": "info"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
     }
   ]
 }

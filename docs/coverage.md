@@ -345,6 +345,27 @@ See `docs/decisions/0019-service-requests.md`.
 | Planned medication / supply | MedicationRequest / SupplyRequest | todo | | |
 | Instructions (4.20) | `patientInstruction`, Communication | todo | | |
 
+## Document header to Composition
+
+See `docs/decisions/0020-composition.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `ClinicalDocument/id` | `identifier` | done | golden `composition` | |
+| `code` | `type` | done | `header_fields_and_sections` | |
+| `title` | `title` | done | same | |
+| `effectiveTime` | `date` | done | same | |
+| `author` | `author` (Practitioner) | done | `missing_author_means_no_composition` | |
+| `custodian` | `custodian` | done | `header_fields_and_sections` | |
+| `confidentialityCode` | `confidentiality` | done | `unknown_confidentiality_is_reported` | |
+| `languageCode` | `language` | done | `header_fields_and_sections` | |
+| Sections | `section` (title, code, text, entry) | done | same | |
+| Resources without an identifier | `section.entry` | todo | | |
+| `legalAuthenticator`, `authenticator` | `attester` | todo | | |
+| `componentOf/encompassingEncounter` | `encounter` | todo | | |
+| `documentationOf/serviceEvent` | `event` | todo | | |
+| `relatedDocument` | `relatesTo` | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

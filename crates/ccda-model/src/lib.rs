@@ -64,6 +64,16 @@ pub struct ClinicalDocument {
     pub code: Option<Code>,
     pub effective_time: Option<String>,
     pub patient: Patient,
+    /// The document `title`.
+    pub title: Option<String>,
+    /// Document-level `author`s (people, devices) with their time.
+    pub authors: Vec<Author>,
+    /// `custodian/assignedCustodian/representedCustodianOrganization`
+    pub custodian: Option<AuthorOrganization>,
+    /// `confidentialityCode/@code`
+    pub confidentiality: Option<String>,
+    /// `languageCode/@code`
+    pub language: Option<String>,
     /// Top-level sections of the structured body, in document order.
     pub sections: Vec<Section>,
 }
@@ -126,6 +136,16 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
         code: child(&root, "code").map(|n| parse_code(&n, &header_narrative)),
         effective_time: child(&root, "effectiveTime").and_then(|n| xml::attr(&n, "value")),
         patient: header::parse_patient(&root),
+        title: child(&root, "title").and_then(|n| xml::text_of(&n)),
+        authors: xml::children(&root, "author")
+            .map(|n| body::parse_author(&n, &header_narrative))
+            .collect(),
+        custodian: child(&root, "custodian")
+            .and_then(|c| child(&c, "assignedCustodian"))
+            .and_then(|c| child(&c, "representedCustodianOrganization"))
+            .map(|o| body::parse_organization(&o)),
+        confidentiality: child(&root, "confidentialityCode").and_then(|n| xml::attr(&n, "code")),
+        language: child(&root, "languageCode").and_then(|n| xml::attr(&n, "code")),
         sections: body::parse_body(&root)?,
     })
 }
