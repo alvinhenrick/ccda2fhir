@@ -30,6 +30,77 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:389b3758-2902-5014-b343-3e1c86230db1",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-CONCERN-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "11450-4",
+                    "display": "Problem list - Reported",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:da49f523-6061-5ac6-9f07-5942f3f106dd"
+                }
+              ],
+              "title": "Problems"
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "75310-3",
+                    "display": "Health concerns Document",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:da49f523-6061-5ac6-9f07-5942f3f106dd"
+                }
+              ],
+              "title": "Health Concerns"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1b5f975d-7983-525c-9448-eb7643a971f4"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:da49f523-6061-5ac6-9f07-5942f3f106dd",
         "resource": {
           "category": [
@@ -194,6 +265,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

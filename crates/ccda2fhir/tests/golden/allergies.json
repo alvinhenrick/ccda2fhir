@@ -30,6 +30,70 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:8a58d708-b191-5dad-9670-7fd64689ddf9",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-ALLERGIES-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "48765-2",
+                    "display": "Allergies",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:3162bcc5-84ef-505c-a445-c388e6431b8e"
+                },
+                {
+                  "reference": "urn:uuid:cc5c73ce-d5c7-59bb-a5fb-aae25a5d12c5"
+                },
+                {
+                  "reference": "urn:uuid:5d4c18aa-1b8e-5bfb-ad3d-d3c4a2de1062"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Penicillin G Hives Peanut Anaphylaxis</p></div>",
+                "status": "generated"
+              },
+              "title": "Allergies"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:4c6ba7ab-ebf1-5d23-95fe-11f576724ac6"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:3162bcc5-84ef-505c-a445-c388e6431b8e",
         "resource": {
           "category": [
@@ -297,6 +361,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

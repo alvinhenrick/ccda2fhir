@@ -30,6 +30,87 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:10a7ccb3-6438-55a9-a137-33622d7769ed",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-VITALS-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "8716-3",
+                    "display": "Vital signs",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:0d9b5819-3156-52a6-a7c3-cca96f7cfcde"
+                },
+                {
+                  "reference": "urn:uuid:862488d5-8ac0-5bf4-baef-ee095de1f364"
+                },
+                {
+                  "reference": "urn:uuid:d8220efe-af5b-586b-9d03-f4abddda15bf"
+                },
+                {
+                  "reference": "urn:uuid:d5e8a125-06da-5356-be77-b852be05b171"
+                },
+                {
+                  "reference": "urn:uuid:b70d607c-f7b9-54b3-97a3-72c552a2dd2f"
+                },
+                {
+                  "reference": "urn:uuid:dedb0dd6-6126-56fd-9ef1-2caeb187c367"
+                },
+                {
+                  "reference": "urn:uuid:fdd36ebf-3cef-574c-b0db-2bc997fb1a33"
+                },
+                {
+                  "reference": "urn:uuid:49b5ad17-9693-558e-88c5-65672fa4088b"
+                },
+                {
+                  "reference": "urn:uuid:9598f909-ae9b-5887-99f3-043188136ef6"
+                },
+                {
+                  "reference": "urn:uuid:05f97048-70de-51eb-bf5a-bf6c939b01ce"
+                }
+              ],
+              "title": "Vital Signs"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:0d9b5819-3156-52a6-a7c3-cca96f7cfcde",
         "resource": {
           "category": [
@@ -1060,6 +1141,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

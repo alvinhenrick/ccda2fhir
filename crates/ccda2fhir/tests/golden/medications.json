@@ -30,6 +30,66 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:8194aebf-b8d1-5fc4-adea-c7f80b2bb53d",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-MEDICATIONS-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "10160-0",
+                    "display": "History of Medication use",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:d468f0f8-dfdc-56e1-a9ce-f002d036acea"
+                },
+                {
+                  "reference": "urn:uuid:83d1b385-669b-5e35-b8bb-7e95d798b4a1"
+                },
+                {
+                  "reference": "urn:uuid:af58e559-c79f-5507-bd6e-1b5703ad5524"
+                }
+              ],
+              "title": "Medications"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:a6f9d02b-61f3-595c-9d7d-04a0e0c1b779"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:d468f0f8-dfdc-56e1-a9ce-f002d036acea",
         "resource": {
           "authoredOn": "2024-08-06T10:15:00-05:00",
@@ -346,6 +406,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

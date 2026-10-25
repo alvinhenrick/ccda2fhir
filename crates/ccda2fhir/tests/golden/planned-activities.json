@@ -30,6 +30,73 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:fbe3cd8c-af61-5b41-9425-2a9939032c0a",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-PLANNED-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "18776-5",
+                    "display": "Plan of care",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:b221f1e0-1e4b-5f02-8e55-a0573a3bf8a4"
+                },
+                {
+                  "reference": "urn:uuid:b37a7283-9d34-59a9-8174-d130990e10e1"
+                },
+                {
+                  "reference": "urn:uuid:107d1087-1ed4-5df4-9f79-b3317933f2da"
+                },
+                {
+                  "reference": "urn:uuid:932af556-f784-543a-83a9-24d280130a8e"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Colonoscopy, lipid panel and a follow-up visit are planned.</p></div>",
+                "status": "generated"
+              },
+              "title": "Plan of Treatment"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:09da0eeb-0ace-57f9-b7b3-57dc169928e3"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:4d7c148b-882c-58e8-bd44-0b228765dc86",
         "resource": {
           "category": [
@@ -305,6 +372,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

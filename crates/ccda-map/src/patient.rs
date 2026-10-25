@@ -420,6 +420,7 @@ mod tests {
             custodian: None,
             confidentiality: None,
             language: None,
+            service_events: Vec::new(),
             encompassing_encounter: None,
             sections: Vec::new(),
         }

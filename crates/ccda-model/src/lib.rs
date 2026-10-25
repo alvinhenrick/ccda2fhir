@@ -14,7 +14,7 @@ use thiserror::Error;
 
 pub use body::{
     Author, AuthorOrganization, Consumable, Entry, Link, Participant, ReferenceRange, Related,
-    Section, Specimen, Statement, StatementKind, TextContent,
+    Section, ServiceEvent, Specimen, Statement, StatementKind, TextContent,
 };
 pub use header::{Address, Guardian, Language, Patient, PersonName, Telecom};
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
@@ -78,6 +78,8 @@ pub struct ClinicalDocument {
     pub confidentiality: Option<String>,
     /// `languageCode/@code`
     pub language: Option<String>,
+    /// `documentationOf/serviceEvent`s.
+    pub service_events: Vec<ServiceEvent>,
     /// `componentOf/encompassingEncounter`, as an Encounter statement.
     pub encompassing_encounter: Option<Statement>,
     /// Top-level sections of the structured body, in document order.
@@ -210,6 +212,10 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
             .map(|o| body::parse_organization(&o)),
         confidentiality: child(&root, "confidentialityCode").and_then(|n| xml::attr(&n, "code")),
         language: child(&root, "languageCode").and_then(|n| xml::attr(&n, "code")),
+        service_events: xml::children(&root, "documentationOf")
+            .filter_map(|d| child(&d, "serviceEvent"))
+            .map(|e| body::parse_service_event(&e, &header_narrative))
+            .collect(),
         encompassing_encounter: child(&root, "componentOf")
             .and_then(|c| child(&c, "encompassingEncounter"))
             .and_then(|e| body::parse_encompassing_encounter(&e, &header_narrative)),

@@ -30,6 +30,71 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:4de6c4ae-a729-5cc9-9773-3f7c412f1815",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-PROBLEMS-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "11450-4",
+                    "display": "Problem list",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:a8330f78-3989-5ecf-aa84-aea5a8cfd638"
+                },
+                {
+                  "reference": "urn:uuid:2cb0b7a2-88a7-5c9d-a2c6-d090adf3a244"
+                },
+                {
+                  "reference": "urn:uuid:ed69c8f1-533c-5d06-9b23-f4733a11d4b8"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Essential hypertensionActive Acute bronchitisResolved AsthmaUnknown end date</p></div>",
+                "status": "generated"
+              },
+              "title": "Problems"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
+          },
+          "title": "Summarization of episode note",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "display": "Summarization of episode note",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:a8330f78-3989-5ecf-aa84-aea5a8cfd638",
         "resource": {
           "category": [
@@ -301,6 +366,10 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
     }
   ]
 }

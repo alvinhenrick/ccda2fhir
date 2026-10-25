@@ -8,9 +8,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use ccda_model::{ClinicalDocument, Section, Statement};
 use serde_json::{json, Map, Value};
 
-use crate::author::{register_author_agent, register_organization};
+use crate::author::{register_author_agent, register_organization, register_practitioner};
 use crate::util::narrative_div;
-use crate::{map_codeable_concept, map_datetime, map_identifier, Context, Report};
+use crate::{
+    data_absent_reason_extension, map_codeable_concept, map_datetime, map_identifier, Context,
+    Report,
+};
 
 const CONFIDENTIALITY: [&str; 6] = ["U", "L", "M", "N", "R", "V"];
 const EMPTY_REASON_SYSTEM: &str = "http://terminology.hl7.org/CodeSystem/list-empty-reason";
@@ -49,35 +52,31 @@ fn keys(identifiers: &Value) -> Vec<String> {
 /// Build the Composition for `doc`. `resources` are the clinical resources already mapped; each
 /// section lists the ones whose identifier matches an id of a statement in that section.
 ///
-/// Returns `None` (reported) when a required element (author, date) is missing.
-pub fn map_composition(
-    doc: &ClinicalDocument,
-    ctx: &mut Context,
-    resources: &[Value],
-) -> Option<Value> {
+/// Missing author or date is marked absent (reported); the Composition is still built.
+pub fn map_composition(doc: &ClinicalDocument, ctx: &mut Context, resources: &[Value]) -> Value {
     let authors: Vec<String> = doc
         .authors
         .iter()
         .filter_map(|a| register_author_agent(a, ctx))
         .collect();
+    // A required element that the document lacks is marked absent, not invented (and the rest of
+    // the document is still converted).
     if authors.is_empty() {
         ctx.report.warn(
             "composition.author.missing",
-            "the document has no author that is a person, software or organization; no Composition was created (author is required)",
+            "the document has no author that is a person, software or organization; author was marked absent",
         );
-        return None;
     }
-    let Some(date) = doc
+    let date = doc
         .effective_time
         .as_deref()
-        .and_then(|t| map_datetime(t, ctx.report))
-    else {
+        .and_then(|t| map_datetime(t, ctx.report));
+    if date.is_none() {
         ctx.report.warn(
             "composition.date.missing",
-            "the document has no usable effectiveTime; no Composition was created (date is required)",
+            "the document has no usable effectiveTime; date was marked absent",
         );
-        return None;
-    };
+    }
 
     // Which resources carry which identifier.
     let mut by_key: BTreeMap<String, Vec<String>> = BTreeMap::new();
@@ -126,14 +125,26 @@ pub fn map_composition(
         }
     }
     r.insert("subject".into(), json!({ "reference": ctx.patient }));
-    r.insert("date".into(), json!(date));
-    r.insert(
-        "author".into(),
-        json!(authors
+    match &date {
+        Some(d) => {
+            r.insert("date".into(), json!(d));
+        }
+        None => {
+            r.insert(
+                "_date".into(),
+                json!({ "extension": [data_absent_reason_extension("UNK", ctx.report)] }),
+            );
+        }
+    }
+    let author = if authors.is_empty() {
+        vec![json!({ "extension": [data_absent_reason_extension("UNK", ctx.report)] })]
+    } else {
+        authors
             .iter()
             .map(|a| json!({ "reference": a }))
-            .collect::<Vec<_>>()),
-    );
+            .collect::<Vec<_>>()
+    };
+    r.insert("author".into(), json!(author));
     let title = doc
         .title
         .clone()
@@ -180,6 +191,15 @@ pub fn map_composition(
         r.insert("custodian".into(), json!({ "reference": c }));
     }
 
+    let events: Vec<Value> = doc
+        .service_events
+        .iter()
+        .filter_map(|e| event(e, ctx))
+        .collect();
+    if !events.is_empty() {
+        r.insert("event".into(), json!(events));
+    }
+
     let sections: Vec<Value> = doc
         .sections
         .iter()
@@ -188,7 +208,49 @@ pub fn map_composition(
     if !sections.is_empty() {
         r.insert("section".into(), json!(sections));
     }
-    Some(Value::Object(r))
+    Value::Object(r)
+}
+
+/// `documentationOf/serviceEvent` to `Composition.event`. The performers (who took part) have no
+/// element of their own in `event`, so they are listed in `detail` as Practitioners.
+fn event(e: &ccda_model::ServiceEvent, ctx: &mut Context) -> Option<Value> {
+    let mut out = Map::new();
+    if let Some(code) = e
+        .code
+        .as_ref()
+        .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
+    {
+        out.insert("code".into(), json!([code]));
+    }
+    if let Some(t) = &e.effective_time {
+        let mut period = Map::new();
+        let start = t
+            .value
+            .as_deref()
+            .or_else(|| t.low.as_ref().and_then(|l| l.value.as_deref()));
+        let end = t
+            .value
+            .as_deref()
+            .or_else(|| t.high.as_ref().and_then(|h| h.value.as_deref()));
+        for (key, raw) in [("start", start), ("end", end)] {
+            if let Some(d) = raw.and_then(|raw| map_datetime(raw, ctx.report)) {
+                period.insert(key.into(), json!(d));
+            }
+        }
+        if !period.is_empty() {
+            out.insert("period".into(), Value::Object(period));
+        }
+    }
+    let detail: Vec<Value> = e
+        .performers
+        .iter()
+        .filter_map(|p| register_practitioner(p, ctx))
+        .map(|r| json!({ "reference": r }))
+        .collect();
+    if !detail.is_empty() {
+        out.insert("detail".into(), json!(detail));
+    }
+    (!out.is_empty()).then_some(Value::Object(out))
 }
 
 fn statement_keys(s: &Statement, ctx: &mut Context, out: &mut Vec<String>) {
@@ -303,7 +365,7 @@ mod tests {
   </structuredBody></component>
 </ClinicalDocument>"#;
 
-    fn run(xml: &str, resources: &[Value]) -> (Option<Value>, Report) {
+    fn run(xml: &str, resources: &[Value]) -> (Value, Report) {
         let d = ccda_model::parse(xml.as_bytes()).unwrap();
         let mut report = Report::default();
         let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
@@ -319,7 +381,6 @@ mod tests {
     #[test]
     fn header_fields_and_sections() {
         let (c, _) = run(DOC, &[allergy()]);
-        let c = c.unwrap();
         assert_eq!(c["status"], "final");
         assert_eq!(c["title"], "Continuity of Care");
         assert_eq!(c["date"], "2025-01-02T12:00:00-05:00");
@@ -337,14 +398,49 @@ mod tests {
     }
 
     #[test]
-    fn missing_author_means_no_composition() {
+    fn missing_author_is_marked_absent_not_skipped() {
         let xml = DOC.replace("<author>", "<x>").replace("</author>", "</x>");
         let (c, report) = run(&xml, &[]);
-        assert!(c.is_none());
+        assert_eq!(c["resourceType"], "Composition");
+        assert!(c["author"][0].get("reference").is_none());
+        assert!(c["author"][0]["extension"][0]["url"]
+            .as_str()
+            .unwrap()
+            .ends_with("data-absent-reason"));
         assert!(report
             .issues
             .iter()
             .any(|i| i.code == "composition.author.missing"));
+    }
+
+    #[test]
+    fn missing_date_is_marked_absent_not_invented() {
+        let xml = DOC.replace("<effectiveTime value=\"20250102120000-0500\"/>", "");
+        let (c, report) = run(&xml, &[]);
+        assert!(c.get("date").is_none());
+        assert!(c["_date"]["extension"][0]["valueCode"].is_string());
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.code == "composition.date.missing"));
+    }
+
+    #[test]
+    fn service_event_becomes_event_with_period_code_and_performers() {
+        let xml = DOC.replace(
+            "<component><structuredBody>",
+            r#"<documentationOf><serviceEvent classCode="PCPR">
+              <effectiveTime><low value="20240101"/><high value="20241231"/></effectiveTime>
+              <performer typeCode="PRF"><functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88"/>
+                <assignedEntity><id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+                  <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+                </assignedEntity></performer>
+            </serviceEvent></documentationOf><component><structuredBody>"#,
+        );
+        let (c, _) = run(&xml, &[]);
+        assert_eq!(c["event"][0]["period"]["start"], "2024-01-01");
+        assert_eq!(c["event"][0]["period"]["end"], "2024-12-31");
+        assert!(c["event"][0]["detail"][0]["reference"].is_string());
     }
 
     #[test]
@@ -354,7 +450,7 @@ mod tests {
             "code=\"Z\"",
         );
         let (c, report) = run(&xml, &[]);
-        assert!(c.unwrap().get("confidentiality").is_none());
+        assert!(c.get("confidentiality").is_none());
         assert!(report
             .issues
             .iter()

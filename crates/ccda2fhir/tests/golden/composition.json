@@ -42,6 +42,19 @@
             "reference": "urn:uuid:807d7531-de2a-5ad3-be3c-a8a929725b50"
           },
           "date": "2025-01-02T12:00:00-05:00",
+          "event": [
+            {
+              "detail": [
+                {
+                  "reference": "urn:uuid:46bb9956-8f3d-5c36-8349-94608c630be8"
+                }
+              ],
+              "period": {
+                "end": "2024-12-31",
+                "start": "2024-01-01"
+              }
+            }
+          ],
           "id": "composition-1",
           "identifier": {
             "system": "urn:oid:2.16.840.1.113883.19.5",

@@ -30,6 +30,60 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:2294b509-4264-50d3-be89-8e88c04332c2",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-DEVICES-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "46264-8",
+                    "display": "History of medical device use",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:4fac7f40-57e7-506d-9685-24b3d531624b"
+                }
+              ],
+              "title": "Medical Equipment"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:4fac7f40-57e7-506d-9685-24b3d531624b",
         "resource": {
           "code": {
@@ -97,6 +151,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

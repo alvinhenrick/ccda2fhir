@@ -420,8 +420,8 @@ See `docs/decisions/0025-encounter-links.md`.
 section narrative) for presence in the converted bundle, and prints counts by element path (no values). Misses are candidates, not
 proof: a status mapped to another vocabulary is expected. On the 29 sample documents the first run found:
 
-- 19 of 29 documents have no header author, so no Composition is built and the header and section structure are lost (next PR).
-- Not mapped at all: `documentationOf/serviceEvent`, `authenticator`, `legalAuthenticator`, `dataEnterer`, `informant`,
+- 19 of 29 documents have no header author. Fixed: the Composition is always built, with the author marked absent (ADR 0020).
+- Not mapped at all: `authenticator`, `legalAuthenticator`, `dataEnterer`, `informant`,
   `participant/associatedEntity` (contacts), and the `telecom` of authors and organizations.
 - Section titles and codes (they go with the Composition), `originalText` references, translations on observation codes.
 

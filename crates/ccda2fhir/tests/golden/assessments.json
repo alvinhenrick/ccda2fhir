@@ -30,6 +30,80 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:fd89c41d-11ba-54c5-996d-b0fb33ae7928",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-ASSESS-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "47420-5",
+                    "display": "Functional status assessment",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:d0b32b75-4cc5-50c3-90c9-f938d8aa3ad0"
+                },
+                {
+                  "reference": "urn:uuid:33dea285-b3a2-5e88-adcf-25aeacfa2a50"
+                }
+              ],
+              "title": "Functional Status"
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "10190-7",
+                    "display": "Mental status Narrative",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:dfb8d228-ec6d-518c-bfbc-d43a38408f28"
+                }
+              ],
+              "title": "Mental Status"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:e3fc5413-a93a-535e-a861-59aec043f7a8"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:d0b32b75-4cc5-50c3-90c9-f938d8aa3ad0",
         "resource": {
           "category": [
@@ -181,6 +255,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

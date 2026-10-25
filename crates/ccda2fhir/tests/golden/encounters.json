@@ -30,6 +30,69 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:81ebcb00-7c32-59d0-ac4d-e44ad016aea2",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-ENCOUNTERS-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "46240-8",
+                    "display": "History of encounters",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:6996737d-8557-5b15-bd1f-5b7aae36695a"
+                },
+                {
+                  "reference": "urn:uuid:e6d36049-ffe1-5d60-865b-980b8a463e0f"
+                },
+                {
+                  "reference": "urn:uuid:706c87c6-7e93-56a5-9660-c5d9ac2d3e8c"
+                },
+                {
+                  "reference": "urn:uuid:47b128ee-ccb3-5263-9951-5379669a149b"
+                }
+              ],
+              "title": "Encounters"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:30aadcda-cfa0-5773-aad5-503659cd7f85"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:6996737d-8557-5b15-bd1f-5b7aae36695a",
         "resource": {
           "class": {
@@ -273,6 +336,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

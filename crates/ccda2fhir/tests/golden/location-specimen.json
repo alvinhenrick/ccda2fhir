@@ -30,6 +30,80 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:dec1a779-eec9-5367-8926-ae0421662a98",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-LOC-SPEC-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "46240-8",
+                    "display": "History of encounters",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:bb96b93d-640c-5fd3-9aea-9d48b594a7b6"
+                }
+              ],
+              "title": "Encounters"
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "30954-2",
+                    "display": "Relevant diagnostic tests and/or laboratory data",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:e91b5d43-0fd0-5e49-9017-c0c0321d13c9"
+                },
+                {
+                  "reference": "urn:uuid:1625ace1-3377-5cda-9497-5e40295a93e6"
+                }
+              ],
+              "title": "Results"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:e91b5d43-0fd0-5e49-9017-c0c0321d13c9",
         "resource": {
           "category": [
@@ -425,6 +499,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

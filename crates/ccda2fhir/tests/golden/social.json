@@ -30,6 +30,66 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:82bd6178-26e0-5fa1-b958-0dafcf854c17",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-SOCIAL-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "29762-2",
+                    "display": "Social history",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:61aad091-0d9c-5011-a9f2-a7842319f7c9"
+                },
+                {
+                  "reference": "urn:uuid:e9cc2f2e-1ef1-5c4d-bf52-473958be74c2"
+                },
+                {
+                  "reference": "urn:uuid:01e08b07-c191-574a-b0e3-db4c29c8d673"
+                }
+              ],
+              "title": "Social History"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:647952cd-9aea-53c9-ab28-1f07b54c5f7b"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:61aad091-0d9c-5011-a9f2-a7842319f7c9",
         "resource": {
           "category": [
@@ -197,6 +257,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }
