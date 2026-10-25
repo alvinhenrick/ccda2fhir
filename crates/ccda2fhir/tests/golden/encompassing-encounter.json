@@ -358,6 +358,24 @@
             "status": "generated"
           }
         }
+      },
+      {
+        "fullUrl": "urn:uuid:f8e2a270-3923-5fb5-86a2-af6d44c8314e",
+        "resource": {
+          "active": true,
+          "id": "practitionerrole-1",
+          "organization": {
+            "reference": "urn:uuid:2ab8e0c9-d4f6-5d63-8073-64e218f24ea1"
+          },
+          "practitioner": {
+            "reference": "urn:uuid:429b857d-85b7-5843-a343-bbcb6c730dee"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
+            "status": "generated"
+          }
+        }
       }
     ],
     "resourceType": "Bundle",
@@ -369,11 +387,11 @@
       "severity": "info"
     },
     {
-      "code": "composition.status.assumed",
+      "code": "organization.active.assumed",
       "severity": "info"
     },
     {
-      "code": "organization.active.assumed",
+      "code": "composition.status.assumed",
       "severity": "info"
     }
   ]

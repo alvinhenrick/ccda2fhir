@@ -358,6 +358,24 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:c68a41aa-613c-51eb-a48a-f40a4f3a9128",
+        "resource": {
+          "active": true,
+          "id": "practitionerrole-1",
+          "organization": {
+            "reference": "urn:uuid:f1c9daa4-10b5-5f12-9dc3-5809fc434b47"
+          },
+          "practitioner": {
+            "reference": "urn:uuid:b9ab44e7-59e9-5481-b7c0-1385db08d1cc"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:6bed13a6-02c3-5455-8e1c-2cd1d251d2f7",
         "resource": {
           "id": "practitioner-2",
@@ -501,6 +519,31 @@
             "status": "generated"
           }
         }
+      },
+      {
+        "fullUrl": "urn:uuid:24a7257f-6cc5-5523-835b-01c7ce6c9a97",
+        "resource": {
+          "active": true,
+          "code": [
+            {
+              "coding": [
+                {
+                  "code": "PCP",
+                  "system": "urn:oid:2.16.840.1.113883.5.88"
+                }
+              ]
+            }
+          ],
+          "id": "practitionerrole-2",
+          "practitioner": {
+            "reference": "urn:uuid:b9ab44e7-59e9-5481-b7c0-1385db08d1cc"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p><table><tr><td>code</td><td>PCP</td></tr></table></div>",
+            "status": "generated"
+          }
+        }
       }
     ],
     "resourceType": "Bundle",
@@ -512,11 +555,11 @@
       "severity": "info"
     },
     {
-      "code": "composition.status.assumed",
+      "code": "organization.active.assumed",
       "severity": "info"
     },
     {
-      "code": "organization.active.assumed",
+      "code": "composition.status.assumed",
       "severity": "info"
     }
   ]

@@ -420,6 +420,31 @@
             "status": "generated"
           }
         }
+      },
+      {
+        "fullUrl": "urn:uuid:ab78f024-e4e9-5776-bc83-20ff3cf71214",
+        "resource": {
+          "active": true,
+          "id": "practitionerrole-1",
+          "practitioner": {
+            "reference": "urn:uuid:2cd8ac1c-f642-5de9-a30e-c0a7d47fff94"
+          },
+          "resourceType": "PractitionerRole",
+          "specialty": [
+            {
+              "coding": [
+                {
+                  "code": "207Q00000X",
+                  "system": "http://nucc.org/provider-taxonomy"
+                }
+              ]
+            }
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
+            "status": "generated"
+          }
+        }
       }
     ],
     "resourceType": "Bundle",

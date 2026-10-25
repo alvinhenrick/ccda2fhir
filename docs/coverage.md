@@ -58,9 +58,9 @@ and only the two fixtures above have been validated.
 | `author/assignedAuthor/id`, `assignedPerson/name` | Practitioner (deduplicated) | done | `the_same_person_becomes_one_practitioner` | |
 | `representedOrganization` | Organization, `Provenance.agent.onBehalfOf` | done | `organization_is_shared_and_linked_with_on_behalf_of` | |
 | `author/time` | `recordedDate` (earliest), `Provenance.recorded` | done | `recorder_is_latest_and_recorded_date_is_earliest` | |
-| `assignedAuthor/code` (role/specialty) | PractitionerRole | todo | | |
+| `assignedAuthor/code` (role/specialty) | PractitionerRole | done | goldens `care_team`, `problems`, others | |
 | `assignedAuthoringDevice` | Device | reported | `software_authors_are_noted_not_mapped` | |
-| Author telecom, address | Practitioner.telecom, address | todo | | |
+| Author telecom, address | Practitioner.telecom, address | done | golden `header_participants` | |
 
 ## Immunizations (Immunization Activity, mood EVN) to Immunization
 
@@ -295,7 +295,7 @@ See `docs/decisions/0016-care-team.md`.
 | Performer code | `participant.role` | done | same | |
 | Member effectiveTime | `participant.period` | done | same | |
 | `functionCode`, patient/related-person members | `role`, RelatedPerson | todo | | |
-| PractitionerRole, Location | PractitionerRole, Location | todo | | |
+| PractitionerRole, Location | PractitionerRole, Location | done | golden `care_team` | |
 
 ## Insurance (Policy Activity) to Coverage
 
