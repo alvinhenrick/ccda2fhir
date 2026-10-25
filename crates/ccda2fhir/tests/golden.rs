@@ -196,3 +196,8 @@ fn patient_details() {
 fn unstructured() {
     check("unstructured");
 }
+
+#[test]
+fn small_templates() {
+    check("small-templates");
+}

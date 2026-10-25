@@ -204,6 +204,18 @@
       {
         "fullUrl": "urn:uuid:7eb5a14b-5c74-5319-a054-abe76c226824",
         "resource": {
+          "activity": [
+            {
+              "reference": {
+                "reference": "urn:uuid:10fa73d1-d165-50ce-bd8c-fdf6b5fb2751"
+              }
+            },
+            {
+              "reference": {
+                "reference": "urn:uuid:f1e9647a-cc53-5540-8b05-096b3083395a"
+              }
+            }
+          ],
           "category": [
             {
               "coding": [

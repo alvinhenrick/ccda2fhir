@@ -28,7 +28,7 @@ and only the two fixtures above have been validated.
 | Date of Diagnosis | `assertedDate` extension | done | `date_of_diagnosis_becomes_asserted_date` | |
 | Supporting observations (SPRT) | `evidence.detail` | reported | `supporting_observations_are_reported_as_unsupported` | |
 | Author | `recorder`, `recordedDate`, Practitioner, Organization, Provenance (ADR 0004) | done | `author.rs` tests; fixtures | |
-| Comment Activity | `note` | todo | | |
+| Comment Activity (4.64) | `note` on the parent resource | done | golden `small_templates`, `comment_becomes_a_note_on_the_parent` | |
 | Prognosis, Priority Preference | not supported by target (IG) | n/a | | |
 
 ## Allergies (Allergy Concern Act / Allergy Intolerance Observation) to AllergyIntolerance
@@ -49,7 +49,7 @@ and only the two fixtures above have been validated.
 | Severity (reaction level, else allergy level) | `reaction.severity` (CF-Severity) | done | `reaction_severity_wins_over_...` | |
 | Criticality Observation (82606-5) | `criticality` (CF-Criticality) | done | `drug_allergy_...` | |
 | Author | `recorder`, `recordedDate`, Practitioner, Organization, Provenance (ADR 0004) | done | `author.rs` tests; fixtures | |
-| Comment Activity | `note` | todo | | |
+| Comment Activity (4.64) | `note` on the parent resource | done | golden `small_templates`, `comment_becomes_a_note_on_the_parent` | |
 
 ## Authors and supporting resources
 
@@ -85,7 +85,7 @@ and only the two fixtures above have been validated.
 | Reaction (4.9) | `reaction` (Observation) | reported | `dose_range_and_reaction_are_reported` | |
 | mood INT (planned) | MedicationRequest | reported | `planned_immunizations_are_reported_not_mapped` | |
 | `primarySource` | not in C-CDA; omitted (R4/US Core 6.1.0 decide) | n/a | | |
-| Comment Activity | `note` | todo | | |
+| Comment Activity (4.64) | `note` on the parent resource | done | golden `small_templates`, `comment_becomes_a_note_on_the_parent` | |
 
 ## Medications (Medication Activity) to MedicationRequest (+ Medication)
 
@@ -279,7 +279,7 @@ See `docs/decisions/0015-care-plan.md`.
 | Section narrative | `text.div` | done | same | |
 | Goals in the document | `goal` | done | `plan_points_at_goals` | |
 | Planned activities (4.39-4.41, 4.44) | ServiceRequest | done | see below | |
-| Planned activities as `CarePlan.activity` | `activity.reference` | todo | | |
+| Planned activities as `CarePlan.activity` | `activity.reference` | done | golden `planned_activities` | |
 | Health Concerns | `addresses` | todo | | |
 | Care team | `careTeam`, `contributor` | todo | | |
 
@@ -377,7 +377,7 @@ See `docs/decisions/0022-health-concerns.md`.
 | Problem Observation inside a Health Concern Act | `Condition` (health-concern) | done | `a_wrapped_problem_observation_becomes_a_health_concern_condition` | |
 | Unresolved pointer, empty concern | report entries | done | `an_unresolved_pointer_is_reported` | |
 | Pointer at allergy, result, social history | category / `addresses` | todo | | |
-| Risk Concern Act | Condition / RiskAssessment | todo | | |
+| Risk Concern Act (4.136) | `Condition` (like a Problem Concern Act) | done | golden `small_templates` | |
 
 ## Functional, cognitive, mental and health status
 
@@ -391,7 +391,7 @@ See `docs/decisions/0023-status-assessments.md`.
 | Mental Status Organizer / Observation / Problem | `Observation` (cognitive-status, assumed) | done | same | |
 | Health Status Observation (4.5) | `Observation` (survey) | done | same | |
 | Assessment Scale Observation (4.69) | `Observation` + components | todo | | |
-| Caregiver Characteristics (4.72), Disability Status | `Observation` | todo | | |
+| Caregiver Characteristics (4.72), Disability Status (4.505) | `Observation` (functional-status) | done | golden `small_templates` | |
 
 ## Planned medications, instructions, procedure observations
 
@@ -505,3 +505,6 @@ See `docs/decisions/0032-unstructured-documents.md`.
 ## Generated narrative
 
 See `docs/decisions/0033-generated-narrative.md`. Every resource without `text` gets a generated `text.div` (status `generated`), which clears the best-practice `dom-6` warning. Resources that already have narrative (Composition sections, CarePlan) keep it. Golden: all.
+
+
+Appointment: a Planned Encounter with mood APT becomes an `Appointment` (golden `small_templates`, `instant_becomes_start`).
