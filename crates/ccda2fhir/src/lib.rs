@@ -11,7 +11,8 @@
 use ccda_map::{
     map_allergies, map_care_plans, map_care_teams, map_coverage, map_devices, map_encounters,
     map_goals, map_immunizations, map_medications, map_notes, map_patient, map_problems,
-    map_procedures, map_results, map_social_history, map_vitals, Context, Profiles, Report,
+    map_procedures, map_results, map_service_requests, map_social_history, map_vitals, Context,
+    Profiles, Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -88,6 +89,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .chain(goals_and_plans(&document, &mut ctx))
         .chain(map_care_teams(&document, &mut ctx))
         .chain(map_coverage(&document, &mut ctx))
+        .chain(map_service_requests(&document, &mut ctx))
     {
         let mut resource = resource;
         profiles.apply(&mut resource);

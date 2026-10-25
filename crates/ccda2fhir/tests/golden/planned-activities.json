@@ -1,0 +1,306 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:09da0eeb-0ace-57f9-b7b3-57dc169928e3",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0018"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:4d7c148b-882c-58e8-bd44-0b228765dc86",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "assess-plan",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/careplan-category"
+                }
+              ]
+            }
+          ],
+          "id": "careplan-1",
+          "intent": "plan",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-careplan"
+            ]
+          },
+          "resourceType": "CarePlan",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:09da0eeb-0ace-57f9-b7b3-57dc169928e3"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Colonoscopy, lipid panel and a follow-up visit are planned.</p></div>",
+            "status": "generated"
+          },
+          "title": "Plan of Treatment"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b221f1e0-1e4b-5f02-8e55-a0573a3bf8a4",
+        "resource": {
+          "authoredOn": "2025-01-02",
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "71388002",
+                  "display": "Procedure",
+                  "system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "73761001",
+                "display": "Colonoscopy",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "servicerequest-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.16.1",
+              "value": "PLAN-1"
+            }
+          ],
+          "intent": "order",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-servicerequest"
+            ]
+          },
+          "occurrenceDateTime": "2025-03-01",
+          "reasonCode": [
+            {
+              "coding": [
+                {
+                  "code": "275978004",
+                  "display": "Screening for colon cancer",
+                  "system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ],
+          "requester": {
+            "reference": "urn:uuid:00386f8c-ebd7-5c8b-a1d0-b4591aa73b7b"
+          },
+          "resourceType": "ServiceRequest",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:09da0eeb-0ace-57f9-b7b3-57dc169928e3"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b37a7283-9d34-59a9-8174-d130990e10e1",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "386053000",
+                  "display": "Evaluation procedure",
+                  "system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "57698-3",
+                "display": "Lipid panel with direct LDL - Serum or Plasma",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "id": "servicerequest-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.16.1",
+              "value": "PLAN-2"
+            }
+          ],
+          "intent": "plan",
+          "occurrencePeriod": {
+            "end": "2025-02-15",
+            "start": "2025-02-01"
+          },
+          "resourceType": "ServiceRequest",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:09da0eeb-0ace-57f9-b7b3-57dc169928e3"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:107d1087-1ed4-5df4-9f79-b3317933f2da",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "308335008",
+                  "display": "Patient encounter procedure",
+                  "system": "http://snomed.info/sct"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "99213",
+                "system": "http://www.ama-assn.org/go/cpt"
+              }
+            ]
+          },
+          "id": "servicerequest-3",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.16.1",
+              "value": "PLAN-3"
+            }
+          ],
+          "intent": "plan",
+          "occurrenceDateTime": "2025-04-01",
+          "resourceType": "ServiceRequest",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:09da0eeb-0ace-57f9-b7b3-57dc169928e3"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:932af556-f784-543a-83a9-24d280130a8e",
+        "resource": {
+          "code": {
+            "coding": [
+              {
+                "code": "409073007",
+                "display": "Education",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "servicerequest-4",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.16.1",
+              "value": "PLAN-4"
+            }
+          ],
+          "intent": "plan",
+          "resourceType": "ServiceRequest",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:09da0eeb-0ace-57f9-b7b3-57dc169928e3"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:00386f8c-ebd7-5c8b-a1d0-b4591aa73b7b",
+        "resource": {
+          "id": "practitioner-1",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "1234567893"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Doe",
+              "given": [
+                "Pat"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:22990dcd-992f-539f-a827-a943166fd114",
+        "resource": {
+          "active": true,
+          "id": "organization-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.9",
+              "value": "CLINIC-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "Example Clinic",
+          "resourceType": "Organization"
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "careplan.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "servicerequest.category.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "provenance.recorded.unavailable",
+      "severity": "warning"
+    },
+    {
+      "code": "servicerequest.category.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "servicerequest.category.assumed",
+      "severity": "info"
+    }
+  ]
+}

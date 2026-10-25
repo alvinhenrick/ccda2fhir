@@ -166,7 +166,7 @@ See `docs/decisions/0008-procedures.md`.
 | Service Delivery Location | `location` | reported, todo (needs Location) | | |
 | Encounter link, comment, instruction (`followUp`) | `encounter`, `note`, `followUp` | todo | | |
 | Procedure Activity Observation | Observation | reported, todo | | |
-| Planned procedure (mood INT) | ServiceRequest | reported, todo | | |
+| Planned procedure (mood INT/RQO/PRP) | ServiceRequest | done | `planned_procedure_becomes_a_plan` | |
 
 ## Encounters (Encounter Activity) to Encounter
 
@@ -186,7 +186,7 @@ See `docs/decisions/0009-encounters.md`.
 | Location participant | `location` | reported, todo (needs Location) | | |
 | Header `encompassingEncounter`, same encounter seen twice | one Encounter | todo | | |
 | Links from procedures, conditions and results to the encounter | `encounter` | todo | | |
-| Planned encounter (mood INT) | Appointment / ServiceRequest | reported, todo | | |
+| Planned encounter (mood INT) | ServiceRequest | done | golden `planned_activities` | |
 
 ## Social history (Social History / Smoking / Tobacco / Pregnancy Observation) to Observation
 
@@ -278,7 +278,8 @@ See `docs/decisions/0015-care-plan.md`.
 | Plan of Treatment section | `CarePlan` (intent plan, category assess-plan) | done | `plan_has_required_fields_and_escaped_narrative` | |
 | Section narrative | `text.div` | done | same | |
 | Goals in the document | `goal` | done | `plan_points_at_goals` | |
-| Planned activities (4.39-4.44, 4.20) | `activity`, ServiceRequest | todo | | |
+| Planned activities (4.39-4.41, 4.44) | ServiceRequest | done | see below | |
+| Planned activities as `CarePlan.activity` | `activity.reference` | todo | | |
 | Health Concerns | `addresses` | todo | | |
 | Care team | `careTeam`, `contributor` | todo | | |
 
@@ -326,6 +327,23 @@ See `docs/decisions/0018-location-and-specimen.md`.
 | Specimen on organizer / observation | `DiagnosticReport.specimen`, `Observation.specimen` | done | golden | |
 | Specimen Condition Observation | `condition` | todo | | |
 | Location status, organization | `status`, `managingOrganization` | todo | | |
+
+## Planned activities to ServiceRequest
+
+See `docs/decisions/0019-service-requests.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Planned Procedure (4.41), Procedure Activity with non-EVN mood | `ServiceRequest` | done | `planned_procedure_becomes_a_plan` | |
+| Planned Encounter (4.40) | `ServiceRequest` | done | golden `planned_activities` | |
+| Planned Observation (4.44) | `ServiceRequest` | done | `missing_status_is_assumed_and_reported` | |
+| Planned Act (4.39) | `ServiceRequest` | done | `planned_act_has_no_assumed_category` | |
+| Mood | `intent` | done | `mood_decides_intent` | |
+| statusCode | `status` | done | | |
+| Indication, targetSiteCode | `reasonCode`, `bodySite` | done | golden | |
+| Author | `requester`, `authoredOn`, Provenance | done | golden | |
+| Planned medication / supply | MedicationRequest / SupplyRequest | todo | | |
+| Instructions (4.20) | `patientInstruction`, Communication | todo | | |
 
 ## Open policy questions
 

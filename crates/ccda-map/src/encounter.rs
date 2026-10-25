@@ -42,11 +42,8 @@ pub fn map_encounters(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
             if s.kind != StatementKind::Encounter || !s.has_template(ENCOUNTER_ACTIVITY) {
                 continue;
             }
+            // Planned encounters are ServiceRequests (see `service_request.rs`).
             if s.mood_code.as_deref().is_some_and(|m| m != "EVN") {
-                ctx.report.info(
-                    "encounter.intent.unsupported",
-                    "a planned encounter (not an event) was not mapped; FHIR uses Appointment or ServiceRequest",
-                );
                 continue;
             }
             map_activity(s, ctx, &mut out);
