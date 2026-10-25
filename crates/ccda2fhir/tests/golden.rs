@@ -156,3 +156,8 @@ fn assessments() {
 fn planned_medication() {
     check("planned-medication");
 }
+
+#[test]
+fn encounter_links() {
+    check("encounter-links");
+}

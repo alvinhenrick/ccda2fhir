@@ -404,6 +404,16 @@ See `docs/decisions/0024-planned-medication-instructions.md`.
 | Procedure Activity Observation (4.13), event | `Observation` (procedure) | done | `procedure_activity_observation_is_an_observation_in_the_procedure_category` | |
 | Procedure Activity Observation (4.13), planned | `ServiceRequest` | done | `a_planned_procedure_activity_observation_is_a_request` | |
 
+## Encounter links
+
+See `docs/decisions/0025-encounter-links.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Nested Encounter Activity (id only) in an entry | `encounter` on Condition, Observation, Procedure, DiagnosticReport, MedicationRequest, Immunization, ServiceRequest, CarePlan | done | golden `encounter_links` | |
+| Encounter id not in the document | info `encounter.link.unresolved` | done | golden `encounter_links` | |
+| `encompassingEncounter` | `Composition.encounter` | open | | |
+
 ## Running real-world samples
 
 `cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
