@@ -8,7 +8,7 @@
 //!
 //! The library is pure: bytes in, a [`Conversion`] out. It performs no I/O and keeps no state.
 
-use ccda_map::{map_allergies, map_patient, map_problems, Context, Report, PATIENT_ID};
+use ccda_map::{map_allergies, map_patient, map_problems, Context, Profiles, Report, PATIENT_ID};
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
 use fhir_out::Bundle;
@@ -19,6 +19,8 @@ use thiserror::Error;
 pub struct Options {
     /// Input safety limits applied while parsing.
     pub limits: Limits,
+    /// Profiles to declare in `meta.profile`. US Core 6.1.0 by default.
+    pub profiles: Profiles,
 }
 
 /// The result of a successful conversion.
@@ -61,7 +63,10 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         })
         .unwrap_or_default();
     let mut bundle = Bundle::with_namespace_seed(&seed);
-    bundle.push(map_patient(&document, &BuiltinTerminology, &mut report));
+    let profiles = options.profiles;
+    let mut patient = map_patient(&document, &BuiltinTerminology, &mut report);
+    profiles.apply(&mut patient);
+    bundle.push(patient);
 
     let mut ctx = Context::new(
         &BuiltinTerminology,
@@ -72,6 +77,8 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .into_iter()
         .chain(map_allergies(&document, &mut ctx))
     {
+        let mut resource = resource;
+        profiles.apply(&mut resource);
         bundle.push(resource);
     }
 

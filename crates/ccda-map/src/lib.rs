@@ -14,6 +14,7 @@ mod identifier;
 mod nullflavor;
 mod patient;
 mod problem;
+mod profile;
 mod quantity;
 mod report;
 mod timestamp;
@@ -28,6 +29,7 @@ pub use nullflavor::{
 };
 pub use patient::{map_patient, PATIENT_ID};
 pub use problem::map_problems;
+pub use profile::Profiles;
 pub use quantity::{decimal, map_age, map_quantity};
 pub use report::{Issue, Report, Severity};
 pub use timestamp::{

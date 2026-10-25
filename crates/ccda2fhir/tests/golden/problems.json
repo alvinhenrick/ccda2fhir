@@ -13,6 +13,11 @@
               "value": "MRN-0001"
             }
           ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
           "name": [
             {
               "family": "Example",
@@ -68,7 +73,12 @@
               "value": "O-1"
             }
           ],
-          "onsetDateTime": "2012-08-06",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition-problems-health-concerns"
+            ]
+          },
+          "onsetDateTime": "2012-08-06T09:30:15-05:00",
           "resourceType": "Condition",
           "subject": {
             "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
@@ -114,7 +124,12 @@
               "value": "O-2"
             }
           ],
-          "onsetDateTime": "2020-01-10",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition-problems-health-concerns"
+            ]
+          },
+          "onsetDateTime": "2020-01-10T08:30:00-05:00",
           "resourceType": "Condition",
           "subject": {
             "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
@@ -167,6 +182,11 @@
               "value": "O-3"
             }
           ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition-problems-health-concerns"
+            ]
+          },
           "onsetAge": {
             "code": "a",
             "system": "http://unitsofmeasure.org",
@@ -183,5 +203,10 @@
     "resourceType": "Bundle",
     "type": "collection"
   },
-  "report": []
+  "report": [
+    {
+      "code": "timestamp.precision-extended",
+      "severity": "info"
+    }
+  ]
 }
