@@ -26,3 +26,19 @@ jobs:
           test "$(docker inspect -f '{{.State.Health.Status}}' svc)" != "unhealthy"
       - if: failure()
         run: docker logs svc
+
+  compose-validator:
+    name: compose validator rig
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: validate a document through compose
+        env:
+          INPUT_DIR: ./crates/ccda2fhir/tests/validator-smoke
+        run: |
+          mkdir -p crates/ccda2fhir/tests/validator-smoke
+          cp crates/ccda2fhir/tests/fixtures/referral.xml crates/ccda2fhir/tests/validator-smoke/
+          docker compose --profile validate up --build --abort-on-container-exit --exit-code-from validator
+      - if: always()
+        run: docker compose --profile validate down -v

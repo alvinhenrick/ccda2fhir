@@ -13,3 +13,24 @@ services:
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     restart: unless-stopped
+
+  # Opt-in test rig: converts the documents in INPUT_DIR through the service and checks the
+  # output with the official HL7 validator (FHIR R4 + US Core 6.1.0). Not started by `up`.
+  #   docker compose --profile validate up --build --abort-on-container-exit --exit-code-from validator
+  #   docker compose --profile validate down -v
+  validator:
+    profiles: ["validate"]
+    build: ./validator
+    depends_on:
+      ccda2fhir:
+        condition: service_healthy
+    environment:
+      CONVERTER_URL: "http://ccda2fhir:8080"
+    volumes:
+      - ${INPUT_DIR:-./crates/ccda2fhir/tests/fixtures}:/input:ro
+      - validator-packages:/root/.fhir
+      - validator-out:/work
+
+volumes:
+  validator-packages:
+  validator-out:
