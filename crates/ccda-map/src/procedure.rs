@@ -160,14 +160,13 @@ fn map_activity(s: &Statement, ctx: &mut Context) -> Value {
         r.insert("performer".into(), json!(performers));
     }
 
-    if s.participants
+    if let Some(reference) = s
+        .participants
         .iter()
-        .any(|p| p.type_code.as_deref() == Some("LOC"))
+        .filter(|p| p.type_code.as_deref() == Some("LOC"))
+        .find_map(|p| crate::location::register_location(p, ctx))
     {
-        ctx.report.info(
-            "procedure.location.unsupported",
-            "a service delivery location was not mapped yet (needs a Location resource)",
-        );
+        r.insert("location".into(), json!({ "reference": reference }));
     }
 
     let mut reasons: Vec<Value> = Vec::new();

@@ -229,14 +229,15 @@ fn map_activity(s: &Statement, ctx: &mut Context, out: &mut Vec<Value>) {
     if !participants.is_empty() {
         r.insert("participant".into(), json!(participants));
     }
-    if s.participants
+    let locations: Vec<Value> = s
+        .participants
         .iter()
-        .any(|p| p.type_code.as_deref() == Some("LOC"))
-    {
-        ctx.report.info(
-            "encounter.location.unsupported",
-            "a service delivery location was not mapped yet (needs a Location resource)",
-        );
+        .filter(|p| p.type_code.as_deref() == Some("LOC"))
+        .filter_map(|p| crate::location::register_location(p, ctx))
+        .map(|reference| json!({ "location": { "reference": reference } }))
+        .collect();
+    if !locations.is_empty() {
+        r.insert("location".into(), json!(locations));
     }
 
     let encounter_ref = ctx.reference("Encounter", &id);

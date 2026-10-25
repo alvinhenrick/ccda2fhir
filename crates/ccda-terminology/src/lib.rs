@@ -96,6 +96,11 @@ const BUILTIN: &[(&str, &str)] = &[
         "2.16.840.1.113883.5.1008",
         "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
     ),
+    // CDC Healthcare Service Location (HSLOC).
+    (
+        "2.16.840.1.113883.6.259",
+        "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+    ),
     // Source of Payment Typology (PHDSC).
     ("2.16.840.1.113883.3.221.5", "https://nahdo.org/sopt"),
     ("2.16.840.1.113883.4.1", "http://hl7.org/fhir/sid/us-ssn"),

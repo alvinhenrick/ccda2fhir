@@ -13,7 +13,7 @@ use crate::types::{
     template_ids, Narrative,
 };
 use crate::xml::{attr, child, children, is_hl7, text_of};
-use crate::{Code, Identifier, ParseError, Quantity, TemplateId, Time, Value};
+use crate::{Address, Code, Identifier, ParseError, Quantity, Telecom, TemplateId, Time, Value};
 
 /// How deep statements may nest before the parser gives up. Real documents stay far below this.
 pub(crate) const MAX_DEPTH: usize = 32;
@@ -118,6 +118,27 @@ pub struct Participant {
     pub playing_entity_code: Option<Code>,
     /// `participantRole/playingDevice/code`
     pub playing_device_code: Option<Code>,
+    /// `participantRole/playingEntity/name` (for a location, its name).
+    pub name: Option<String>,
+    /// `participantRole/addr`
+    pub addresses: Vec<Address>,
+    /// `participantRole/telecom`
+    pub telecoms: Vec<Telecom>,
+}
+
+/// A `specimen` of a result: `specimenRole` and its `specimenPlayingEntity`.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Specimen {
+    /// `specimenRole/id`
+    pub ids: Vec<Identifier>,
+    /// `specimenPlayingEntity/code`
+    pub code: Option<Code>,
+    /// `specimenPlayingEntity/name`
+    pub name: Option<String>,
+    /// `specimenPlayingEntity/desc`
+    pub description: Option<String>,
+    /// `specimenPlayingEntity/quantity`
+    pub quantity: Option<Quantity>,
 }
 
 /// `referenceRange/observationRange` of an observation.
@@ -163,6 +184,7 @@ pub struct Statement {
     /// `value` elements (observations normally have one).
     pub values: Vec<Value>,
     pub participants: Vec<Participant>,
+    pub specimens: Vec<Specimen>,
     pub interpretation_codes: Vec<Code>,
     pub method_codes: Vec<Code>,
     pub target_site_codes: Vec<Code>,
@@ -331,6 +353,40 @@ fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
             .map(|n| parse_code(&n, narrative)),
         playing_entity_code: code_of(role, "playingEntity"),
         playing_device_code: code_of(role, "playingDevice"),
+        name: role
+            .and_then(|r| child(&r, "playingEntity"))
+            .and_then(|e| child(&e, "name"))
+            .and_then(|n| text_of(&n)),
+        addresses: role
+            .iter()
+            .flat_map(|r| children(r, "addr"))
+            .map(|n| crate::header::parse_address(&n))
+            .collect(),
+        telecoms: role
+            .iter()
+            .flat_map(|r| children(r, "telecom"))
+            .map(|n| crate::header::parse_telecom(&n))
+            .collect(),
+    }
+}
+
+fn parse_specimen(node: &Node, narrative: &Narrative) -> Specimen {
+    let role = child(node, "specimenRole");
+    let entity = role.and_then(|r| child(&r, "specimenPlayingEntity"));
+    Specimen {
+        ids: role.as_ref().map(identifiers).unwrap_or_default(),
+        code: entity
+            .and_then(|e| child(&e, "code"))
+            .map(|n| parse_code(&n, narrative)),
+        name: entity
+            .and_then(|e| child(&e, "name"))
+            .and_then(|n| text_of(&n)),
+        description: entity
+            .and_then(|e| child(&e, "desc"))
+            .and_then(|n| text_of(&n)),
+        quantity: entity
+            .and_then(|e| child(&e, "quantity"))
+            .map(|n| crate::types::parse_quantity(&n)),
     }
 }
 
@@ -461,6 +517,9 @@ fn parse_statement(
             .collect(),
         participants: children(node, "participant")
             .map(|n| parse_participant(&n, narrative))
+            .collect(),
+        specimens: children(node, "specimen")
+            .map(|n| parse_specimen(&n, narrative))
             .collect(),
         related,
     })

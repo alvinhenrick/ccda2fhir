@@ -311,6 +311,22 @@ See `docs/decisions/0017-coverage.md`.
 | Subscriber as person, plan name | `subscriber`, `class` (plan) | todo | | |
 | Authorization (4.123) | ServiceRequest / ClaimResponse | todo | | |
 
+## Locations and Specimens
+
+See `docs/decisions/0018-location-and-specimen.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Service Delivery Location (4.32) | `Location` | done | `named_location_is_created_once` | |
+| Location on an encounter | `Encounter.location` | done | golden `location_and_specimen` | |
+| Location on a procedure | `Procedure.location` | done | | |
+| `specimenRole` | `Specimen` | done | `name_only_specimen_gets_text_type_and_subject` | |
+| Specimen `desc`, `quantity` | `note`, `collection.quantity` | done | `description_becomes_a_note` | |
+| Specimen Collection Procedure | `collection.bodySite`, `collectedDateTime` | done | golden | |
+| Specimen on organizer / observation | `DiagnosticReport.specimen`, `Observation.specimen` | done | golden | |
+| Specimen Condition Observation | `condition` | todo | | |
+| Location status, organization | `status`, `managingOrganization` | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

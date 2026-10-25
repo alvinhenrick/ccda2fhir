@@ -208,7 +208,7 @@ fn human_name(n: &PersonName) -> Option<Value> {
     Some(Value::Object(out))
 }
 
-fn address(a: &Address) -> Option<Value> {
+pub(crate) fn address(a: &Address) -> Option<Value> {
     let mut out = Map::new();
     match a.use_code.as_deref() {
         Some("H" | "HP") => {
@@ -241,7 +241,7 @@ fn address(a: &Address) -> Option<Value> {
     (out.keys().any(|k| k != "use")).then_some(Value::Object(out))
 }
 
-fn telecom(t: &Telecom) -> Option<Value> {
+pub(crate) fn telecom(t: &Telecom) -> Option<Value> {
     let raw = t.value.as_deref()?;
     let (system, value) = if let Some(v) = raw.strip_prefix("tel:") {
         ("phone", v)

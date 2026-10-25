@@ -41,10 +41,24 @@ fn observation(s: &Statement, org: Option<&Statement>, ctx: &mut Context) -> Map
         "category".into(),
         category_of(ctx, "laboratory", "Laboratory"),
     );
-    if !s.participants.is_empty() {
+    // A specimen on the organizer applies to every observation in it; one on the observation
+    // itself is added to those.
+    let collection = org.and_then(crate::specimen::collection_procedure);
+    let mut refs: Vec<String> = org
+        .map(|o| crate::specimen::register_specimens(&o.specimens, collection, ctx))
+        .unwrap_or_default();
+    for reference in crate::specimen::register_specimens(&s.specimens, collection, ctx) {
+        if !refs.contains(&reference) {
+            refs.push(reference);
+        }
+    }
+    if let Some(first) = refs.first() {
+        r.insert("specimen".into(), json!({ "reference": first }));
+    }
+    if refs.len() > 1 {
         ctx.report.info(
-            "results.specimen.unsupported",
-            "a specimen or other participant on a result was not mapped yet",
+            "results.specimen.extra-dropped",
+            "an observation has more than one specimen; only the first was kept on the Observation",
         );
     }
     apply_performer(&mut r, s, org, ctx);
@@ -106,6 +120,15 @@ fn report(org: &Statement, ctx: &mut Context, out: &mut Vec<Value>) {
         }),
     );
     r.insert("subject".into(), json!({ "reference": ctx.patient }));
+    let collection = crate::specimen::collection_procedure(org);
+    let specimens: Vec<Value> =
+        crate::specimen::register_specimens(&org.specimens, collection, ctx)
+            .into_iter()
+            .map(|reference| json!({ "reference": reference }))
+            .collect();
+    if !specimens.is_empty() {
+        r.insert("specimen".into(), json!(specimens));
+    }
     insert_effective(&mut r, org, ctx);
     if !r.contains_key("effectiveDateTime") && !r.contains_key("effectivePeriod") {
         insert_span(&mut r, &members);

@@ -1,0 +1,426 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0017"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:e91b5d43-0fd0-5e49-9017-c0c0321d13c9",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "LAB",
+                  "display": "Laboratory",
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "24357-6",
+                "display": "Urinalysis macro (dipstick) panel - Urine",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-06-01T09:30:00-05:00",
+          "id": "diagnosticreport-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.15.3",
+              "value": "ORG-1"
+            }
+          ],
+          "issued": "2024-06-01T10:00:00-05:00",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:6da0c811-24c7-502c-b892-f0cb37961256"
+            }
+          ],
+          "resourceType": "DiagnosticReport",
+          "result": [
+            {
+              "reference": "urn:uuid:1625ace1-3377-5cda-9497-5e40295a93e6"
+            }
+          ],
+          "specimen": [
+            {
+              "reference": "urn:uuid:7dd3b9ca-cd56-5b95-bb35-65ac6956ef2e"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:1625ace1-3377-5cda-9497-5e40295a93e6",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "laboratory",
+                  "display": "Laboratory",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "5811-5",
+                "display": "Specific gravity of Urine by Test strip",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-06-01T09:30:00-05:00",
+          "id": "result-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.15.3",
+              "value": "R-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:6da0c811-24c7-502c-b892-f0cb37961256"
+            }
+          ],
+          "resourceType": "Observation",
+          "specimen": {
+            "reference": "urn:uuid:7dd3b9ca-cd56-5b95-bb35-65ac6956ef2e"
+          },
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          },
+          "valueQuantity": {
+            "value": 1.015
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:bb96b93d-640c-5fd3-9aea-9d48b594a7b6",
+        "resource": {
+          "class": {
+            "code": "AMB",
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+          },
+          "id": "encounter-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.15.1",
+              "value": "ENC-1"
+            }
+          ],
+          "location": [
+            {
+              "location": {
+                "reference": "urn:uuid:20fef857-524d-53ce-a769-e9d5345014f3"
+              }
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+            ]
+          },
+          "period": {
+            "end": "2024-06-01T09:45:00-05:00",
+            "start": "2024-06-01T09:00:00-05:00"
+          },
+          "resourceType": "Encounter",
+          "status": "finished",
+          "subject": {
+            "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          },
+          "type": [
+            {
+              "coding": [
+                {
+                  "code": "99213",
+                  "system": "http://www.ama-assn.org/go/cpt"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:7dd3b9ca-cd56-5b95-bb35-65ac6956ef2e",
+        "resource": {
+          "collection": {
+            "bodySite": {
+              "coding": [
+                {
+                  "code": "64033007",
+                  "display": "Kidney structure",
+                  "system": "http://snomed.info/sct"
+                }
+              ]
+            },
+            "collectedDateTime": "2024-06-01T09:15:00-05:00"
+          },
+          "id": "specimen-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.15.4",
+              "value": "SPEC-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-specimen"
+            ]
+          },
+          "note": [
+            {
+              "text": "Midstream clean catch"
+            }
+          ],
+          "resourceType": "Specimen",
+          "subject": {
+            "reference": "urn:uuid:0d8b86f2-679a-5b2c-a74a-efc7f8433690"
+          },
+          "type": {
+            "coding": [
+              {
+                "code": "122575003",
+                "display": "Urine specimen",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:6da0c811-24c7-502c-b892-f0cb37961256",
+        "resource": {
+          "id": "practitioner-1",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "1234567893"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Doe",
+              "given": [
+                "Pat"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:deaa5cd4-ba30-5ea9-afdc-d961f2568a37",
+        "resource": {
+          "active": true,
+          "id": "organization-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.9",
+              "value": "LAB-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "Example Lab",
+          "resourceType": "Organization"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:31dfb827-a005-577d-818c-ae95b4b50769",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:deaa5cd4-ba30-5ea9-afdc-d961f2568a37"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:6da0c811-24c7-502c-b892-f0cb37961256"
+              }
+            }
+          ],
+          "id": "provenance-1",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-06-01T10:00:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:1625ace1-3377-5cda-9497-5e40295a93e6"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:45393026-992a-5fe0-9f58-4ddddba384c1",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:deaa5cd4-ba30-5ea9-afdc-d961f2568a37"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:6da0c811-24c7-502c-b892-f0cb37961256"
+              }
+            }
+          ],
+          "id": "provenance-2",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-06-01T10:00:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:e91b5d43-0fd0-5e49-9017-c0c0321d13c9"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:20fef857-524d-53ce-a769-e9d5345014f3",
+        "resource": {
+          "address": {
+            "city": "Springfield",
+            "country": "US",
+            "line": [
+              "1 Example Way"
+            ],
+            "postalCode": "62701",
+            "state": "IL",
+            "use": "work"
+          },
+          "id": "location-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.15.2",
+              "value": "LOC-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-location"
+            ]
+          },
+          "name": "Example Urgent Care",
+          "resourceType": "Location",
+          "telecom": [
+            {
+              "system": "phone",
+              "use": "work",
+              "value": "+1-555-555-1212"
+            }
+          ],
+          "type": [
+            {
+              "coding": [
+                {
+                  "code": "1160-1",
+                  "display": "Urgent Care Center",
+                  "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "results.category.assumed-laboratory",
+      "severity": "info"
+    },
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "results.category.assumed-laboratory",
+      "severity": "info"
+    },
+    {
+      "code": "results.issued.derived",
+      "severity": "info"
+    }
+  ]
+}
