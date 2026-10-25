@@ -17,7 +17,7 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 | | SDOH goals, interventions | todo | map without an SDOH tag |
 | Immunizations | immunizations | done | |
 | Procedures | procedures | done | |
-| | reason for referral | partial | `ServiceRequest.reasonCode`; the Referral act (4.140) is still reported as unmapped |
+| | reason for referral | done | Referral act (4.140) is a ServiceRequest with the recipient as performer; golden `referral` |
 | Care team members | name, identifier, role, location, telecom | done | |
 | Laboratory | tests, values/results, specimen type, result status | done | |
 | Provenance | author organization, author time stamp | done | |

@@ -242,3 +242,8 @@ fn template_versions_do_not_change_the_output() {
 fn sdoh() {
     check("sdoh");
 }
+
+#[test]
+fn referral() {
+    check("referral");
+}

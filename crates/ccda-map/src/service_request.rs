@@ -13,6 +13,8 @@ use crate::{
     data_absent_reason_extension, map_codeable_concept, map_datetime, map_identifier, Context,
 };
 
+/// Referral (4.140): an act that asks another provider to see the patient.
+const REFERRAL: &str = "2.16.840.1.113883.10.20.22.4.140";
 const PLANNED_ACT: &str = "2.16.840.1.113883.10.20.22.4.39";
 const PLANNED_ENCOUNTER: &str = "2.16.840.1.113883.10.20.22.4.40";
 const PLANNED_PROCEDURE: &str = "2.16.840.1.113883.10.20.22.4.41";
@@ -59,7 +61,8 @@ fn is_planned(s: &Statement) -> bool {
         && s.has_template(PLANNED_PROCEDURE))
         || (s.kind == StatementKind::Encounter && s.has_template(PLANNED_ENCOUNTER))
         || (s.kind == StatementKind::Observation && s.has_template(PLANNED_OBSERVATION))
-        || (s.kind == StatementKind::Act && s.has_template(PLANNED_ACT));
+        || (s.kind == StatementKind::Act && s.has_template(PLANNED_ACT))
+        || (s.kind == StatementKind::Act && s.has_template(REFERRAL));
     let activity_template = (s.kind == StatementKind::Procedure
         && s.has_template(PROCEDURE_ACTIVITY_PROCEDURE))
         || (s.kind == StatementKind::Act && s.has_template(PROCEDURE_ACTIVITY_ACT))
@@ -109,6 +112,9 @@ fn status(s: &Statement, ctx: &mut Context) -> &'static str {
 fn category(s: &Statement) -> Option<(&'static str, &'static str)> {
     if s.has_template(INSTRUCTION) {
         return Some(("409073007", "Education"));
+    }
+    if s.has_template(REFERRAL) {
+        return Some(("3457005", "Patient referral"));
     }
     match s.kind {
         StatementKind::Procedure => Some(("71388002", "Procedure")),
@@ -207,6 +213,56 @@ fn map_request(s: &Statement, ctx: &mut Context) -> Value {
     if s.has_template(INSTRUCTION) {
         if let Some(t) = s.text.as_deref().map(str::trim).filter(|t| !t.is_empty()) {
             r.insert("patientInstruction".into(), json!(t));
+        }
+    }
+
+    if let Some(priority) = s.priority_code.as_ref().and_then(|c| c.code.as_deref()) {
+        match priority {
+            "R" => {
+                r.insert("priority".into(), json!("routine"));
+            }
+            "UR" => {
+                r.insert("priority".into(), json!("urgent"));
+            }
+            "A" => {
+                r.insert("priority".into(), json!("asap"));
+            }
+            "S" | "EM" => {
+                r.insert("priority".into(), json!("stat"));
+            }
+            _ => ctx.report.info(
+                "servicerequest.priority.unmapped",
+                "a priorityCode has no FHIR request priority; priority was omitted",
+            ),
+        }
+    }
+
+    // The referral recipient (`participant typeCode="REFT"`) is the performer; its role code
+    // (a specialty) is the performer type.
+    for p in s
+        .participants
+        .iter()
+        .filter(|p| p.type_code.as_deref() == Some("REFT"))
+    {
+        let person = p.person_name.clone().unwrap_or_default();
+        let agent = ccda_model::Author {
+            ids: p.ids.clone(),
+            role_code: p.role_code.clone(),
+            given: person.given,
+            family: person.family.or_else(|| p.name.clone()),
+            telecoms: p.telecoms.clone(),
+            addresses: p.addresses.clone(),
+            ..ccda_model::Author::default()
+        };
+        if let Some(reference) = crate::author::register_author_agent(&agent, ctx) {
+            r.insert("performer".into(), json!([{ "reference": reference }]));
+        }
+        if let Some(role) = p
+            .role_code
+            .as_ref()
+            .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
+        {
+            r.insert("performerType".into(), role);
         }
     }
 
