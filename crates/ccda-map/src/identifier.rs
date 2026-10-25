@@ -32,12 +32,20 @@ pub fn map_identifier(
     let root = id.root.as_deref();
     let extension = id.extension.as_deref();
 
-    match (root, extension) {
+    let mapped = match (root, extension) {
         (None, Some(value)) => Some(json!({ "value": value })),
         (Some(root), Some(extension)) => {
             map_root_and_extension(root, extension, terminology, report)
         }
         (root, None) => map_without_extension(root, id.null_flavor.as_deref(), terminology, report),
+    };
+    // `assigningAuthorityName` is the human readable name of the namespace.
+    match (mapped, id.assigning_authority_name.as_deref()) {
+        (Some(mut v), Some(name)) if !name.trim().is_empty() => {
+            v["assigner"] = json!({ "display": name });
+            Some(v)
+        }
+        (mapped, _) => mapped,
     }
 }
 
@@ -145,6 +153,7 @@ mod tests {
             root: root.map(Into::into),
             extension: extension.map(Into::into),
             null_flavor: null_flavor.map(Into::into),
+            ..Identifier::default()
         }
     }
 

@@ -23,6 +23,8 @@ pub struct Identifier {
     pub extension: Option<String>,
     /// HL7 `nullFlavor` if the identifier is intentionally absent, e.g. `NI`.
     pub null_flavor: Option<String>,
+    /// `assigningAuthorityName`: a human readable name for the namespace.
+    pub assigning_authority_name: Option<String>,
 }
 
 /// A coded value (`CD`/`CE`): `<code code=".." codeSystem=".." displayName=".."/>`.
@@ -141,6 +143,7 @@ pub(crate) fn identifier(node: &Node) -> Identifier {
         root: attr(node, "root"),
         extension: attr(node, "extension"),
         null_flavor: attr(node, "nullFlavor"),
+        assigning_authority_name: attr(node, "assigningAuthorityName"),
     }
 }
 

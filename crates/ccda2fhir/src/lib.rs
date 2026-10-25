@@ -9,11 +9,12 @@
 //! The library is pure: bytes in, a [`Conversion`] out. It performs no I/O and keeps no state.
 
 use ccda_map::{
-    link_encounters, map_allergies, map_assessments, map_care_plans, map_care_teams,
-    map_composition, map_coverage, map_devices, map_encompassing_encounter, map_encounters,
-    map_family_history, map_goals, map_health_concerns, map_immunizations, map_medications,
-    map_notes, map_patient, map_problems, map_procedures, map_results, map_service_requests,
-    map_social_history, map_vitals, report_unmapped, Context, Profiles, Report,
+    link_encounters, link_managing_organization, map_allergies, map_assessments, map_care_plans,
+    map_care_teams, map_composition, map_coverage, map_devices, map_encompassing_encounter,
+    map_encounters, map_family_history, map_goals, map_health_concerns, map_immunizations,
+    map_medications, map_notes, map_patient, map_problems, map_procedures, map_results,
+    map_service_requests, map_social_history, map_vitals, report_unmapped, Context, Profiles,
+    Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -70,11 +71,12 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .unwrap_or_default();
     let mut bundle = Bundle::with_namespace_seed(&seed);
     let profiles = options.profiles;
-    let mut patient = map_patient(&document, &BuiltinTerminology, &mut report);
+    let mut ctx = Context::new(&BuiltinTerminology, &mut report, &seed);
+    let mut patient = map_patient(&document, &BuiltinTerminology, ctx.report);
+    link_managing_organization(&document, &mut ctx, &mut patient);
     profiles.apply(&mut patient);
     bundle.push(patient);
 
-    let mut ctx = Context::new(&BuiltinTerminology, &mut report, &seed);
     let mut resources: Vec<serde_json::Value> = map_problems(&document, &mut ctx)
         .into_iter()
         .chain(map_allergies(&document, &mut ctx))

@@ -401,6 +401,7 @@ mod tests {
             root: Some("2.16.840.1.113883.4.6".into()),
             extension: Some(n.into()),
             null_flavor: None,
+            ..Identifier::default()
         }
     }
 
@@ -506,6 +507,7 @@ mod tests {
                     root: Some("1.2.3".into()),
                     extension: Some("ORG".into()),
                     null_flavor: None,
+                    ..Identifier::default()
                 }],
                 name: Some("Example Clinic".into()),
                 ..AuthorOrganization::default()

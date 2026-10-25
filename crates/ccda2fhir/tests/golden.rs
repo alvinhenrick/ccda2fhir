@@ -186,3 +186,8 @@ fn scales_and_supplies() {
 fn header_participants() {
     check("header-participants");
 }
+
+#[test]
+fn patient_details() {
+    check("patient-details");
+}
