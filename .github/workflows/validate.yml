@@ -1,0 +1,56 @@
+name: FHIR validation
+
+# Converts every fixture and validates the output with the official HL7 FHIR validator
+# against FHIR R4 (4.0.1) and US Core. See scripts/validate.sh.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  validate:
+    name: HL7 validator
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Cache validator and FHIR packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/validator
+            ~/.fhir/packages
+          key: fhir-validator-${{ hashFiles('scripts/validate.sh') }}
+          restore-keys: fhir-validator-
+      - name: Convert fixtures and validate
+        run: scripts/validate.sh
+      - name: Summarize results
+        if: always()
+        run: |
+          {
+            echo "## FHIR validation"
+            for f in target/validation/*.validation.txt; do
+              [ -e "$f" ] || continue
+              echo "### $(basename "$f" .validation.txt)"
+              echo '```'
+              grep -E "^(Success|\*FAILURE\*|Error @|Warning @|Information @)|errors?, .* warnings?" "$f" | head -60 || true
+              echo '```'
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload validation output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation
+          path: target/validation/
