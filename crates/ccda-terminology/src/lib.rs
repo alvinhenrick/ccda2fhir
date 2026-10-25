@@ -49,6 +49,10 @@ const BUILTIN: &[(&str, &str)] = &[
     ),
     ("2.16.840.1.113883.6.69", "http://hl7.org/fhir/sid/ndc"),
     (
+        "2.16.840.1.113883.5.8",
+        "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+    ),
+    (
         "2.16.840.1.113883.3.26.1.1",
         "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl",
     ),

@@ -86,3 +86,12 @@ and only the two fixtures above have been validated.
 | mood INT (planned) | MedicationRequest | reported | `planned_immunizations_are_reported_not_mapped` | |
 | `primarySource` | not in C-CDA; omitted (R4/US Core 6.1.0 decide) | n/a | | |
 | Comment Activity | `note` | todo | | |
+
+## Open policy questions
+
+- **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that
+  differ from the code system's official display, and the validator reports those as errors on our
+  output (found with a deliberately realistic Immunization fixture). Options for later, as configuration:
+  keep (lossless, current), drop when the system is known, or replace from a terminology source.
+- **OID table.** Entries are added as fixtures need them (NCI Thesaurus, v3 ActReason so far); the table
+  still needs a full review against the HL7 OID registry.

@@ -84,7 +84,7 @@
             "coding": [
               {
                 "code": "C28161",
-                "display": "Intramuscular Route of Administration",
+                "display": "INTRAMUSCULAR",
                 "system": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl"
               }
             ]
@@ -103,7 +103,7 @@
             "coding": [
               {
                 "code": "140",
-                "display": "Influenza, seasonal, injectable, preservative free",
+                "display": "Influenza, split virus, trivalent, PF",
                 "system": "http://hl7.org/fhir/sid/cvx"
               }
             ]
@@ -136,7 +136,7 @@
               {
                 "code": "MEDPREC",
                 "display": "medical precaution",
-                "system": "urn:oid:2.16.840.1.113883.5.8"
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason"
               }
             ]
           },

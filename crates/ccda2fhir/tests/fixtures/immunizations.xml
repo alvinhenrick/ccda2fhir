@@ -26,13 +26,13 @@
       <statusCode code="completed"/>
       <effectiveTime value="20241010"/>
       <repeatNumber value="1"/>
-      <routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="Intramuscular Route of Administration"/>
+      <routeCode code="C28161" codeSystem="2.16.840.1.113883.3.26.1.1" displayName="INTRAMUSCULAR"/>
       <approachSiteCode code="368208006" codeSystem="2.16.840.1.113883.6.96" displayName="Left upper arm structure"/>
       <doseQuantity value="0.5" unit="mL"/>
       <consumable><manufacturedProduct classCode="MANU">
         <templateId root="2.16.840.1.113883.10.20.22.4.54"/>
         <manufacturedMaterial>
-          <code code="140" codeSystem="2.16.840.1.113883.12.292" displayName="Influenza, seasonal, injectable, preservative free"/>
+          <code code="140" codeSystem="2.16.840.1.113883.12.292" displayName="Influenza, split virus, trivalent, PF"/>
           <lotNumberText>LOT-0042</lotNumberText>
         </manufacturedMaterial>
         <manufacturerOrganization><name>Example Vaccines Inc</name></manufacturerOrganization>
