@@ -30,6 +30,12 @@ impl Profiles {
             "Immunization" => "us-core-immunization",
             // US Core requires authoredOn and requester; claim it only when both are present.
             "Observation" => observation_profile(resource)?,
+            "Goal" => {
+                if !resource["description"].is_object() {
+                    return None;
+                }
+                "us-core-goal"
+            }
             "Device" => {
                 if !(resource["udiCarrier"][0]["carrierHRF"].is_string()
                     && resource["type"].is_object())

@@ -1,0 +1,99 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:d2291a2b-7de2-5601-802f-3debb0eee99c",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0013"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:7acbcab1-e569-5f17-827d-b4e3e73f54db",
+        "resource": {
+          "description": {
+            "coding": [
+              {
+                "code": "289169006",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "goal-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-1"
+            }
+          ],
+          "lifecycleStatus": "active",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2025-01-01",
+          "subject": {
+            "reference": "urn:uuid:d2291a2b-7de2-5601-802f-3debb0eee99c"
+          },
+          "target": [
+            {
+              "dueDate": "2025-12-31"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b8e6804a-b0b0-51a7-8a2b-bb0f1b37cf9c",
+        "resource": {
+          "description": {
+            "text": "Walk 30 minutes a day"
+          },
+          "id": "goal-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-2"
+            }
+          ],
+          "lifecycleStatus": "completed",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2024-06-01",
+          "subject": {
+            "reference": "urn:uuid:d2291a2b-7de2-5601-802f-3debb0eee99c"
+          }
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": []
+}
