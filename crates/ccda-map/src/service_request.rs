@@ -20,6 +20,8 @@ const PLANNED_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.44";
 const PROCEDURE_ACTIVITY_PROCEDURE: &str = "2.16.840.1.113883.10.20.22.4.14";
 const PROCEDURE_ACTIVITY_ACT: &str = "2.16.840.1.113883.10.20.22.4.12";
 const ENCOUNTER_ACTIVITY: &str = "2.16.840.1.113883.10.20.22.4.49";
+const INSTRUCTION: &str = "2.16.840.1.113883.10.20.22.4.20";
+const PROCEDURE_ACTIVITY_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.13";
 const INDICATION: &str = "2.16.840.1.113883.10.20.22.4.19";
 const SNOMED_URI: &str = "http://snomed.info/sct";
 
@@ -57,6 +59,12 @@ fn is_planned(s: &Statement) -> bool {
         && s.has_template(PROCEDURE_ACTIVITY_PROCEDURE))
         || (s.kind == StatementKind::Act && s.has_template(PROCEDURE_ACTIVITY_ACT))
         || (s.kind == StatementKind::Encounter && s.has_template(ENCOUNTER_ACTIVITY));
+    // An Instruction is always a request for patient education or instruction.
+    if s.kind == StatementKind::Act && s.has_template(INSTRUCTION) {
+        return true;
+    }
+    let activity_template = activity_template
+        || (s.kind == StatementKind::Observation && s.has_template(PROCEDURE_ACTIVITY_OBSERVATION));
     // A planned template says "planned" itself; a plain activity template does only through its mood.
     planned_template && !matches!(s.mood_code.as_deref(), Some("EVN"))
         || activity_template && !is_event(s)
@@ -94,6 +102,9 @@ fn status(s: &Statement, ctx: &mut Context) -> &'static str {
 
 /// A broad SNOMED category from the kind of activity. C-CDA has no category, US Core wants one.
 fn category(s: &Statement) -> Option<(&'static str, &'static str)> {
+    if s.has_template(INSTRUCTION) {
+        return Some(("409073007", "Education"));
+    }
     match s.kind {
         StatementKind::Procedure => Some(("71388002", "Procedure")),
         StatementKind::Encounter => Some(("308335008", "Patient encounter procedure")),
@@ -188,6 +199,12 @@ fn map_request(s: &Statement, ctx: &mut Context) -> Value {
         r.insert("reasonCode".into(), json!(reasons));
     }
 
+    if s.has_template(INSTRUCTION) {
+        if let Some(t) = s.text.as_deref().map(str::trim).filter(|t| !t.is_empty()) {
+            r.insert("patientInstruction".into(), json!(t));
+        }
+    }
+
     let authors: Vec<_> = s.authors.iter().collect();
     apply_authors(&mut r, FIELDS, &authors, ctx);
     Value::Object(r)
@@ -257,6 +274,30 @@ mod tests {
             .issues
             .iter()
             .any(|i| i.code == "servicerequest.status.assumed"));
+    }
+
+    #[test]
+    fn an_instruction_is_an_education_request_with_the_text_as_patient_instruction() {
+        let (out, _) = run(
+            "act",
+            INSTRUCTION,
+            "INT",
+            r#"<statusCode code="completed"/><text>Possible flu-like symptoms for three days.</text>"#,
+        );
+        assert_eq!(out[0]["category"][0]["coding"][0]["code"], "409073007");
+        assert_eq!(
+            out[0]["patientInstruction"],
+            "Possible flu-like symptoms for three days."
+        );
+        assert_eq!(out[0]["status"], "completed");
+    }
+
+    #[test]
+    fn a_planned_procedure_activity_observation_is_a_request() {
+        let (out, _) = run("observation", PROCEDURE_ACTIVITY_OBSERVATION, "INT", "");
+        assert_eq!(out.len(), 1);
+        let (out, _) = run("observation", PROCEDURE_ACTIVITY_OBSERVATION, "EVN", "");
+        assert!(out.is_empty());
     }
 
     #[test]

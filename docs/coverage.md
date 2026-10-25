@@ -393,17 +393,23 @@ See `docs/decisions/0023-status-assessments.md`.
 | Assessment Scale Observation (4.69) | `Observation` + components | todo | | |
 | Caregiver Characteristics (4.72), Disability Status | `Observation` | todo | | |
 
-## Gaps found by running real-world samples
+## Planned medications, instructions, procedure observations
+
+See `docs/decisions/0024-planned-medication-instructions.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Planned Medication Activity (4.42) | `MedicationRequest` | done | golden `planned_medication` | |
+| Instruction (4.20), top level | `ServiceRequest` (education, `patientInstruction`) | done | `an_instruction_is_an_education_request_with_the_text_as_patient_instruction` | |
+| Procedure Activity Observation (4.13), event | `Observation` (procedure) | done | `procedure_activity_observation_is_an_observation_in_the_procedure_category` | |
+| Procedure Activity Observation (4.13), planned | `ServiceRequest` | done | `a_planned_procedure_activity_observation_is_a_request` | |
+
+## Running real-world samples
 
 `cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
-code `entry.unmapped`, with the template OID). On the 29 sample documents in the Medplum repository (ONC 170.315(b)(1) CCD and
-transition-of-care samples plus small unit samples), nothing failed to convert, and these templates were found but not mapped:
-
-| Template | Name | FHIR target | Status |
-|---|---|---|---|
-| 4.42 | Planned Medication Activity | `MedicationRequest` (intent plan) | todo |
-| 4.20 | Instruction | `ServiceRequest.patientInstruction` / `Communication` | todo |
-| 4.13 | Procedure Activity Observation | `Procedure` | todo (reported today) |
+code `entry.unmapped`, with the template OID). On the 29 sample documents in the Medplum repository (ONC 170.315(b)(1) samples and
+small unit samples) nothing fails to convert and no entry is unmapped. Gaps it found earlier are now covered: Health Concerns,
+status assessments, planned medications, instructions and procedure observations.
 
 ## Open policy questions
 

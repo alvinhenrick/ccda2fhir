@@ -15,6 +15,7 @@ use crate::{
 };
 
 const MEDICATION_ACTIVITY: &str = "2.16.840.1.113883.10.20.22.4.16";
+const PLANNED_MEDICATION: &str = "2.16.840.1.113883.10.20.22.4.42";
 const SUPPLY_ORDER: &str = "2.16.840.1.113883.10.20.22.4.17";
 const MEDICATION_DISPENSE: &str = "2.16.840.1.113883.10.20.22.4.18";
 const INDICATION: &str = "2.16.840.1.113883.10.20.22.4.19";
@@ -33,7 +34,7 @@ pub fn map_medications(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> 
         for entry in &section.entries {
             let s = &entry.statement;
             if s.kind != StatementKind::SubstanceAdministration
-                || !s.has_template(MEDICATION_ACTIVITY)
+                || !(s.has_template(MEDICATION_ACTIVITY) || s.has_template(PLANNED_MEDICATION))
             {
                 continue;
             }

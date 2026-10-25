@@ -14,8 +14,10 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.2",   // Result Observation
     "2.16.840.1.113883.10.20.22.4.3",   // Problem Concern Act
     "2.16.840.1.113883.10.20.22.4.12",  // Procedure Activity Act
+    "2.16.840.1.113883.10.20.22.4.13",  // Procedure Activity Observation
     "2.16.840.1.113883.10.20.22.4.14",  // Procedure Activity Procedure
     "2.16.840.1.113883.10.20.22.4.16",  // Medication Activity
+    "2.16.840.1.113883.10.20.22.4.20",  // Instruction
     "2.16.840.1.113883.10.20.22.4.26",  // Vital Signs Organizer
     "2.16.840.1.113883.10.20.22.4.27",  // Vital Sign Observation
     "2.16.840.1.113883.10.20.22.4.30",  // Allergy Concern Act
@@ -23,6 +25,7 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.39",  // Planned Act
     "2.16.840.1.113883.10.20.22.4.40",  // Planned Encounter
     "2.16.840.1.113883.10.20.22.4.41",  // Planned Procedure
+    "2.16.840.1.113883.10.20.22.4.42",  // Planned Medication Activity
     "2.16.840.1.113883.10.20.22.4.44",  // Planned Observation
     "2.16.840.1.113883.10.20.22.4.49",  // Encounter Activity
     "2.16.840.1.113883.10.20.22.4.52",  // Immunization Activity
@@ -95,10 +98,10 @@ mod tests {
     #[test]
     fn unhandled_template_is_reported_by_oid() {
         let out = run(
-            r#"<entry><act><templateId root="2.16.840.1.113883.10.20.22.4.13"/></act></entry>"#,
+            r#"<entry><act><templateId root="2.16.840.1.113883.10.20.22.4.69"/></act></entry>"#,
         );
         assert_eq!(out.len(), 1);
-        assert!(out[0].contains("2.16.840.1.113883.10.20.22.4.13"));
+        assert!(out[0].contains("2.16.840.1.113883.10.20.22.4.69"));
     }
 
     #[test]
