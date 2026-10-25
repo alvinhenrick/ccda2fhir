@@ -10,10 +10,11 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 | | sexual orientation, gender identity | partial | v3 only; v3.1 removed them; Observation or reported, no Patient extension yet |
 | Allergies and intolerances | substance (medication, drug class), reaction | done | |
 | Problems | problems, date of diagnosis, date of resolution | done | onset and abatement |
-| | SDOH problems/health concerns | todo | no SDOH category yet |
+| | SDOH problems/health concerns | done | `sdoh` category from ICD-10-CM Z55 to Z65; golden `sdoh` (ADR 0036) |
 | Health status / assessments | health concerns, functional, disability, mental/cognitive, pregnancy, smoking status | done | |
 | Assessment and plan of treatment | assessment and plan | done | CarePlan with activity links |
-| | SDOH assessment, goals, interventions | todo | assessments and goals map, but without SDOH categories |
+| | SDOH assessment | partial | screening observations get `sdoh` for a short LOINC list |
+| | SDOH goals, interventions | todo | map without an SDOH tag |
 | Immunizations | immunizations | done | |
 | Procedures | procedures | done | |
 | | reason for referral | partial | `ServiceRequest.reasonCode`; the Referral act (4.140) is still reported as unmapped |

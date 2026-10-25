@@ -14,7 +14,8 @@ use ccda_map::{
     map_composition, map_coverage, map_devices, map_encompassing_encounter, map_encounters,
     map_family_history, map_goals, map_health_concerns, map_immunizations, map_medications,
     map_notes, map_patient, map_problems, map_procedures, map_results, map_service_requests,
-    map_social_history, map_unstructured, map_vitals, report_unmapped, Context, Profiles, Report,
+    map_social_history, map_unstructured, map_vitals, report_unmapped, tag_sdoh, Context, Profiles,
+    Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -104,6 +105,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     resources.extend(concerns);
     link_encounters(&document, &mut ctx, &mut resources);
     attach_comments(&document, &mut ctx, &mut resources);
+    tag_sdoh(&mut ctx, &mut resources);
     link_care_plan_activities(&document, &mut ctx, &mut resources);
     report_unmapped(&document, &mut ctx);
     // The Composition lists the resources above, so it is built last and placed right after the
