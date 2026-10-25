@@ -247,6 +247,16 @@ fn observation_profile(resource: &Value) -> Option<&'static str> {
             None
         };
     }
+    if in_category("functional-status") || in_category("cognitive-status") {
+        let has_value = resource.as_object().is_some_and(|o| {
+            o.keys()
+                .any(|k| k.starts_with("value") || k == "dataAbsentReason")
+        });
+        let timed =
+            resource["effectiveDateTime"].is_string() || resource["effectivePeriod"].is_object();
+        return (resource["code"]["coding"].is_array() && has_value && timed)
+            .then_some("us-core-simple-observation");
+    }
     vital_signs_profile(resource)
 }
 

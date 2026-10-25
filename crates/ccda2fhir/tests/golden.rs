@@ -146,3 +146,8 @@ fn composition() {
 fn health_concerns() {
     check("health-concerns");
 }
+
+#[test]
+fn assessments() {
+    check("assessments");
+}

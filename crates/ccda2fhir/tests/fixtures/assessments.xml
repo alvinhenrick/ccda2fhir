@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-ASSESS-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <effectiveTime value="20250102120000-0500"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0021"/>
+      <patient>
+        <name><given>Lee</given><family>Example</family></name>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19550505"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component><structuredBody>
+  <component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.14"/>
+    <code code="47420-5" codeSystem="2.16.840.1.113883.6.1" displayName="Functional status assessment"/>
+    <title>Functional Status</title>
+    <text/>
+    <entry><organizer classCode="CLUSTER" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.66"/>
+      <id root="1.3.6.1.4.1.22812.18.1" extension="FS-ORG"/>
+      <code code="d5" codeSystem="2.16.840.1.113883.6.254" displayName="Self-Care"/>
+      <statusCode code="completed"/>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.67"/>
+        <id root="1.3.6.1.4.1.22812.18.1" extension="FS-1"/>
+        <code code="54522-8" codeSystem="2.16.840.1.113883.6.1" displayName="Functional status"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20240501"/>
+        <value xsi:type="CD" code="105504002" codeSystem="2.16.840.1.113883.6.96" displayName="Dependence on cane"/>
+      </observation></component>
+    </organizer></entry>
+  </section></component>
+  <component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.56"/>
+    <code code="10190-7" codeSystem="2.16.840.1.113883.6.1" displayName="Mental status Narrative"/>
+    <title>Mental Status</title>
+    <text/>
+    <entry><observation classCode="OBS" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.74"/>
+      <id root="1.3.6.1.4.1.22812.18.1" extension="CS-1"/>
+      <code code="373930000" codeSystem="2.16.840.1.113883.6.96" displayName="Cognitive function"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20240501"/>
+      <value xsi:type="CD" code="260379002" codeSystem="2.16.840.1.113883.6.96" displayName="Impaired"/>
+    </observation></entry>
+  </section></component>
+  </structuredBody></component>
+</ClinicalDocument>

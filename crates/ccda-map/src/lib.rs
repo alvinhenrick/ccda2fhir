@@ -8,6 +8,7 @@
 //! IG's general mapping guidance and are reused by every resource mapper.
 
 mod allergy;
+mod assessment;
 mod author;
 mod care_plan;
 mod care_team;
@@ -42,6 +43,7 @@ mod util;
 mod vitals;
 
 pub use allergy::map_allergies;
+pub use assessment::map_assessments;
 pub use care_plan::map_care_plans;
 pub use care_team::map_care_teams;
 pub use coding::map_codeable_concept;
