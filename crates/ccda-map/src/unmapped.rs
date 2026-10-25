@@ -24,6 +24,8 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.65",  // Preprocedure Diagnosis
     "2.16.840.1.113883.10.20.22.4.48",  // Advance Directive Observation
     "2.16.840.1.113883.10.20.22.4.108", // Advance Directive Organizer
+    "2.16.840.1.113883.10.20.22.4.512", // Average Blood Pressure Organizer
+    "2.16.840.1.113883.10.20.22.4.79",  // Deceased Observation (Patient)
     "2.16.840.1.113883.10.20.22.4.17",  // Supply Order
     "2.16.840.1.113883.10.20.22.4.18",  // Medication Dispense
     "2.16.840.1.113883.10.20.22.4.131", // Intervention Act (its activities are mapped)

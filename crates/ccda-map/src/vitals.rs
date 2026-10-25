@@ -13,6 +13,9 @@ use crate::util::LOINC;
 use crate::{map_codeable_concept, Context};
 
 const VITALS_ORGANIZER: &str = "2.16.840.1.113883.10.20.22.4.26";
+/// Average Blood Pressure Organizer (C-CDA 3.0): its members are averaged readings, not the
+/// systolic and diastolic pair, so each stays its own vital-signs Observation.
+const AVERAGE_BP_ORGANIZER: &str = "2.16.840.1.113883.10.20.22.4.512";
 const VITAL_SIGN: &str = "2.16.840.1.113883.10.20.22.4.27";
 
 const LOINC_URI: &str = "http://loinc.org";
@@ -48,6 +51,15 @@ pub fn map_vitals(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
                     .filter(|m| m.kind == StatementKind::Observation && m.has_template(VITAL_SIGN))
                     .collect();
                 map_group(&members, Some(s), ctx, &mut out);
+            } else if s.kind == StatementKind::Organizer && s.has_template(AVERAGE_BP_ORGANIZER) {
+                for member in s
+                    .related
+                    .iter()
+                    .map(|r| &r.statement)
+                    .filter(|m| m.kind == StatementKind::Observation)
+                {
+                    out.push(Value::Object(single(member, Some(s), ctx)));
+                }
             } else if s.kind == StatementKind::Observation && s.has_template(VITAL_SIGN) {
                 map_group(&[s], None, ctx, &mut out);
             }
@@ -402,5 +414,22 @@ mod tests {
         let (out, _) = run(&organizer(""));
         assert_eq!(out.len(), 1);
         assert!(out[0].get("hasMember").is_none());
+    }
+
+    #[test]
+    fn average_blood_pressure_keeps_each_average_as_its_own_vital_sign() {
+        let body = format!(
+            "{}{}",
+            vital("96607-7", "128", "mm[Hg]"),
+            vital("96608-5", "82", "mm[Hg]")
+        );
+        let xml = organizer(&body).replace(
+            "2.16.840.1.113883.10.20.22.4.26",
+            "2.16.840.1.113883.10.20.22.4.512",
+        );
+        let (out, _) = run(&xml);
+        assert_eq!(out.len(), 2);
+        assert_eq!(by_code(&out, "96607-7")["valueQuantity"]["value"], 128);
+        assert_eq!(out[0]["category"][0]["coding"][0]["code"], "vital-signs");
     }
 }
