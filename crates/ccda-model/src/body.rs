@@ -233,6 +233,8 @@ pub struct Participant {
     pub playing_device_code: Option<Code>,
     /// `participantRole/playingEntity/name` (for a location, its name).
     pub name: Option<String>,
+    /// The same name, split into parts (for a person).
+    pub person_name: Option<crate::PersonName>,
     /// `participantRole/addr`
     pub addresses: Vec<Address>,
     /// `participantRole/telecom`
@@ -309,6 +311,8 @@ pub struct Statement {
     /// `repeatNumber/@value` (dose number for immunizations, repeats for orders).
     pub repeat_number: Option<String>,
     pub route_code: Option<Code>,
+    /// `priorityCode` (ActPriority: `R` routine, `UR` urgent, ...).
+    pub priority_code: Option<Code>,
     pub approach_site_code: Option<Code>,
     /// `sdtc:dischargeDispositionCode` of an encounter.
     pub discharge_disposition: Option<Code>,
@@ -496,6 +500,10 @@ fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
             .and_then(|r| child(&r, "playingEntity"))
             .and_then(|e| child(&e, "name"))
             .and_then(|n| text_of(&n)),
+        person_name: role
+            .and_then(|r| child(&r, "playingEntity"))
+            .and_then(|e| child(&e, "name"))
+            .map(|n| crate::header::parse_name(&n)),
         addresses: role
             .iter()
             .flat_map(|r| children(r, "addr"))
@@ -688,6 +696,7 @@ fn parse_statement_as(
             .collect(),
         repeat_number: child(node, "repeatNumber").and_then(|n| attr(&n, "value")),
         route_code: child(node, "routeCode").map(|n| parse_code(&n, narrative)),
+        priority_code: child(node, "priorityCode").map(|n| parse_code(&n, narrative)),
         approach_site_code: child(node, "approachSiteCode").map(|n| parse_code(&n, narrative)),
         // The extension namespace (`sdtc:`) is not HL7 v3, so match on the local name only.
         discharge_disposition: node

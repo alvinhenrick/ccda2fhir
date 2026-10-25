@@ -91,7 +91,7 @@ pub struct Patient {
     pub provider_organization: Option<AuthorOrganization>,
 }
 
-fn parse_name(node: &Node) -> PersonName {
+pub(crate) fn parse_name(node: &Node) -> PersonName {
     let texts =
         |name: &str| -> Vec<String> { children(node, name).filter_map(|c| text_of(&c)).collect() };
     PersonName {
