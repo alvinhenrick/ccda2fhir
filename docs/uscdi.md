@@ -14,7 +14,7 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 | Health status / assessments | health concerns, functional, disability, mental/cognitive, pregnancy, smoking status | done | |
 | Assessment and plan of treatment | assessment and plan | done | CarePlan with activity links |
 | | SDOH assessment | partial | screening observations get `sdoh` for a short LOINC list |
-| | SDOH goals, interventions | todo | map without an SDOH tag |
+| | SDOH goals, interventions | done | Intervention Acts are unwrapped; `sdoh` category from Z55 to Z65; golden `sdoh_interventions` (ADR 0039) |
 | Immunizations | immunizations | done | |
 | Procedures | procedures | done | |
 | | reason for referral | done | Referral act (4.140) is a ServiceRequest with the recipient as performer; golden `referral` |

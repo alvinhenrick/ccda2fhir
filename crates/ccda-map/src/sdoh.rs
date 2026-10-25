@@ -2,7 +2,7 @@
 //!
 //! C-CDA has no SDOH flag, so the category is derived from the code, using only lists that are
 //! unambiguous: ICD-10-CM Z55 to Z65 ("persons with potential health hazards related to
-//! socioeconomic and psychosocial circumstances") for Conditions, and a short list of LOINC
+//! socioeconomic and psychosocial circumstances") for Conditions, interventions and goals, and a short list of LOINC
 //! SDOH screening panels and items for Observations. Every tag is reported.
 
 use serde_json::{json, Value};
@@ -26,8 +26,8 @@ fn is_sdoh_icd10(code: &str) -> bool {
         && matches!((b[1], b[2]), (b'5', b'5'..=b'9') | (b'6', b'0'..=b'5'))
 }
 
-fn has_coding(resource: &Value, test: impl Fn(&str, &str) -> bool) -> bool {
-    resource["code"]["coding"]
+fn has_coding(resource: &Value, field: &str, test: impl Fn(&str, &str) -> bool) -> bool {
+    resource[field]["coding"]
         .as_array()
         .into_iter()
         .flatten()
@@ -37,6 +37,18 @@ fn has_coding(resource: &Value, test: impl Fn(&str, &str) -> bool) -> bool {
                 c["code"].as_str().unwrap_or_default(),
             )
         })
+}
+
+/// Procedure.category is a single CodeableConcept; an SDOH intervention is a social service
+/// procedure.
+fn tag_procedure(resource: &mut Value) {
+    if resource.get("category").is_none() {
+        resource["category"] = json!({ "coding": [{
+            "system": "http://snomed.info/sct",
+            "code": "410606002",
+            "display": "Social service procedure",
+        }] });
+    }
 }
 
 fn tag(resource: &mut Value) {
@@ -51,12 +63,23 @@ fn tag(resource: &mut Value) {
 pub fn tag_sdoh(ctx: &mut Context, resources: &mut [Value]) {
     for r in resources.iter_mut() {
         let sdoh = match r["resourceType"].as_str() {
-            Some("Condition") => has_coding(r, |s, c| s == ICD10CM && is_sdoh_icd10(c)),
-            Some("Observation") => has_coding(r, |s, c| s == LOINC && SDOH_LOINC.contains(&c)),
+            Some("Condition") => has_coding(r, "code", |s, c| s == ICD10CM && is_sdoh_icd10(c)),
+            Some("Observation") => {
+                has_coding(r, "code", |s, c| s == LOINC && SDOH_LOINC.contains(&c))
+            }
+            // Interventions and goals are SDOH when they are about an SDOH Z code.
+            Some("Procedure" | "ServiceRequest") => {
+                has_coding(r, "code", |s, c| s == ICD10CM && is_sdoh_icd10(c))
+            }
+            Some("Goal") => has_coding(r, "description", |s, c| s == ICD10CM && is_sdoh_icd10(c)),
             _ => false,
         };
         if sdoh {
-            tag(r);
+            if r["resourceType"] == "Procedure" {
+                tag_procedure(r);
+            } else {
+                tag(r);
+            }
             ctx.report.info(
                 "sdoh.category.derived",
                 "a resource was given the sdoh category because its code is on the SDOH code list",

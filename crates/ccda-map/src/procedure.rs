@@ -28,8 +28,7 @@ const FIELDS: AuthorFields = AuthorFields {
 pub fn map_procedures(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
     let mut out = Vec::new();
     for section in doc.all_sections() {
-        for entry in &section.entries {
-            let s = &entry.statement;
+        for s in crate::util::activities(section) {
             // The IG maps a Procedure Activity Observation to an Observation (see Results).
             // A planned or requested one is a ServiceRequest (see `service_request.rs`).
             if s.has_template(PROCEDURE_ACTIVITY_OBSERVATION) {

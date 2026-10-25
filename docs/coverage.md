@@ -525,3 +525,13 @@ See `docs/decisions/0035-template-versions.md`. Template matching ignores versio
 | Referral (4.140) | `ServiceRequest` (category Patient referral) | done | golden `referral` |
 | `participant typeCode="REFT"` | `performer` (Practitioner), `performerType` | done | golden `referral` |
 | `priorityCode` (R, UR, A, S, EM) | `priority` | done | golden `referral` |
+
+## Interventions and SDOH goals
+
+See `docs/decisions/0039-interventions-sdoh.md`.
+
+| C-CDA | FHIR | Status | Test |
+|---|---|---|---|
+| Intervention Act (4.131) and its Procedure Activity | `Procedure` | done | golden `sdoh_interventions` |
+| Planned Intervention Act (4.146) and its planned activity | `ServiceRequest` | done | golden `sdoh_interventions` |
+| SDOH Z-code on an intervention or goal | `sdoh` category (Procedure: social service procedure) | done | golden `sdoh_interventions` |
