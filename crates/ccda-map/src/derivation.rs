@@ -11,6 +11,9 @@ use crate::{map_datetime, Context};
 
 const PARTICIPANT_TYPE: &str = "http://terminology.hl7.org/CodeSystem/provenance-participant-type";
 const ACTIVITY_SYSTEM: &str = "http://hl7.org/fhir/w3c-provenance-activity-type";
+/// The R4 value set for `Provenance.activity` has no derivation code, so the activity also
+/// carries `create` from it: the converter creates the FHIR resources.
+const DATA_OPERATION: &str = "http://terminology.hl7.org/CodeSystem/v3-DataOperation";
 const ENTITY_ROLE: &str = "source";
 
 /// Add the converter `Device` and the derivation `Provenance` to the extra resources.
@@ -62,7 +65,10 @@ pub fn map_derivation(
         "id": id,
         "target": targets,
         "recorded": recorded,
-        "activity": { "coding": [{ "system": ACTIVITY_SYSTEM, "code": "Derivation" }] },
+        "activity": { "coding": [
+            { "system": ACTIVITY_SYSTEM, "code": "Derivation" },
+            { "system": DATA_OPERATION, "code": "CREATE" },
+        ] },
         "agent": [{
             "type": { "coding": [{ "system": PARTICIPANT_TYPE, "code": "assembler" }] },
             "who": { "reference": ctx.reference("Device", &device_id) },
