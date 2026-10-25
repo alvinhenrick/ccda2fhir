@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdtc="urn:hl7-org:sdtc">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-DEMOGRAPHICS-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <effectiveTime value="20250102120000-0500"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0010"/>
+      <addr use="HP">
+        <streetAddressLine>1 Example Street</streetAddressLine>
+        <city>Sampletown</city><state>CA</state><postalCode>90000</postalCode><country>US</country>
+      </addr>
+      <telecom use="MC" value="tel:+1-555-555-0100"/>
+      <telecom use="HP" value="mailto:jo@example.com"/>
+      <patient>
+        <name use="L"><given>Jo</given><given>Q</given><family>Example</family><suffix>Jr</suffix></name>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19800214"/>
+        <maritalStatusCode code="M" codeSystem="2.16.840.1.113883.5.2"/>
+        <raceCode code="2106-3" displayName="White" codeSystem="2.16.840.1.113883.6.238"/>
+        <sdtc:raceCode code="2108-9" displayName="European" codeSystem="2.16.840.1.113883.6.238"/>
+        <ethnicGroupCode code="2186-5" displayName="Not Hispanic or Latino" codeSystem="2.16.840.1.113883.6.238"/>
+        <languageCommunication>
+          <languageCode code="en"/>
+          <preferenceInd value="true"/>
+        </languageCommunication>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.17"/>
+    <code code="29762-2" codeSystem="2.16.840.1.113883.6.1" displayName="Social history"/>
+    <title>Social History</title>
+    <text/>
+    <entry typeCode="DRIV"><observation classCode="OBS" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.200"/>
+      <code code="76689-9" codeSystem="2.16.840.1.113883.6.1"/>
+      <statusCode code="completed"/>
+      <value xsi:type="CD" code="F" codeSystem="2.16.840.1.113883.5.1"/>
+    </observation></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>

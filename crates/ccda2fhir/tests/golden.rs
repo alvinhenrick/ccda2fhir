@@ -91,3 +91,8 @@ fn encounters() {
 fn social() {
     check("social");
 }
+
+#[test]
+fn demographics() {
+    check("demographics");
+}

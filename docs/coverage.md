@@ -203,6 +203,28 @@ See `docs/decisions/0010-social-history.md`.
 | Birth sex, gender identity, tribal affiliation | Patient extensions | reported, todo (with Patient demographics) | `birth_sex_is_left_for_the_patient_and_reported` | |
 | SDOH categories, assessment scales | other categories / Observation panels | todo | | |
 
+## Patient demographics (recordTarget) to Patient
+
+See `docs/decisions/0011-patient-demographics.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `id` | `identifier` | done | `maps_identifiers_name_gender_and_birth_date` | |
+| `name` (all, with use, prefix, suffix) | `name` | done | `names_addresses_and_telecoms_keep_their_parts_and_uses` | |
+| `addr`, `telecom` | `address`, `telecom` (system from the URI prefix) | done | same | |
+| `administrativeGenderCode` | `gender` | done | `gender_follows_the_ig_concept_map` | |
+| `birthTime` | `birthDate` | done | `invalid_birth_time_is_omitted_with_a_warning` | |
+| `maritalStatusCode` | `maritalStatus` | done | `language_marital_status_and_guardian` | |
+| `raceCode`, `sdtc:raceCode` | US Core race extension | done | `race_and_ethnicity_become_us_core_extensions` | |
+| `ethnicGroupCode`, `sdtc:ethnicGroupCode` | US Core ethnicity extension | done | same | |
+| Birth Sex Observation | US Core birth sex extension | done | `birth_sex_and_gender_identity_come_from_social_history` | |
+| Gender Identity Observation | US Core gender identity extension | done | same | |
+| `languageCommunication` | `communication` | done | `language_marital_status_and_guardian` | |
+| `guardian` | `contact` | done | same | |
+| `providerOrganization` | `managingOrganization` | todo | | |
+| Sex, sexual orientation, tribal affiliation | US Core extensions / Observations | todo | | |
+| Religious affiliation, birthplace | not supported (IG) | not mapped, not yet reported | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

@@ -16,7 +16,7 @@ pub use body::{
     Author, AuthorOrganization, Consumable, Entry, Link, Participant, ReferenceRange, Related,
     Section, Statement, StatementKind,
 };
-pub use header::Patient;
+pub use header::{Address, Guardian, Language, Patient, PersonName, Telecom};
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
 
 use types::{identifier, parse_code, Narrative};

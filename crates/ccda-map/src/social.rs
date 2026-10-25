@@ -31,12 +31,11 @@ pub fn map_social_history(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Valu
             if s.kind != StatementKind::Observation {
                 continue;
             }
+            // Birth sex and gender identity are Patient extensions (see the patient mapper).
             if s.has_template(BIRTH_SEX) || s.has_template(GENDER_IDENTITY) {
-                ctx.report.info(
-                    "social.patient-extension.unsupported",
-                    "birth sex or gender identity belongs on the Patient and was not mapped as an Observation",
-                );
-            } else if s.has_template(PREGNANCY) {
+                continue;
+            }
+            if s.has_template(PREGNANCY) {
                 out.push(pregnancy(s, ctx));
             } else if s.has_template(SOCIAL_HISTORY)
                 || s.has_template(SMOKING_STATUS)
@@ -217,12 +216,9 @@ mod tests {
     }
 
     #[test]
-    fn birth_sex_is_left_for_the_patient_and_reported() {
+    fn birth_sex_is_left_for_the_patient_mapper() {
         let (out, report) = run(&doc(BIRTH_SEX, "", ""));
         assert!(out.is_empty());
-        assert!(report
-            .issues
-            .iter()
-            .any(|i| i.code == "social.patient-extension.unsupported"));
+        assert!(report.issues.is_empty());
     }
 }
