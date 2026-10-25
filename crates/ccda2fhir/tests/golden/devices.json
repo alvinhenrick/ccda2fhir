@@ -1,0 +1,97 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0012"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:4fac7f40-57e7-506d-9685-24b3d531624b",
+        "resource": {
+          "code": {
+            "coding": [
+              {
+                "code": "175135009",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "procedure-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.11.1",
+              "value": "IMPLANT-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+            ]
+          },
+          "performedDateTime": "2023-04-20",
+          "resourceType": "Procedure",
+          "status": "completed",
+          "subject": {
+            "reference": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:c87d95eb-5e1c-5a91-a090-fc7731acb8e5",
+        "resource": {
+          "id": "device-1",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-implantable-device"
+            ]
+          },
+          "patient": {
+            "reference": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493"
+          },
+          "resourceType": "Device",
+          "type": {
+            "coding": [
+              {
+                "code": "14106009",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "udiCarrier": [
+            {
+              "carrierHRF": "(01)00643169001763(11)230101(17)301231(10)LOT1(21)SER1",
+              "deviceIdentifier": "00643169001763"
+            }
+          ]
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": []
+}

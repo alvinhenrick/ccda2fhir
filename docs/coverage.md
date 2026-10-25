@@ -242,6 +242,19 @@ See `docs/decisions/0012-notes.md`.
 | `reference/externalDocument` | `relatesTo` | todo | | |
 | The document itself | Composition / DocumentReference | todo | | |
 
+## Devices (Product Instance / UDI) to Device
+
+See `docs/decisions/0013-devices.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `participantRole/id` (FDA UDI root) | `udiCarrier.carrierHRF` (+ `deviceIdentifier` for GS1) | done | `udi_gives_carrier_with_device_identifier_and_type` | |
+| `playingDevice/code` | `type` | done | same | |
+| Same UDI seen twice | one Device | done | `the_same_udi_twice_is_one_device` | |
+| Lot, serial, dates in the UDI | `lotNumber`, `serialNumber`, `expirationDate` | todo | | |
+| Link from the procedure | `Procedure.focalDevice` | todo | | |
+| Non-implantable Device uses (assessment scales, software) | other Devices | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that
