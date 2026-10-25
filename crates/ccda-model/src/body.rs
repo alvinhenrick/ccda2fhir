@@ -9,7 +9,8 @@
 use roxmltree::Node;
 
 use crate::types::{
-    identifiers, is_statement_element, parse_code, parse_time, parse_value, template_ids, Narrative,
+    identifiers, is_statement_element, parse_code, parse_quantity, parse_time, parse_value,
+    template_ids, Narrative,
 };
 use crate::xml::{attr, child, children, is_hl7, text_of};
 use crate::{Code, Identifier, ParseError, Quantity, TemplateId, Time, Value};
@@ -134,6 +135,9 @@ pub struct Statement {
     pub text: Option<String>,
     pub status_code: Option<String>,
     pub effective_time: Option<Time>,
+    /// Every `effectiveTime` in document order. Medications carry the validity interval first
+    /// and the frequency (`PIVL_TS`/`EIVL_TS`, `operator="A"`) after it.
+    pub effective_times: Vec<Time>,
     /// `value` elements (observations normally have one).
     pub values: Vec<Value>,
     pub participants: Vec<Participant>,
@@ -147,6 +151,13 @@ pub struct Statement {
     pub dose_quantity: Option<Quantity>,
     /// `doseQuantity` when it is a `low`/`high` interval.
     pub dose_range: Option<(Option<Quantity>, Option<Quantity>)>,
+    pub rate_quantity: Option<Quantity>,
+    /// `maxDoseQuantity`: numerator and denominator.
+    pub max_dose_quantity: Option<(Option<Quantity>, Option<Quantity>)>,
+    /// `quantity` (supply orders and dispenses).
+    pub quantity: Option<Quantity>,
+    /// A `precondition` is present (for example "as needed").
+    pub has_precondition: bool,
     pub administration_unit_code: Option<Code>,
     pub consumable: Option<Consumable>,
     pub related: Vec<Related>,
@@ -253,14 +264,6 @@ fn parse_organization(node: &Node) -> AuthorOrganization {
     }
 }
 
-fn parse_quantity(node: &Node) -> Quantity {
-    Quantity {
-        value: attr(node, "value"),
-        unit: attr(node, "unit"),
-        null_flavor: attr(node, "nullFlavor"),
-    }
-}
-
 fn parse_consumable(node: &Node, narrative: &Narrative) -> Option<Consumable> {
     let product = child(node, "manufacturedProduct")?;
     let material = child(&product, "manufacturedMaterial");
@@ -347,6 +350,18 @@ fn parse_statement(
         text,
         status_code: child(node, "statusCode").and_then(|n| attr(&n, "code")),
         effective_time: child(node, "effectiveTime").map(|n| parse_time(&n)),
+        effective_times: children(node, "effectiveTime")
+            .map(|n| parse_time(&n))
+            .collect(),
+        rate_quantity: child(node, "rateQuantity").map(|n| parse_quantity(&n)),
+        max_dose_quantity: child(node, "maxDoseQuantity").map(|n| {
+            (
+                child(&n, "numerator").map(|q| parse_quantity(&q)),
+                child(&n, "denominator").map(|q| parse_quantity(&q)),
+            )
+        }),
+        quantity: child(node, "quantity").map(|n| parse_quantity(&n)),
+        has_precondition: child(node, "precondition").is_some(),
         values: children(node, "value")
             .map(|n| parse_value(&n, narrative))
             .collect(),

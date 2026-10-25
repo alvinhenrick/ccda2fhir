@@ -87,6 +87,34 @@ and only the two fixtures above have been validated.
 | `primarySource` | not in C-CDA; omitted (R4/US Core 6.1.0 decide) | n/a | | |
 | Comment Activity | `note` | todo | | |
 
+## Medications (Medication Activity) to MedicationRequest (+ Medication)
+
+See `docs/decisions/0005-medications.md` for the rules and the deliberate differences from the IG.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `id` | `identifier` | done | golden `medications` | |
+| `statusCode` | `status` (CF-MedicationStatus) | done | `status_map_follows_the_ig` | |
+| `moodCode` INT / EVN | `intent` order / plan | done | `intent_follows_mood` | |
+| `negationInd` | `doNotPerform` (not in IG) | done | `negation_sets_do_not_perform` | |
+| `effectiveTime` IVL_TS | `timing.repeat.boundsPeriod` | done | golden | |
+| `effectiveTime` PIVL_TS | `timing.repeat.period/periodMax/periodUnit` | done | `period_and_range` | |
+| `effectiveTime` EIVL_TS | `timing.repeat.when/offset` | done | `offset_must_be_whole_minutes` | |
+| `repeatNumber` | `timing.repeat.count` (INT only) | done | `repeat_number_is_a_count_for_orders_only` | |
+| `routeCode`, `doseQuantity`, dose range, `rateQuantity` | `route`, `doseAndRate` | done | golden | |
+| `maxDoseQuantity` | `maxDosePerPeriod` (IG: maxDosePerAdministration) | done, differs | golden | |
+| Free Text Sig | `dosageInstruction.text` (IG: patientInstruction) | done, differs | golden | |
+| Instruction | `dosageInstruction.patientInstruction` | done | golden | |
+| `precondition` | `asNeededBoolean` (IG: not supported) | done, differs | `messages_never_contain_document_values` | |
+| Consumable code | `medicationCodeableConcept` | done | golden | |
+| Consumable with manufacturer | `Medication` + `medicationReference` | done | `manufacturer_makes_a_medication_resource` | |
+| Indication | `reasonCode` | done | golden | |
+| `performer` | `performer` (first only) | done | golden | |
+| `author` | `requester`, `authoredOn`, Provenance | done | golden | |
+| `approachSiteCode`, `administrationUnitCode`, drug vehicle | not supported (IG) | reported | golden report | |
+| Supply order, Medication Dispense | `dispenseRequest` / MedicationDispense | reported, todo | | |
+| Planned immunization (mood INT) | MedicationRequest | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

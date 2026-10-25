@@ -51,13 +51,32 @@ pub struct TimePoint {
     pub null_flavor: Option<String>,
 }
 
-/// An `effectiveTime`: a point (`value`) or an interval (`low`/`high`).
+/// The `period` of a periodic interval (`PIVL_TS`): one value, or a `low`/`high` range.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct TimePeriod {
+    pub value: Option<String>,
+    pub unit: Option<String>,
+    pub low: Option<Quantity>,
+    pub high: Option<Quantity>,
+}
+
+/// An `effectiveTime`: a point (`value`), an interval (`low`/`high`), or, for medications, a
+/// frequency (`PIVL_TS` with `period`, `EIVL_TS` with `event`).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Time {
     pub value: Option<String>,
     pub low: Option<TimePoint>,
     pub high: Option<TimePoint>,
     pub null_flavor: Option<String>,
+    /// The local name of `xsi:type`, e.g. `IVL_TS`, `PIVL_TS`, `EIVL_TS`.
+    pub xsi_type: Option<String>,
+    /// `operator`: `A` means this time intersects (further restricts) the previous one.
+    pub operator: Option<String>,
+    pub period: Option<TimePeriod>,
+    /// `EIVL_TS` `event/@code` (for example `ACM`, `HS`).
+    pub event: Option<String>,
+    /// `EIVL_TS` `offset`.
+    pub offset: Option<Quantity>,
 }
 
 /// A value with a raw string and an optional `nullFlavor`.
@@ -162,12 +181,36 @@ fn time_point(node: &Node) -> TimePoint {
     }
 }
 
+pub(crate) fn parse_quantity(node: &Node) -> Quantity {
+    Quantity {
+        value: attr(node, "value"),
+        unit: attr(node, "unit"),
+        null_flavor: attr(node, "nullFlavor"),
+    }
+}
+
 pub(crate) fn parse_time(node: &Node) -> Time {
+    let offset = child(node, "offset").map(|n| {
+        // An offset may be a single quantity or a range; a range contributes its low end.
+        child(&n, "low").map_or_else(|| parse_quantity(&n), |l| parse_quantity(&l))
+    });
     Time {
         value: attr(node, "value"),
         low: child(node, "low").map(|n| time_point(&n)),
         high: child(node, "high").map(|n| time_point(&n)),
         null_flavor: attr(node, "nullFlavor"),
+        xsi_type: node
+            .attribute((XSI_NS, "type"))
+            .map(|t| t.rsplit(':').next().unwrap_or(t).to_owned()),
+        operator: attr(node, "operator"),
+        period: child(node, "period").map(|p| TimePeriod {
+            value: attr(&p, "value"),
+            unit: attr(&p, "unit"),
+            low: child(&p, "low").map(|n| parse_quantity(&n)),
+            high: child(&p, "high").map(|n| parse_quantity(&n)),
+        }),
+        event: child(node, "event").and_then(|n| attr(&n, "code")),
+        offset,
     }
 }
 

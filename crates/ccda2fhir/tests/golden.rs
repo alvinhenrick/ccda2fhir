@@ -61,3 +61,8 @@ fn allergies() {
 fn immunizations() {
     check("immunizations");
 }
+
+#[test]
+fn medications() {
+    check("medications");
+}

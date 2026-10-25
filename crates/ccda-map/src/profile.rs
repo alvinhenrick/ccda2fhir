@@ -28,6 +28,14 @@ impl Profiles {
             "Patient" => "us-core-patient",
             "AllergyIntolerance" => "us-core-allergyintolerance",
             "Immunization" => "us-core-immunization",
+            // US Core requires authoredOn and requester; claim it only when both are present.
+            "MedicationRequest" => {
+                if !(resource["authoredOn"].is_string() && resource["requester"].is_object()) {
+                    return None;
+                }
+                "us-core-medicationrequest"
+            }
+            "Medication" => "us-core-medication",
             "Provenance" => "us-core-provenance",
             "Organization" => {
                 if !(resource["name"].is_string() && resource["active"].is_boolean()) {
