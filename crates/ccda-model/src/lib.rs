@@ -13,8 +13,8 @@ use roxmltree::{Document, ParsingOptions};
 use thiserror::Error;
 
 pub use body::{
-    Author, AuthorOrganization, Consumable, Entry, Link, Participant, Related, Section, Statement,
-    StatementKind,
+    Author, AuthorOrganization, Consumable, Entry, Link, Participant, ReferenceRange, Related,
+    Section, Statement, StatementKind,
 };
 pub use header::Patient;
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
@@ -404,8 +404,9 @@ mod tests {
         assert!(matches!(&values[3], Value::Boolean(s) if s.value.as_deref() == Some("true")));
         assert_eq!(
             values[4],
-            Value::Other {
-                xsi_type: Some("IVL_PQ".into())
+            Value::Range {
+                low: None,
+                high: None
             }
         );
         assert_eq!(values[5], Value::Other { xsi_type: None });

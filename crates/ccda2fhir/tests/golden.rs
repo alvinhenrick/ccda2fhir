@@ -66,3 +66,8 @@ fn immunizations() {
 fn medications() {
     check("medications");
 }
+
+#[test]
+fn vitals() {
+    check("vitals");
+}

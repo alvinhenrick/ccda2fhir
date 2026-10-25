@@ -29,6 +29,7 @@ impl Profiles {
             "AllergyIntolerance" => "us-core-allergyintolerance",
             "Immunization" => "us-core-immunization",
             // US Core requires authoredOn and requester; claim it only when both are present.
+            "Observation" => vital_signs_profile(resource)?,
             "MedicationRequest" => {
                 if !(resource["authoredOn"].is_string() && resource["requester"].is_object()) {
                     return None;
@@ -95,6 +96,62 @@ impl Profiles {
             resource["meta"] = json!({ "profile": [url] });
         }
     }
+}
+
+/// The US Core vital sign profile an Observation meets, or `None`. A specific profile is claimed
+/// only when the value uses a unit that profile allows; otherwise the general vital signs profile
+/// is claimed when the Observation is complete enough for it.
+fn vital_signs_profile(resource: &Value) -> Option<&'static str> {
+    let is_vital = resource["category"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .flat_map(|c| c["coding"].as_array().into_iter().flatten())
+        .any(|c| c["code"] == "vital-signs");
+    if !is_vital {
+        return None;
+    }
+    let has_loinc = |code: &str| {
+        resource["code"]["coding"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .any(|c| c["system"] == "http://loinc.org" && c["code"] == code)
+    };
+    let unit = resource["valueQuantity"]["code"].as_str();
+    let ucum = resource["valueQuantity"]["system"] == "http://unitsofmeasure.org";
+    let unit_is = |allowed: &[&str]| ucum && unit.is_some_and(|u| allowed.contains(&u));
+    let specific = if has_loinc("85354-9") {
+        Some("us-core-blood-pressure")
+    } else if has_loinc("59408-5") && unit_is(&["%"]) {
+        Some("us-core-pulse-oximetry")
+    } else if has_loinc("8867-4") && unit_is(&["/min"]) {
+        Some("us-core-heart-rate")
+    } else if has_loinc("9279-1") && unit_is(&["/min"]) {
+        Some("us-core-respiratory-rate")
+    } else if has_loinc("8310-5") && unit_is(&["Cel", "[degF]"]) {
+        Some("us-core-body-temperature")
+    } else if has_loinc("8302-2") && unit_is(&["cm", "[in_i]"]) {
+        Some("us-core-body-height")
+    } else if has_loinc("29463-7") && unit_is(&["kg", "g", "[lb_av]", "[oz_av]"]) {
+        Some("us-core-body-weight")
+    } else if has_loinc("39156-5") && unit_is(&["kg/m2"]) {
+        Some("us-core-bmi")
+    } else if has_loinc("9843-4") && unit_is(&["cm", "[in_i]"]) {
+        Some("us-core-head-circumference")
+    } else {
+        None
+    };
+    if specific.is_some() {
+        return specific;
+    }
+    let complete = resource["valueQuantity"].is_object()
+        || resource["dataAbsentReason"].is_object()
+        || resource["component"].is_array()
+        || resource["hasMember"].is_array();
+    (complete
+        && resource["effectiveDateTime"].is_string() | resource["effectivePeriod"].is_object())
+    .then_some("us-core-vital-signs")
 }
 
 #[cfg(test)]

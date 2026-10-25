@@ -120,6 +120,15 @@ pub struct Participant {
     pub playing_device_code: Option<Code>,
 }
 
+/// `referenceRange/observationRange` of an observation.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ReferenceRange {
+    /// `interpretationCode` (`N` normal, `H`, `L`, ...).
+    pub interpretation: Option<Code>,
+    pub text: Option<String>,
+    pub value: Option<Value>,
+}
+
 /// A clinical statement and everything nested under it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Statement {
@@ -141,6 +150,10 @@ pub struct Statement {
     /// `value` elements (observations normally have one).
     pub values: Vec<Value>,
     pub participants: Vec<Participant>,
+    pub interpretation_codes: Vec<Code>,
+    pub method_codes: Vec<Code>,
+    pub target_site_codes: Vec<Code>,
+    pub reference_ranges: Vec<ReferenceRange>,
     pub authors: Vec<Author>,
     pub performers: Vec<Author>,
     /// `repeatNumber/@value` (dose number for immunizations, repeats for orders).
@@ -390,6 +403,23 @@ fn parse_statement(
         administration_unit_code: child(node, "administrationUnitCode")
             .map(|n| parse_code(&n, narrative)),
         consumable: child(node, "consumable").and_then(|n| parse_consumable(&n, narrative)),
+        interpretation_codes: children(node, "interpretationCode")
+            .map(|n| parse_code(&n, narrative))
+            .collect(),
+        method_codes: children(node, "methodCode")
+            .map(|n| parse_code(&n, narrative))
+            .collect(),
+        target_site_codes: children(node, "targetSiteCode")
+            .map(|n| parse_code(&n, narrative))
+            .collect(),
+        reference_ranges: children(node, "referenceRange")
+            .filter_map(|n| child(&n, "observationRange"))
+            .map(|r| ReferenceRange {
+                interpretation: child(&r, "interpretationCode").map(|n| parse_code(&n, narrative)),
+                text: child(&r, "text").and_then(|n| text_of(&n)),
+                value: child(&r, "value").map(|n| parse_value(&n, narrative)),
+            })
+            .collect(),
         authors: children(node, "author")
             .map(|n| parse_author(&n, narrative))
             .collect(),

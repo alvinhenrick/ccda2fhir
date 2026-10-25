@@ -33,6 +33,21 @@ pub fn decimal(text: &str) -> Option<Number> {
     serde_json::from_str(text).ok()
 }
 
+/// The UCUM code for a unit string. Documents often use common non-UCUM spellings (`lb`, `in`,
+/// `F`); the well-known ones are replaced, anything else is passed through unchanged.
+fn ucum_code(unit: &str) -> &str {
+    match unit {
+        "lb" | "lbs" | "lb_av" => "[lb_av]",
+        "oz" | "oz_av" => "[oz_av]",
+        "in" | "inch" | "inches" | "in_i" => "[in_i]",
+        "ft" | "foot" | "feet" | "ft_i" => "[ft_i]",
+        "F" | "degF" | "deg F" => "[degF]",
+        "C" | "degC" | "deg C" => "Cel",
+        "bpm" | "beats/min" | "breaths/min" | "/minute" => "/min",
+        other => other,
+    }
+}
+
 /// Map a physical quantity to a FHIR `Quantity`. Returns `None` (with a warning) when the value
 /// is missing or not a decimal.
 pub fn map_quantity(quantity: &Quantity, report: &mut Report) -> Option<Value> {
@@ -47,9 +62,16 @@ pub fn map_quantity(quantity: &Quantity, report: &mut Report) -> Option<Value> {
     let mut out = Map::new();
     out.insert("value".into(), Value::Number(number));
     if let Some(unit) = quantity.unit.as_deref().filter(|u| *u != "1") {
+        let code = ucum_code(unit);
+        if code != unit {
+            report.info(
+                "quantity.unit.normalized",
+                "a unit that is not valid UCUM was replaced by its UCUM equivalent in `code`",
+            );
+        }
         out.insert("unit".into(), json!(unit));
         out.insert("system".into(), json!(UCUM));
-        out.insert("code".into(), json!(unit));
+        out.insert("code".into(), json!(code));
     }
     Some(Value::Object(out))
 }

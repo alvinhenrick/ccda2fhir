@@ -112,6 +112,11 @@ pub enum Value {
     Boolean(Scalar),
     /// `TS`
     Timestamp(Scalar),
+    /// `IVL_PQ`: a range of quantities.
+    Range {
+        low: Option<Quantity>,
+        high: Option<Quantity>,
+    },
     /// Any type we do not model yet. Kept so mappers can report it instead of silently losing it.
     Other { xsi_type: Option<String> },
 }
@@ -233,6 +238,10 @@ pub(crate) fn parse_value(node: &Node, narrative: &Narrative) -> Value {
             unit: attr(node, "unit"),
             null_flavor: attr(node, "nullFlavor"),
         }),
+        Some("IVL_PQ") => Value::Range {
+            low: child(node, "low").map(|n| parse_quantity(&n)),
+            high: child(node, "high").map(|n| parse_quantity(&n)),
+        },
         Some("INT") => Value::Integer(scalar(node)),
         Some("REAL") => Value::Real(scalar(node)),
         Some("BL") => Value::Boolean(scalar(node)),

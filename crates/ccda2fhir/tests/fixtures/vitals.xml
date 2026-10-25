@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-VITALS-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <effectiveTime value="20250102120000-0500"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0005"/>
+      <patient>
+        <name><given>Eli</given><family>Example</family></name>
+        <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19750309"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.4.1"/>
+    <code code="8716-3" codeSystem="2.16.840.1.113883.6.1" displayName="Vital signs"/>
+    <title>Vital Signs</title>
+    <text/>
+    <entry typeCode="DRIV"><organizer classCode="CLUSTER" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.26"/>
+      <id root="1.3.6.1.4.1.22812.7.1" extension="ORG-1"/>
+      <code code="46680005" codeSystem="2.16.840.1.113883.6.96" displayName="Vital signs"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20241105083000-0500"/>
+      <author>
+        <time value="20241105083500-0500"/>
+        <assignedAuthor>
+          <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+          <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+          <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Clinic</name></representedOrganization>
+        </assignedAuthor>
+      </author>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-1"/>
+        <code code="8480-6" codeSystem="2.16.840.1.113883.6.1" displayName="Systolic blood pressure"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="120" unit="mm[Hg]"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-2"/>
+        <code code="8462-4" codeSystem="2.16.840.1.113883.6.1" displayName="Diastolic blood pressure"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="80" unit="mm[Hg]"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-3"/>
+        <code code="8867-4" codeSystem="2.16.840.1.113883.6.1" displayName="Heart rate"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="72" unit="/min"/>
+        <interpretationCode code="N" codeSystem="2.16.840.1.113883.5.83"/>
+        <referenceRange><observationRange><value xsi:type="IVL_PQ"><low value="60" unit="/min"/><high value="100" unit="/min"/></value></observationRange></referenceRange>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-4"/>
+        <code code="29463-7" codeSystem="2.16.840.1.113883.6.1" displayName="Body weight"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="154.5" unit="lb"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-5"/>
+        <code code="8302-2" codeSystem="2.16.840.1.113883.6.1" displayName="Body height"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="68" unit="in"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-6"/>
+        <code code="8310-5" codeSystem="2.16.840.1.113883.6.1" displayName="Body temperature"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="98.6" unit="F"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-7"/>
+        <code code="59408-5" codeSystem="2.16.840.1.113883.6.1" displayName="Oxygen saturation in Arterial blood by Pulse oximetry"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="98" unit="%"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-8"/>
+        <code code="3151-8" codeSystem="2.16.840.1.113883.6.1" displayName="Inhaled oxygen flow rate"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="2" unit="L/min"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-9"/>
+        <code code="9279-1" codeSystem="2.16.840.1.113883.6.1" displayName="Respiratory rate"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" nullFlavor="NI"/>
+      </observation></component>
+    </organizer></entry>
+    <!-- Second visit: only a systolic reading, so it cannot become a blood pressure panel -->
+    <entry typeCode="DRIV"><organizer classCode="CLUSTER" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.26"/>
+      <id root="1.3.6.1.4.1.22812.7.1" extension="ORG-2"/>
+      <code code="46680005" codeSystem="2.16.840.1.113883.6.96"/>
+      <statusCode code="completed"/>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.27"/>
+        <id root="1.3.6.1.4.1.22812.7.1" extension="V-10"/>
+        <code code="8480-6" codeSystem="2.16.840.1.113883.6.1" displayName="Systolic blood pressure"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241105083000-0500"/>
+        <value xsi:type="PQ" value="132" unit="mm[Hg]"/>
+      </observation></component>
+    </organizer></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>

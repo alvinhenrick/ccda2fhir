@@ -15,6 +15,7 @@ mod identifier;
 mod immunization;
 mod medication;
 mod nullflavor;
+mod observation;
 mod patient;
 mod problem;
 mod profile;
@@ -22,6 +23,7 @@ mod quantity;
 mod report;
 mod timestamp;
 mod util;
+mod vitals;
 
 pub use allergy::map_allergies;
 pub use coding::map_codeable_concept;
@@ -40,3 +42,4 @@ pub use report::{Issue, Report, Severity};
 pub use timestamp::{
     hl7_date_to_fhir_date, hl7_ts_to_fhir_datetime, map_datetime, Converted, InvalidTimestamp, Loss,
 };
+pub use vitals::map_vitals;

@@ -1,0 +1,1028 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1",
+        "resource": {
+          "birthDate": "1975-03-09",
+          "gender": "male",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0005"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Eli"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:0d9b5819-3156-52a6-a7c3-cca96f7cfcde",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "85353-1",
+                "display": "Vital signs, weight, height, head circumference, oxygen saturation and BMI panel",
+                "system": "http://loinc.org"
+              }
+            ],
+            "text": "Vital Signs Panel"
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "hasMember": [
+            {
+              "reference": "urn:uuid:862488d5-8ac0-5bf4-baef-ee095de1f364"
+            },
+            {
+              "reference": "urn:uuid:fdd36ebf-3cef-574c-b0db-2bc997fb1a33"
+            },
+            {
+              "reference": "urn:uuid:d8220efe-af5b-586b-9d03-f4abddda15bf"
+            },
+            {
+              "reference": "urn:uuid:d5e8a125-06da-5356-be77-b852be05b171"
+            },
+            {
+              "reference": "urn:uuid:b70d607c-f7b9-54b3-97a3-72c552a2dd2f"
+            },
+            {
+              "reference": "urn:uuid:dedb0dd6-6126-56fd-9ef1-2caeb187c367"
+            },
+            {
+              "reference": "urn:uuid:49b5ad17-9693-558e-88c5-65672fa4088b"
+            }
+          ],
+          "id": "vitalsigns-panel-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "ORG-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:862488d5-8ac0-5bf4-baef-ee095de1f364",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "85354-9",
+                "display": "Blood pressure panel with all children optional",
+                "system": "http://loinc.org"
+              }
+            ],
+            "text": "Blood pressure"
+          },
+          "component": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "8480-6",
+                    "display": "Systolic blood pressure",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "valueQuantity": {
+                "code": "mm[Hg]",
+                "system": "http://unitsofmeasure.org",
+                "unit": "mm[Hg]",
+                "value": 120
+              }
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "8462-4",
+                    "display": "Diastolic blood pressure",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "valueQuantity": {
+                "code": "mm[Hg]",
+                "system": "http://unitsofmeasure.org",
+                "unit": "mm[Hg]",
+                "value": 80
+              }
+            }
+          ],
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-1"
+            },
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-2"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-blood-pressure"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:fdd36ebf-3cef-574c-b0db-2bc997fb1a33",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "59408-5",
+                "display": "Oxygen saturation in Arterial blood by Pulse oximetry",
+                "system": "http://loinc.org"
+              },
+              {
+                "code": "2708-6",
+                "display": "Oxygen saturation in Arterial blood",
+                "system": "http://loinc.org"
+              }
+            ],
+            "text": "Oxygen saturation"
+          },
+          "component": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "3151-8",
+                    "display": "Inhaled oxygen flow rate",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "valueQuantity": {
+                "code": "L/min",
+                "system": "http://unitsofmeasure.org",
+                "unit": "L/min",
+                "value": 2
+              }
+            }
+          ],
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-7"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "valueQuantity": {
+            "code": "%",
+            "system": "http://unitsofmeasure.org",
+            "unit": "%",
+            "value": 98
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:d8220efe-af5b-586b-9d03-f4abddda15bf",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "8867-4",
+                "display": "Heart rate",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-3",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-3"
+            }
+          ],
+          "interpretation": [
+            {
+              "coding": [
+                {
+                  "code": "N",
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation"
+                }
+              ]
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-heart-rate"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "referenceRange": [
+            {
+              "high": {
+                "code": "/min",
+                "system": "http://unitsofmeasure.org",
+                "unit": "/min",
+                "value": 100
+              },
+              "low": {
+                "code": "/min",
+                "system": "http://unitsofmeasure.org",
+                "unit": "/min",
+                "value": 60
+              }
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "valueQuantity": {
+            "code": "/min",
+            "system": "http://unitsofmeasure.org",
+            "unit": "/min",
+            "value": 72
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:d5e8a125-06da-5356-be77-b852be05b171",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "29463-7",
+                "display": "Body weight",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-4",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-4"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-weight"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "valueQuantity": {
+            "code": "[lb_av]",
+            "system": "http://unitsofmeasure.org",
+            "unit": "lb",
+            "value": 154.5
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b70d607c-f7b9-54b3-97a3-72c552a2dd2f",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "8302-2",
+                "display": "Body height",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-5",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-5"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-height"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "valueQuantity": {
+            "code": "[in_i]",
+            "system": "http://unitsofmeasure.org",
+            "unit": "in",
+            "value": 68
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:dedb0dd6-6126-56fd-9ef1-2caeb187c367",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "8310-5",
+                "display": "Body temperature",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-6",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-6"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-temperature"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "valueQuantity": {
+            "code": "[degF]",
+            "system": "http://unitsofmeasure.org",
+            "unit": "F",
+            "value": 98.6
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:49b5ad17-9693-558e-88c5-65672fa4088b",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "9279-1",
+                "display": "Respiratory rate",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "dataAbsentReason": {
+            "coding": [
+              {
+                "code": "unknown",
+                "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-7",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-9"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs"
+            ]
+          },
+          "performer": [
+            {
+              "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:9598f909-ae9b-5887-99f3-043188136ef6",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "85353-1",
+                "display": "Vital signs, weight, height, head circumference, oxygen saturation and BMI panel",
+                "system": "http://loinc.org"
+              }
+            ],
+            "text": "Vital Signs Panel"
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "hasMember": [
+            {
+              "reference": "urn:uuid:05f97048-70de-51eb-bf5a-bf6c939b01ce"
+            }
+          ],
+          "id": "vitalsigns-panel-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "ORG-2"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs"
+            ]
+          },
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:05f97048-70de-51eb-bf5a-bf6c939b01ce",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "vital-signs",
+                  "display": "Vital Signs",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "8480-6",
+                "display": "Systolic blood pressure",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-11-05T08:30:00-05:00",
+          "id": "vitalsign-8",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.7.1",
+              "value": "V-10"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs"
+            ]
+          },
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "valueQuantity": {
+            "code": "mm[Hg]",
+            "system": "http://unitsofmeasure.org",
+            "unit": "mm[Hg]",
+            "value": 132
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8",
+        "resource": {
+          "id": "practitioner-1",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "1234567893"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Doe",
+              "given": [
+                "Pat"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7",
+        "resource": {
+          "active": true,
+          "id": "organization-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.9",
+              "value": "ORG-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "Example Clinic",
+          "resourceType": "Organization"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:b6cef40d-5850-5beb-9c02-1fb55ed2ca87",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-1",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:862488d5-8ac0-5bf4-baef-ee095de1f364"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:13a1fa3f-a2eb-57b1-8558-46a006f91e41",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-2",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:fdd36ebf-3cef-574c-b0db-2bc997fb1a33"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:4f2870a9-5892-5640-8333-ead3f1bb8f81",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-3",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:d8220efe-af5b-586b-9d03-f4abddda15bf"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:1bd973d4-5532-51b1-b826-b4fc45926a53",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-4",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:d5e8a125-06da-5356-be77-b852be05b171"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:10273a3a-f65b-5171-92a1-ac5152b23c3a",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-5",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:b70d607c-f7b9-54b3-97a3-72c552a2dd2f"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:3f5b85b2-f022-5fa0-b474-f775a9427a1d",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-6",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:dedb0dd6-6126-56fd-9ef1-2caeb187c367"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:2b1f3b2a-2297-543e-98a1-4a8337050e0d",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-7",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:49b5ad17-9693-558e-88c5-65672fa4088b"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:05f9c64a-e39b-5072-8447-1c8af51e48bb",
+        "resource": {
+          "agent": [
+            {
+              "onBehalfOf": {
+                "reference": "urn:uuid:0a402707-aa89-57ab-b5e0-196f87ac05d7"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "author",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:4a939556-c396-576c-a377-f6cfefed67e8"
+              }
+            }
+          ],
+          "id": "provenance-8",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance"
+            ]
+          },
+          "recorded": "2024-11-05T08:35:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:0d9b5819-3156-52a6-a7c3-cca96f7cfcde"
+            }
+          ]
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "quantity.unit.normalized",
+      "severity": "info"
+    },
+    {
+      "code": "quantity.unit.normalized",
+      "severity": "info"
+    },
+    {
+      "code": "quantity.unit.normalized",
+      "severity": "info"
+    },
+    {
+      "code": "vitals.blood-pressure.incomplete",
+      "severity": "info"
+    }
+  ]
+}
