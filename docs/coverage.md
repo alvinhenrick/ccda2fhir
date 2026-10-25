@@ -188,6 +188,21 @@ See `docs/decisions/0009-encounters.md`.
 | Links from procedures, conditions and results to the encounter | `encounter` | todo | | |
 | Planned encounter (mood INT) | Appointment / ServiceRequest | reported, todo | | |
 
+## Social history (Social History / Smoking / Tobacco / Pregnancy Observation) to Observation
+
+See `docs/decisions/0010-social-history.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Social History Observation | Observation, category `social-history` | done | golden `social` | |
+| Smoking Status MU / Tobacco Use | Observation; US Core smoking status when coded and dated | done | `smoking_status_is_a_social_history_observation_with_a_date` | |
+| Start-only `effectiveTime` | `effectiveDateTime` | done | same | |
+| Pregnancy Observation | Pregnancy status / intent Observation (LOINC code) | done | `pregnancy_uses_the_loinc_code_one_time_and_an_edd_component` | |
+| Estimated delivery date | component 11778-8 | done | same | |
+| Unknown pregnancy value | v3 NullFlavor UNK coding | done | `unknown_pregnancy_value_is_a_null_flavor_coding` | |
+| Birth sex, gender identity, tribal affiliation | Patient extensions | reported, todo (with Patient demographics) | `birth_sex_is_left_for_the_patient_and_reported` | |
+| SDOH categories, assessment scales | other categories / Observation panels | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

@@ -159,6 +159,33 @@ fn observation_profile(resource: &Value) -> Option<&'static str> {
         let coded = resource["code"]["coding"].is_array();
         return (has_value && timed && coded).then_some("us-core-observation-lab");
     }
+    if in_category("social-history") {
+        let has_loinc = |code: &str| {
+            resource["code"]["coding"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .any(|c| c["system"] == "http://loinc.org" && c["code"] == code)
+        };
+        let coded_value = resource["valueCodeableConcept"].is_object();
+        let dated = resource["effectiveDateTime"].is_string();
+        return if has_loinc("72166-2") && coded_value && dated {
+            Some("us-core-smokingstatus")
+        } else if has_loinc("82810-3") && coded_value && dated {
+            Some("us-core-observation-pregnancystatus")
+        } else if has_loinc("86645-9") && coded_value && dated {
+            Some("us-core-observation-pregnancyintent")
+        } else if resource["code"]["coding"].is_array()
+            && resource.as_object().is_some_and(|o| {
+                o.keys()
+                    .any(|k| k.starts_with("value") || k == "dataAbsentReason")
+            })
+        {
+            Some("us-core-simple-observation")
+        } else {
+            None
+        };
+    }
     vital_signs_profile(resource)
 }
 

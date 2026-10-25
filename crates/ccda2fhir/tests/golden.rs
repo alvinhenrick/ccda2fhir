@@ -86,3 +86,8 @@ fn procedures() {
 fn encounters() {
     check("encounters");
 }
+
+#[test]
+fn social() {
+    check("social");
+}
