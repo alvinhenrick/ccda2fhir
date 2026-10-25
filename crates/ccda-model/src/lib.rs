@@ -29,6 +29,9 @@ pub struct Limits {
     pub max_bytes: usize,
     /// Maximum number of XML nodes the parser will create.
     pub max_nodes: u32,
+    /// Maximum element nesting depth. The XML parser recurses on depth, so this is checked with
+    /// a flat scan before parsing. Real C-CDA documents stay well under 100.
+    pub max_depth: usize,
 }
 
 impl Default for Limits {
@@ -36,6 +39,7 @@ impl Default for Limits {
         Self {
             max_bytes: 50 * 1024 * 1024, // 50 MiB
             max_nodes: 5_000_000,
+            max_depth: 256,
         }
     }
 }
@@ -94,6 +98,61 @@ impl ClinicalDocument {
     }
 }
 
+/// True if element nesting in `xml` is deeper than `max`.
+///
+/// A flat scan: it follows tags, comments, CDATA and processing instructions, and honours quotes
+/// inside tags, without building anything. Malformed input is not diagnosed here (the real
+/// parser does that); it only has to be safe to hand on.
+fn exceeds_depth(xml: &[u8], max: usize) -> bool {
+    let mut depth = 0usize;
+    let mut i = 0usize;
+    while i < xml.len() {
+        if xml[i] != b'<' {
+            i += 1;
+            continue;
+        }
+        let rest = &xml[i..];
+        if rest.starts_with(b"<!--") {
+            i += find(rest, b"-->").map_or(rest.len(), |p| p + 3);
+        } else if rest.starts_with(b"<![CDATA[") {
+            i += find(rest, b"]]>").map_or(rest.len(), |p| p + 3);
+        } else if rest.starts_with(b"<?") {
+            i += find(rest, b"?>").map_or(rest.len(), |p| p + 2);
+        } else if rest.starts_with(b"<!") {
+            i += find(rest, b">").map_or(rest.len(), |p| p + 1);
+        } else {
+            let closing = rest.starts_with(b"</");
+            // Find the end of the tag, skipping quoted attribute values.
+            let mut j = 1;
+            let mut quote = None;
+            while j < rest.len() {
+                match (quote, rest[j]) {
+                    (None, b'"' | b'\'') => quote = Some(rest[j]),
+                    (Some(q), c) if c == q => quote = None,
+                    (None, b'>') => break,
+                    _ => {}
+                }
+                j += 1;
+            }
+            let self_closing = j > 0 && j < rest.len() && rest[j - 1] == b'/';
+            if closing {
+                depth = depth.saturating_sub(1);
+            } else if !self_closing {
+                depth += 1;
+                if depth > max {
+                    return true;
+                }
+            }
+            i += j + 1;
+        }
+    }
+    false
+}
+
+fn find(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+    haystack.windows(needle.len()).position(|w| w == needle)
+}
+
 /// Parse a C-CDA document with the default [`Limits`].
 ///
 /// # Errors
@@ -116,6 +175,9 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
         });
     }
     let text = std::str::from_utf8(xml).map_err(|_| ParseError::NotUtf8)?;
+    if exceeds_depth(text.as_bytes(), limits.max_depth) {
+        return Err(ParseError::TooDeep);
+    }
 
     // `allow_dtd: false` makes roxmltree reject any DOCTYPE, which closes the
     // door on entity-expansion attacks. `nodes_limit` bounds memory use.
@@ -174,6 +236,26 @@ mod tests {
     </patientRole>
   </recordTarget>
 </ClinicalDocument>"#;
+
+    #[test]
+    fn depth_scan_counts_elements_and_ignores_comments_cdata_and_quotes() {
+        assert!(!exceeds_depth(b"<a><b><c/></b></a>", 3));
+        assert!(exceeds_depth(b"<a><b><c></c></b></a>", 2));
+        // Tags inside comments, CDATA, PIs and attribute values do not count.
+        assert!(!exceeds_depth(b"<a><!-- <b><c><d> --></a>", 1));
+        assert!(!exceeds_depth(b"<a><![CDATA[<b><c>]]></a>", 1));
+        assert!(!exceeds_depth(b"<a><?pi <b><c> ?></a>", 1));
+        assert!(!exceeds_depth(b"<a x=\"<b><c>\" y='>'/>", 1));
+        // Unterminated constructs end the scan instead of looping.
+        assert!(!exceeds_depth(b"<a><!-- <b><c>", 1));
+        assert!(exceeds_depth(&b"<a>".repeat(1000), 256));
+    }
+
+    #[test]
+    fn deeply_nested_input_is_refused_before_parsing() {
+        let xml = format!("{}{}", "<a>".repeat(100_000), "</a>".repeat(100_000));
+        assert_eq!(parse(xml.as_bytes()), Err(ParseError::TooDeep));
+    }
 
     #[test]
     fn parses_header_and_patient() {

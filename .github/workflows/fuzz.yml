@@ -1,0 +1,42 @@
+name: Fuzz
+
+on:
+  pull_request:
+    paths:
+      - "crates/**"
+      - "fuzz/**"
+      - ".github/workflows/fuzz.yml"
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "How long to fuzz"
+        default: "300"
+
+jobs:
+  fuzz:
+    name: cargo-fuzz convert
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: fuzz
+      - run: cargo install cargo-fuzz --locked
+      - name: Seed the corpus with the synthetic fixtures
+        run: |
+          mkdir -p fuzz/corpus/convert
+          cp crates/ccda2fhir/tests/fixtures/*.xml fuzz/corpus/convert/
+      - name: Fuzz
+        env:
+          SECONDS_TO_RUN: ${{ github.event.inputs.seconds || (github.event_name == 'schedule' && '600') || '60' }}
+        run: cargo fuzz run convert -- -max_len=65536 -timeout=10 -rss_limit_mb=2048 -max_total_time="$SECONDS_TO_RUN"
+      - name: Keep crashing inputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-artifacts
+          path: fuzz/artifacts

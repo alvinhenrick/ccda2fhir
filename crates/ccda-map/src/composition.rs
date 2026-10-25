@@ -3,7 +3,7 @@
 //! There is no IG page for this (the C-CDA on FHIR document profiles are outdated); this follows
 //! FHIR R4 Composition. See `docs/decisions/0020-composition.md`.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use ccda_model::{ClinicalDocument, Section, Statement};
 use serde_json::{json, Map, Value};
@@ -207,10 +207,12 @@ fn section(
     for e in &s.entries {
         statement_keys(&e.statement, ctx, &mut found);
     }
+    // Keep first-seen order; the set makes the duplicate check constant time.
     let mut refs: Vec<String> = Vec::new();
+    let mut seen: BTreeSet<&String> = BTreeSet::new();
     for k in found {
         for reference in by_key.get(&k).into_iter().flatten() {
-            if !refs.contains(reference) {
+            if seen.insert(reference) {
                 refs.push(reference.clone());
             }
         }
