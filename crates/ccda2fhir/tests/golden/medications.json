@@ -342,6 +342,10 @@
     {
       "code": "medication.precondition.as-needed-assumed",
       "severity": "info"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
     }
   ]
 }

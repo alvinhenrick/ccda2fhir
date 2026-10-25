@@ -181,6 +181,10 @@
     {
       "code": "organization.active.assumed",
       "severity": "info"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
     }
   ]
 }

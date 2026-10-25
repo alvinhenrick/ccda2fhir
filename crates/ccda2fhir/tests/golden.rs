@@ -136,3 +136,8 @@ fn location_and_specimen() {
 fn planned_activities() {
     check("planned-activities");
 }
+
+#[test]
+fn composition() {
+    check("composition");
+}

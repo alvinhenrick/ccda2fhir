@@ -1,0 +1,272 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:38410c34-43e9-573f-abd4-d31e95be57a5",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0019"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:1d9c34f4-3d06-52e8-8e90-d4f6b0906f16",
+        "resource": {
+          "author": [
+            {
+              "reference": "urn:uuid:46bb9956-8f3d-5c36-8349-94608c630be8"
+            }
+          ],
+          "confidentiality": "N",
+          "custodian": {
+            "reference": "urn:uuid:807d7531-de2a-5ad3-be3c-a8a929725b50"
+          },
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-COMPOSITION-1"
+          },
+          "language": "en-US",
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "18776-5",
+                    "display": "Plan of care",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
+                "status": "generated"
+              },
+              "title": "Plan of Treatment"
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "61146-7",
+                    "display": "Goals",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:c7b06c04-b2be-5717-b7df-99b8f1d68697"
+                },
+                {
+                  "reference": "urn:uuid:8975e428-8d93-55fe-acbb-d4448111ff7e"
+                }
+              ],
+              "title": "Goals"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:38410c34-43e9-573f-abd4-d31e95be57a5"
+          },
+          "title": "Continuity of Care Document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "display": "Summarization of episode note",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:c7b06c04-b2be-5717-b7df-99b8f1d68697",
+        "resource": {
+          "description": {
+            "coding": [
+              {
+                "code": "289169006",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "goal-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-1"
+            }
+          ],
+          "lifecycleStatus": "active",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2025-01-01",
+          "subject": {
+            "reference": "urn:uuid:38410c34-43e9-573f-abd4-d31e95be57a5"
+          },
+          "target": [
+            {
+              "dueDate": "2025-12-31"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:8975e428-8d93-55fe-acbb-d4448111ff7e",
+        "resource": {
+          "description": {
+            "text": "Walk 30 minutes a day"
+          },
+          "id": "goal-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-2"
+            }
+          ],
+          "lifecycleStatus": "completed",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2024-06-01",
+          "subject": {
+            "reference": "urn:uuid:38410c34-43e9-573f-abd4-d31e95be57a5"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:9d85a77b-cb8c-5cf1-b2a0-361b5dd4bdac",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "assess-plan",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/careplan-category"
+                }
+              ]
+            }
+          ],
+          "goal": [
+            {
+              "reference": "urn:uuid:c7b06c04-b2be-5717-b7df-99b8f1d68697"
+            },
+            {
+              "reference": "urn:uuid:8975e428-8d93-55fe-acbb-d4448111ff7e"
+            }
+          ],
+          "id": "careplan-1",
+          "intent": "plan",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-careplan"
+            ]
+          },
+          "resourceType": "CarePlan",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:38410c34-43e9-573f-abd4-d31e95be57a5"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
+            "status": "generated"
+          },
+          "title": "Plan of Treatment"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:46bb9956-8f3d-5c36-8349-94608c630be8",
+        "resource": {
+          "id": "practitioner-1",
+          "identifier": [
+            {
+              "system": "http://hl7.org/fhir/sid/us-npi",
+              "value": "1234567893"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "family": "Doe",
+              "given": [
+                "Pat"
+              ]
+            }
+          ],
+          "resourceType": "Practitioner"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:807d7531-de2a-5ad3-be3c-a8a929725b50",
+        "resource": {
+          "active": true,
+          "id": "organization-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.9",
+              "value": "CLINIC-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "Example Clinic",
+          "resourceType": "Organization"
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "careplan.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    }
+  ]
+}

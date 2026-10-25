@@ -139,6 +139,10 @@
     {
       "code": "careplan.status.assumed",
       "severity": "info"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
     }
   ]
 }

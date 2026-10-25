@@ -273,7 +273,7 @@ fn narrative_of(section: &Node) -> Narrative {
     map
 }
 
-fn parse_author(node: &Node, narrative: &Narrative) -> Author {
+pub(crate) fn parse_author(node: &Node, narrative: &Narrative) -> Author {
     let time = child(node, "time").and_then(|n| attr(&n, "value"));
     parse_agent(child(node, "assignedAuthor"), time, narrative)
 }
@@ -307,7 +307,7 @@ fn parse_agent(assigned: Option<Node>, time: Option<String>, narrative: &Narrati
     }
 }
 
-fn parse_organization(node: &Node) -> AuthorOrganization {
+pub(crate) fn parse_organization(node: &Node) -> AuthorOrganization {
     AuthorOrganization {
         ids: identifiers(node),
         name: child(node, "name").and_then(|n| text_of(&n)),

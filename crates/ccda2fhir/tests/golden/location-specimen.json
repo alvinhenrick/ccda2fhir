@@ -421,6 +421,10 @@
     {
       "code": "results.issued.derived",
       "severity": "info"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
     }
   ]
 }

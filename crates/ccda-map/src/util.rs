@@ -34,3 +34,12 @@ pub(crate) fn start_of(statement: &Statement) -> Option<TimePoint> {
 pub(crate) fn nested(statement: &Statement) -> impl Iterator<Item = &Statement> {
     statement.related.iter().map(|r| &r.statement)
 }
+
+/// An XHTML narrative `div` holding `text` as one escaped paragraph.
+pub(crate) fn narrative_div(text: &str) -> String {
+    let escaped = text
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;");
+    format!("<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>{escaped}</p></div>")
+}

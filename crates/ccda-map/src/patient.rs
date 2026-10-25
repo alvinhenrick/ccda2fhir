@@ -415,6 +415,11 @@ mod tests {
             code: None,
             effective_time: None,
             patient,
+            title: None,
+            authors: Vec::new(),
+            custodian: None,
+            confidentiality: None,
+            language: None,
             sections: Vec::new(),
         }
     }
