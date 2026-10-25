@@ -122,7 +122,7 @@ fn pregnancy(s: &Statement, ctx: &mut Context) -> Value {
             if let Some(Cv::Timestamp(x)) = related.values.first() {
                 if let Some(d) = x.value.as_deref().and_then(|v| map_datetime(v, ctx.report)) {
                     components.push(json!({
-                        "code": { "coding": [{ "system": LOINC_URI, "code": "11778-8", "display": "Estimated date of delivery" }] },
+                        "code": { "coding": [{ "system": LOINC_URI, "code": "11778-8", "display": "Delivery date Estimated" }] },
                         "valueDateTime": d
                     }));
                 }
