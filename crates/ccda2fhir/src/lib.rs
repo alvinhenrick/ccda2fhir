@@ -10,6 +10,7 @@
 
 use ccda_map::{map_patient, Report};
 use ccda_model::Limits;
+use ccda_terminology::BuiltinTerminology;
 use fhir_out::Bundle;
 use thiserror::Error;
 
@@ -48,7 +49,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
 
     let mut report = Report::default();
     let mut bundle = Bundle::new();
-    bundle.push(map_patient(&document, &mut report));
+    bundle.push(map_patient(&document, &BuiltinTerminology, &mut report));
 
     Ok(Conversion { bundle, report })
 }
@@ -59,7 +60,9 @@ mod tests {
     use serde_json::json;
 
     const SAMPLE: &str = r#"<ClinicalDocument xmlns="urn:hl7-org:v3">
-  <recordTarget><patientRole><patient>
+  <recordTarget><patientRole>
+    <id root="2.16.840.1.113883.4.1" extension="000-00-0000"/>
+    <patient>
     <name><given>Alice</given><family>Example</family></name>
     <administrativeGenderCode code="F"/>
     <birthTime value="19700101"/>
@@ -72,6 +75,10 @@ mod tests {
         let json = conversion.bundle.to_json();
         assert_eq!(json["entry"][0]["resource"]["resourceType"], "Patient");
         assert_eq!(json["entry"][0]["resource"]["birthDate"], "1970-01-01");
+        assert_eq!(
+            json["entry"][0]["resource"]["identifier"][0]["system"],
+            "http://hl7.org/fhir/sid/us-ssn"
+        );
         assert!(conversion.report.issues.is_empty());
     }
 

@@ -42,11 +42,34 @@ pub enum ParseError {
     NotClinicalDocument,
 }
 
-/// A coded or plain identifier: `<id root="..." extension="..."/>`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// An identifier: `<id root="..." extension="..." nullFlavor="..."/>`.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Identifier {
-    pub root: String,
+    /// The OID or UUID that names the assigning namespace.
+    pub root: Option<String>,
+    /// The identifier value within that namespace.
     pub extension: Option<String>,
+    /// HL7 `nullFlavor` if the identifier is intentionally absent, e.g. `NI`.
+    pub null_flavor: Option<String>,
+}
+
+/// A coded value (`CD`/`CE`): `<code code=".." codeSystem=".." displayName=".."/>`.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Code {
+    /// The code itself.
+    pub code: Option<String>,
+    /// OID of the code system.
+    pub code_system: Option<String>,
+    /// Display name for the code.
+    pub display_name: Option<String>,
+    /// Plain text from `originalText`, if it holds text directly.
+    pub original_text: Option<String>,
+    /// A `#reference` into the section narrative from `originalText`, if present.
+    pub original_text_reference: Option<String>,
+    /// HL7 `nullFlavor` if the code is intentionally absent.
+    pub null_flavor: Option<String>,
+    /// Alternative codings of the same concept.
+    pub translations: Vec<Code>,
 }
 
 /// The patient as described in the header's `recordTarget`.
@@ -58,12 +81,16 @@ pub struct Patient {
     pub birth_time: Option<String>,
     /// Administrative gender code, e.g. `M` or `F`.
     pub gender_code: Option<String>,
+    /// Identifiers from `patientRole/id` (MRN, SSN and so on).
+    pub identifiers: Vec<Identifier>,
 }
 
 /// The parts of a C-CDA document we model so far.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClinicalDocument {
     pub id: Option<Identifier>,
+    /// The document type code (for example LOINC 34133-9 for a CCD).
+    pub code: Option<Code>,
     pub effective_time: Option<String>,
     pub patient: Patient,
 }
@@ -97,7 +124,8 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
     }
 
     Ok(ClinicalDocument {
-        id: child(&root, "id").map(identifier),
+        id: child(&root, "id").map(|n| identifier(&n)),
+        code: child(&root, "code").map(|n| parse_code(&n)),
         effective_time: child(&root, "effectiveTime")
             .and_then(|n| n.attribute("value"))
             .map(str::to_owned),
@@ -124,10 +152,41 @@ fn path<'a, 'input>(node: &Node<'a, 'input>, names: &[&str]) -> Option<Node<'a, 
         .try_fold(*node, |current, name| child(&current, name))
 }
 
-fn identifier(node: Node) -> Identifier {
+fn attr(node: &Node, name: &str) -> Option<String> {
+    node.attribute(name)
+        .filter(|v| !v.is_empty())
+        .map(str::to_owned)
+}
+
+fn identifier(node: &Node) -> Identifier {
     Identifier {
-        root: node.attribute("root").unwrap_or_default().to_owned(),
-        extension: node.attribute("extension").map(str::to_owned),
+        root: attr(node, "root"),
+        extension: attr(node, "extension"),
+        null_flavor: attr(node, "nullFlavor"),
+    }
+}
+
+/// Parse a coded element and its `translation` children.
+fn parse_code(node: &Node) -> Code {
+    let original_text = child(node, "originalText");
+    Code {
+        code: attr(node, "code"),
+        code_system: attr(node, "codeSystem"),
+        display_name: attr(node, "displayName"),
+        original_text: original_text
+            .as_ref()
+            .filter(|n| child(n, "reference").is_none())
+            .and_then(text_of),
+        original_text_reference: original_text
+            .as_ref()
+            .and_then(|n| child(n, "reference"))
+            .and_then(|n| attr(&n, "value")),
+        null_flavor: attr(node, "nullFlavor"),
+        translations: node
+            .children()
+            .filter(|c| is_hl7(c, "translation"))
+            .map(|c| parse_code(&c))
+            .collect(),
     }
 }
 
@@ -143,8 +202,19 @@ fn text_of(node: &Node) -> Option<String> {
 }
 
 fn parse_patient(root: &Node) -> Patient {
-    let Some(patient) = path(root, &["recordTarget", "patientRole", "patient"]) else {
+    let Some(role) = path(root, &["recordTarget", "patientRole"]) else {
         return Patient::default();
+    };
+    let identifiers: Vec<Identifier> = role
+        .children()
+        .filter(|c| is_hl7(c, "id"))
+        .map(|c| identifier(&c))
+        .collect();
+    let Some(patient) = child(&role, "patient") else {
+        return Patient {
+            identifiers,
+            ..Patient::default()
+        };
     };
 
     let name = child(&patient, "name");
@@ -166,6 +236,7 @@ fn parse_patient(root: &Node) -> Patient {
         gender_code: child(&patient, "administrativeGenderCode")
             .and_then(|n| n.attribute("code"))
             .map(str::to_owned),
+        identifiers,
     }
 }
 
@@ -176,9 +247,15 @@ mod tests {
     const SAMPLE: &str = r#"<?xml version="1.0" encoding="UTF-8"?>
 <ClinicalDocument xmlns="urn:hl7-org:v3">
   <id root="2.16.840.1.113883.19.5" extension="DOC-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" displayName="Summarization of episode note">
+    <originalText>Continuity of Care Document</originalText>
+    <translation code="CCD" codeSystem="1.2.3.4" displayName="CCD"/>
+  </code>
   <effectiveTime value="20250102120000-0500"/>
   <recordTarget>
     <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-1"/>
+      <id nullFlavor="NI"/>
       <patient>
         <name><given>Alice</given><given>Q</given><family>Example</family></name>
         <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
@@ -194,8 +271,9 @@ mod tests {
         assert_eq!(
             doc.id,
             Some(Identifier {
-                root: "2.16.840.1.113883.19.5".into(),
-                extension: Some("DOC-1".into())
+                root: Some("2.16.840.1.113883.19.5".into()),
+                extension: Some("DOC-1".into()),
+                null_flavor: None,
             })
         );
         assert_eq!(doc.effective_time.as_deref(), Some("20250102120000-0500"));
@@ -203,6 +281,40 @@ mod tests {
         assert_eq!(doc.patient.family.as_deref(), Some("Example"));
         assert_eq!(doc.patient.birth_time.as_deref(), Some("19700101"));
         assert_eq!(doc.patient.gender_code.as_deref(), Some("F"));
+    }
+
+    #[test]
+    fn parses_document_code_with_translation_and_original_text() {
+        let doc = parse(SAMPLE.as_bytes()).unwrap();
+        let code = doc.code.expect("document code");
+        assert_eq!(code.code.as_deref(), Some("34133-9"));
+        assert_eq!(code.code_system.as_deref(), Some("2.16.840.1.113883.6.1"));
+        assert_eq!(
+            code.original_text.as_deref(),
+            Some("Continuity of Care Document")
+        );
+        assert_eq!(code.translations.len(), 1);
+        assert_eq!(code.translations[0].code.as_deref(), Some("CCD"));
+    }
+
+    #[test]
+    fn parses_patient_identifiers_including_null_flavor() {
+        let doc = parse(SAMPLE.as_bytes()).unwrap();
+        let ids = doc.patient.identifiers;
+        assert_eq!(ids.len(), 2);
+        assert_eq!(ids[0].extension.as_deref(), Some("MRN-1"));
+        assert_eq!(ids[1].root, None);
+        assert_eq!(ids[1].null_flavor.as_deref(), Some("NI"));
+    }
+
+    #[test]
+    fn original_text_reference_is_kept_separately() {
+        let xml = r##"<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <code code="1" codeSystem="2.3"><originalText><reference value="#a1"/></originalText></code>
+</ClinicalDocument>"##;
+        let code = parse(xml.as_bytes()).unwrap().code.unwrap();
+        assert_eq!(code.original_text, None);
+        assert_eq!(code.original_text_reference.as_deref(), Some("#a1"));
     }
 
     #[test]

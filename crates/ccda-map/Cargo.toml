@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 ccda-model.workspace = true
+ccda-terminology.workspace = true
 serde_json.workspace = true
 
 [lints]

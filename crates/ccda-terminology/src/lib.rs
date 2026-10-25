@@ -4,6 +4,14 @@
 //! trait so callers can later swap in a richer implementation (for example one backed by a
 //! terminology server) without touching the mappers.
 
+/// True if `s` looks like an OID: two or more dot-separated groups of digits.
+#[must_use]
+pub fn is_oid(s: &str) -> bool {
+    s.split('.').count() >= 2
+        && s.split('.')
+            .all(|part| !part.is_empty() && part.bytes().all(|b| b.is_ascii_digit()))
+}
+
 /// Translates between C-CDA code system OIDs and FHIR system URIs.
 pub trait Terminology {
     /// The FHIR system URI for a code system OID, if known.
@@ -17,6 +25,10 @@ pub trait Terminology {
             None => format!("urn:oid:{oid}"),
         }
     }
+
+    /// True if the OID names an identifier system such as SSN or NPI (as opposed to a code
+    /// system). The IG says the OID itself must never be sent as an identifier value for these.
+    fn is_identifier_system(&self, oid: &str) -> bool;
 }
 
 /// OID to URI pairs bundled with the library.
@@ -46,7 +58,12 @@ const BUILTIN: &[(&str, &str)] = &[
         "2.16.840.1.113883.5.1008",
         "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
     ),
+    ("2.16.840.1.113883.4.1", "http://hl7.org/fhir/sid/us-ssn"),
+    ("2.16.840.1.113883.4.6", "http://hl7.org/fhir/sid/us-npi"),
 ];
+
+/// OIDs that identify people or organizations rather than concepts.
+const IDENTIFIER_SYSTEMS: &[&str] = &["2.16.840.1.113883.4.1", "2.16.840.1.113883.4.6"];
 
 /// The default, offline [`Terminology`] implementation.
 #[derive(Debug, Default, Clone, Copy)]
@@ -58,6 +75,10 @@ impl Terminology for BuiltinTerminology {
             .iter()
             .find(|(known, _)| *known == oid)
             .map(|(_, uri)| *uri)
+    }
+
+    fn is_identifier_system(&self, oid: &str) -> bool {
+        IDENTIFIER_SYSTEMS.contains(&oid)
     }
 }
 
@@ -77,6 +98,32 @@ mod tests {
     fn unknown_oid_falls_back_to_urn_oid() {
         assert_eq!(BuiltinTerminology.oid_to_uri("1.2.3"), None);
         assert_eq!(BuiltinTerminology.system_for_oid("1.2.3"), "urn:oid:1.2.3");
+    }
+
+    #[test]
+    fn recognizes_oids() {
+        assert!(is_oid("2.16.840.1.113883.6.1"));
+        assert!(is_oid("1.2"));
+        for bad in ["", "1", "1.", ".1", "1..2", "1.a", "urn:oid:1.2", "1.2 "] {
+            assert!(!is_oid(bad), "{bad:?}");
+        }
+    }
+
+    #[test]
+    fn ssn_and_npi_are_identifier_systems_with_uris() {
+        assert!(BuiltinTerminology.is_identifier_system("2.16.840.1.113883.4.1"));
+        assert_eq!(
+            BuiltinTerminology.oid_to_uri("2.16.840.1.113883.4.6"),
+            Some("http://hl7.org/fhir/sid/us-npi")
+        );
+        assert!(!BuiltinTerminology.is_identifier_system("2.16.840.1.113883.6.1"));
+    }
+
+    #[test]
+    fn identifier_systems_all_have_uris() {
+        for oid in IDENTIFIER_SYSTEMS {
+            assert!(BuiltinTerminology.oid_to_uri(oid).is_some(), "{oid}");
+        }
     }
 
     #[test]
