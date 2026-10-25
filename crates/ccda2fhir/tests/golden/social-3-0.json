@@ -233,6 +233,12 @@
                 },
                 {
                   "reference": "urn:uuid:8988192b-9530-5938-bad7-b4a341b042fc"
+                },
+                {
+                  "reference": "urn:uuid:a2b4cbbf-46ab-5c9f-b1d4-4534f23b7c16"
+                },
+                {
+                  "reference": "urn:uuid:996c6659-d2b1-51ec-9788-729b1b3c102e"
                 }
               ],
               "text": {
@@ -370,6 +376,109 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:a2b4cbbf-46ab-5c9f-b1d4-4534f23b7c16",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "survey",
+                  "display": "Survey",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "71799-1",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-03-01",
+          "id": "social-3",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.3.5",
+              "value": "AD-1"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:121316b4-9197-51d2-b1f2-50073a5990d6"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>71799-1</td></tr><tr><td>category</td><td>Survey</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-03-01</td></tr><tr><td>valueCodeableConcept</td><td>20430005</td></tr></table></div>",
+            "status": "generated"
+          },
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "code": "20430005",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:996c6659-d2b1-51ec-9788-729b1b3c102e",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "social-history",
+                  "display": "Social History",
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "code": "54899-0",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-03-01",
+          "id": "social-4",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.3.5",
+              "value": "IN-1"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-simple-observation"
+            ]
+          },
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:121316b4-9197-51d2-b1f2-50073a5990d6"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>54899-0</td></tr><tr><td>category</td><td>Social History</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-03-01</td></tr><tr><td>valueCodeableConcept</td><td>373066001</td></tr></table></div>",
+            "status": "generated"
+          },
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "code": "373066001",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:9c736cd2-47fe-5192-83db-c791bc4779df",
         "resource": {
           "active": true,
@@ -483,6 +592,12 @@
             },
             {
               "reference": "urn:uuid:8988192b-9530-5938-bad7-b4a341b042fc"
+            },
+            {
+              "reference": "urn:uuid:a2b4cbbf-46ab-5c9f-b1d4-4534f23b7c16"
+            },
+            {
+              "reference": "urn:uuid:996c6659-d2b1-51ec-9788-729b1b3c102e"
             }
           ],
           "text": {

@@ -22,6 +22,7 @@ const SEX_URL: &str = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-s
 pub(crate) const TRIBAL_AFFILIATION_TEMPLATE: &str = "2.16.840.1.113883.10.20.22.4.506";
 /// Sex Observation (C-CDA 3.0).
 pub(crate) const SEX_TEMPLATE: &str = "2.16.840.1.113883.10.20.22.4.507";
+const DECEASED_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.79";
 const BIRTH_SEX_TEMPLATE: &str = "2.16.840.1.113883.10.20.22.4.200";
 const GENDER_IDENTITY_TEMPLATE: &str = "2.16.840.1.113883.10.20.34.3.45";
 
@@ -216,6 +217,13 @@ pub fn map_patient(
         }
     } else if let Some(b) = patient.deceased_ind {
         resource.insert("deceasedBoolean".into(), json!(b));
+    }
+
+    // A Deceased Observation (4.79) in the body says the same thing when the header does not.
+    if !resource.contains_key("deceasedDateTime") && !resource.contains_key("deceasedBoolean") {
+        if let Some(deceased) = deceased_observation(doc, report) {
+            resource.insert(deceased.0.into(), deceased.1);
+        }
     }
 
     if let Some(raw) = &patient.birth_time {
@@ -516,6 +524,31 @@ fn sex_and_gender_identity(
         }
     }
     out
+}
+
+/// `deceased[x]` from a Deceased Observation (4.79): its date when it has one, else `true`.
+fn deceased_observation(
+    doc: &ClinicalDocument,
+    report: &mut Report,
+) -> Option<(&'static str, Value)> {
+    for section in doc.all_sections() {
+        for entry in &section.entries {
+            let s = &entry.statement;
+            if s.kind != StatementKind::Observation || !s.has_template(DECEASED_OBSERVATION) {
+                continue;
+            }
+            let raw = s.effective_time.as_ref().and_then(|t| {
+                t.value
+                    .as_deref()
+                    .or_else(|| t.low.as_ref().and_then(|l| l.value.as_deref()))
+            });
+            return Some(match raw.and_then(|r| crate::map_datetime(r, report)) {
+                Some(d) => ("deceasedDateTime", json!(d)),
+                None => ("deceasedBoolean", json!(true)),
+            });
+        }
+    }
+    None
 }
 
 /// The Patient extension for a Tribal Affiliation (4.506) or Sex (4.507) Observation, if its
@@ -848,5 +881,17 @@ mod tests {
             r["contact"][0]["relationship"][0]["coding"][0]["code"],
             "GRD"
         );
+    }
+
+    #[test]
+    fn deceased_observation_sets_deceased_when_the_header_is_silent() {
+        let body = r#"<entry><observation classCode="OBS" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.22.4.79"/>
+  <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+  <effectiveTime><low value="20240315"/></effectiveTime>
+  <value xsi:type="CD" code="419099009" codeSystem="2.16.840.1.113883.6.96"/>
+</observation></entry>"#;
+        let (r, _) = parse_doc("<patient/>", body);
+        assert_eq!(r["deceasedDateTime"], "2024-03-15");
     }
 }

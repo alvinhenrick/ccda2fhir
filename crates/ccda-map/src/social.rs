@@ -30,11 +30,23 @@ const SOCIAL_3_0: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.507",
     "2.16.840.1.113883.10.20.22.4.511",
     "2.16.840.1.113883.10.20.22.4.281",
+    // Advance directive existence, interpreter needed, age range.
+    "2.16.840.1.113883.10.20.22.4.513",
+    "2.16.840.1.113883.10.20.22.4.515",
+    "2.16.840.1.113883.10.20.22.4.516",
+];
+
+/// Medication adherence, care experience preference and treatment intervention preference
+/// (C-CDA 3.0): what the patient reports or prefers, so the `survey` category.
+const SURVEY_3_0: &[&str] = &[
+    "2.16.840.1.113883.10.20.22.4.508",
+    "2.16.840.1.113883.10.20.22.4.509",
+    "2.16.840.1.113883.10.20.22.4.510",
 ];
 
 /// The 3.0 templates, for the "not mapped" check.
 pub(crate) fn handled_templates() -> impl Iterator<Item = &'static str> {
-    SOCIAL_3_0.iter().copied()
+    SOCIAL_3_0.iter().chain(SURVEY_3_0).copied()
 }
 
 const LOINC_URI: &str = "http://loinc.org";
@@ -73,6 +85,10 @@ pub fn map_social_history(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Valu
                 || SOCIAL_3_0.iter().any(|t| s.has_template(t))
             {
                 out.push(social(s, ctx));
+            } else if SURVEY_3_0.iter().any(|t| s.has_template(t)) {
+                let mut r = social(s, ctx);
+                r["category"] = category("survey", "Survey");
+                out.push(r);
             }
         }
     }
@@ -323,5 +339,14 @@ mod tests_3_0 {
             "2.16.840.1.113883.6.96",
         );
         assert_eq!(out.len(), 1);
+    }
+
+    #[test]
+    fn adherence_and_preferences_are_survey_observations() {
+        for template in SURVEY_3_0 {
+            let (out, _) = run_one(template, "20430005", "2.16.840.1.113883.6.96");
+            assert_eq!(out.len(), 1, "{template}");
+            assert_eq!(out[0]["category"][0]["coding"][0]["code"], "survey");
+        }
     }
 }
