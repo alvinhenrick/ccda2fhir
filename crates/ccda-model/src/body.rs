@@ -64,6 +64,29 @@ pub struct Related {
     pub statement: Statement,
 }
 
+/// An organization named by an author (`representedOrganization`).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct AuthorOrganization {
+    pub ids: Vec<Identifier>,
+    pub name: Option<String>,
+}
+
+/// Who recorded a statement, and when: an `author`.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Author {
+    /// `author/time`, raw HL7 timestamp.
+    pub time: Option<String>,
+    /// `assignedAuthor/id`
+    pub ids: Vec<Identifier>,
+    /// `assignedAuthor/code` (role or specialty)
+    pub role_code: Option<Code>,
+    pub given: Vec<String>,
+    pub family: Option<String>,
+    /// `assignedAuthoringDevice/softwareName`: the author is software, not a person.
+    pub device_name: Option<String>,
+    pub organization: Option<AuthorOrganization>,
+}
+
 /// A `participant` (for example the allergen of an allergy, or a device).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Participant {
@@ -98,6 +121,7 @@ pub struct Statement {
     /// `value` elements (observations normally have one).
     pub values: Vec<Value>,
     pub participants: Vec<Participant>,
+    pub authors: Vec<Author>,
     pub related: Vec<Related>,
 }
 
@@ -159,6 +183,38 @@ fn narrative_of(section: &Node) -> Narrative {
         }
     }
     map
+}
+
+fn parse_author(node: &Node, narrative: &Narrative) -> Author {
+    let assigned = child(node, "assignedAuthor");
+    let person = assigned.and_then(|a| child(&a, "assignedPerson"));
+    let name = person.and_then(|p| child(&p, "name"));
+    let organization = assigned
+        .and_then(|a| child(&a, "representedOrganization"))
+        .map(|o| AuthorOrganization {
+            ids: identifiers(&o),
+            name: child(&o, "name").and_then(|n| text_of(&n)),
+        });
+    Author {
+        time: child(node, "time").and_then(|n| attr(&n, "value")),
+        ids: assigned.as_ref().map(identifiers).unwrap_or_default(),
+        role_code: assigned
+            .and_then(|a| child(&a, "code"))
+            .map(|n| parse_code(&n, narrative)),
+        given: name
+            .iter()
+            .flat_map(|n| children(n, "given"))
+            .filter_map(|n| text_of(&n))
+            .collect(),
+        family: name
+            .and_then(|n| child(&n, "family"))
+            .and_then(|n| text_of(&n)),
+        device_name: assigned
+            .and_then(|a| child(&a, "assignedAuthoringDevice"))
+            .and_then(|d| child(&d, "softwareName"))
+            .and_then(|n| text_of(&n)),
+        organization,
+    }
 }
 
 fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
@@ -231,6 +287,9 @@ fn parse_statement(
         effective_time: child(node, "effectiveTime").map(|n| parse_time(&n)),
         values: children(node, "value")
             .map(|n| parse_value(&n, narrative))
+            .collect(),
+        authors: children(node, "author")
+            .map(|n| parse_author(&n, narrative))
             .collect(),
         participants: children(node, "participant")
             .map(|n| parse_participant(&n, narrative))

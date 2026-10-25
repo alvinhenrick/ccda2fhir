@@ -12,7 +12,10 @@ mod xml;
 use roxmltree::{Document, ParsingOptions};
 use thiserror::Error;
 
-pub use body::{Entry, Link, Participant, Related, Section, Statement, StatementKind};
+pub use body::{
+    Author, AuthorOrganization, Entry, Link, Participant, Related, Section, Statement,
+    StatementKind,
+};
 pub use header::Patient;
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
 
@@ -406,6 +409,37 @@ mod tests {
             }
         );
         assert_eq!(values[5], Value::Other { xsi_type: None });
+    }
+
+    #[test]
+    fn parses_authors_with_person_organization_and_device() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <component><structuredBody><component><section>
+    <entry><observation classCode="OBS" moodCode="EVN">
+      <author><time value="20200101120000-0500"/><assignedAuthor>
+        <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+        <code code="207R00000X" codeSystem="2.16.840.1.113883.6.101"/>
+        <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+        <representedOrganization><id root="1.2.3" extension="ORG"/><name>Example Clinic</name></representedOrganization>
+      </assignedAuthor></author>
+      <author><time value="2020"/><assignedAuthor><id nullFlavor="NA"/>
+        <assignedAuthoringDevice><softwareName>EHR 1.0</softwareName></assignedAuthoringDevice>
+      </assignedAuthor></author>
+    </observation></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>"#;
+        let doc = parse(xml.as_bytes()).unwrap();
+        let authors = &doc.sections[0].entries[0].statement.authors;
+        assert_eq!(authors.len(), 2);
+        assert_eq!(authors[0].time.as_deref(), Some("20200101120000-0500"));
+        assert_eq!(authors[0].ids[0].extension.as_deref(), Some("1234567893"));
+        assert_eq!(authors[0].given, ["Pat"]);
+        assert_eq!(authors[0].family.as_deref(), Some("Doe"));
+        let org = authors[0].organization.as_ref().unwrap();
+        assert_eq!(org.name.as_deref(), Some("Example Clinic"));
+        assert_eq!(org.ids[0].extension.as_deref(), Some("ORG"));
+        assert_eq!(authors[1].device_name.as_deref(), Some("EHR 1.0"));
+        assert_eq!(authors[1].ids[0].null_flavor.as_deref(), Some("NA"));
     }
 
     #[test]

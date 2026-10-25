@@ -27,6 +27,25 @@ impl Profiles {
         let name = match resource["resourceType"].as_str()? {
             "Patient" => "us-core-patient",
             "AllergyIntolerance" => "us-core-allergyintolerance",
+            "Provenance" => "us-core-provenance",
+            // Only claim the profile when its required elements are present: identifier with a
+            // system and value, and a name with a family.
+            "Practitioner" => {
+                let has_identifier = resource["identifier"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .any(|i| i["system"].is_string() && i["value"].is_string());
+                let has_family = resource["name"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .any(|n| n["family"].is_string());
+                if !(has_identifier && has_family) {
+                    return None;
+                }
+                "us-core-practitioner"
+            }
             "Condition" => {
                 let encounter_diagnosis = resource["category"]
                     .as_array()
@@ -82,6 +101,25 @@ mod tests {
             .profile_for(&problem)
             .unwrap()
             .ends_with("us-core-condition-problems-health-concerns"));
+    }
+
+    #[test]
+    fn practitioner_profile_is_claimed_only_when_required_elements_exist() {
+        let complete = json!({
+            "resourceType": "Practitioner",
+            "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1" }],
+            "name": [{ "family": "Doe" }]
+        });
+        assert!(Profiles::UsCore610.profile_for(&complete).is_some());
+        let no_identifier =
+            json!({ "resourceType": "Practitioner", "name": [{ "family": "Doe" }] });
+        assert_eq!(Profiles::UsCore610.profile_for(&no_identifier), None);
+        let no_system = json!({
+            "resourceType": "Practitioner",
+            "identifier": [{ "value": "1" }],
+            "name": [{ "family": "Doe" }]
+        });
+        assert_eq!(Profiles::UsCore610.profile_for(&no_system), None);
     }
 
     #[test]

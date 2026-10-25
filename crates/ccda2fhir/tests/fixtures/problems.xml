@@ -42,7 +42,23 @@
                 <observation classCode="OBS" moodCode="EVN">
                   <templateId root="2.16.840.1.113883.10.20.22.4.4"/>
                   <id root="1.3.6.1.4.1.22812.3.1.2" extension="O-1"/>
-                  <code code="55607006" codeSystem="2.16.840.1.113883.6.96" displayName="Problem"/>
+                  <author>
+                    <time value="20120901101500-0500"/>
+                    <assignedAuthor>
+                      <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+                      <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+                      <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Clinic</name></representedOrganization>
+                    </assignedAuthor>
+                  </author>
+                  <author>
+                    <time value="20120806093015-0500"/>
+                    <assignedAuthor>
+                      <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+                      <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+                      <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Clinic</name></representedOrganization>
+                    </assignedAuthor>
+                  </author>
+                                    <code code="55607006" codeSystem="2.16.840.1.113883.6.96" displayName="Problem"/>
                   <statusCode code="completed"/>
                   <effectiveTime><low value="20120806093015-0500"/></effectiveTime>
                   <value xsi:type="CD" code="59621000" codeSystem="2.16.840.1.113883.6.96" displayName="Essential hypertension">

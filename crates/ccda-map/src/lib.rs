@@ -8,6 +8,7 @@
 //! IG's general mapping guidance and are reused by every resource mapper.
 
 mod allergy;
+mod author;
 mod coding;
 mod context;
 mod identifier;

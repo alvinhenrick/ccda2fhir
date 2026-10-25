@@ -14,6 +14,7 @@ version = "0.1.0"
 dependencies = [
  "ccda-model",
  "ccda-terminology",
+ "fhir-out",
  "serde_json",
 ]
 

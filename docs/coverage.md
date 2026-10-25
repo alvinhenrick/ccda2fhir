@@ -27,7 +27,7 @@ and only the two fixtures above have been validated.
 | Age Observation | `onsetAge` | done | `age_at_onset_is_used_only_without_an_onset_date` | |
 | Date of Diagnosis | `assertedDate` extension | done | `date_of_diagnosis_becomes_asserted_date` | |
 | Supporting observations (SPRT) | `evidence.detail` | reported | `supporting_observations_are_reported_as_unsupported` | |
-| Author | `recorder`, `recordedDate`, Provenance | todo (needs author model) | | |
+| Author | `recorder`, `recordedDate`, Practitioner, Organization, Provenance (ADR 0004) | done | `author.rs` tests; fixtures | |
 | Comment Activity | `note` | todo | | |
 | Prognosis, Priority Preference | not supported by target (IG) | n/a | | |
 
@@ -48,5 +48,16 @@ and only the two fixtures above have been validated.
 | Reaction `id` | `reaction.id` (IG: source value) | skipped: an element id cannot carry root+extension | | |
 | Severity (reaction level, else allergy level) | `reaction.severity` (CF-Severity) | done | `reaction_severity_wins_over_...` | |
 | Criticality Observation (82606-5) | `criticality` (CF-Criticality) | done | `drug_allergy_...` | |
-| Author | `recorder`, `recordedDate`, Provenance | todo (author model) | | |
+| Author | `recorder`, `recordedDate`, Practitioner, Organization, Provenance (ADR 0004) | done | `author.rs` tests; fixtures | |
 | Comment Activity | `note` | todo | | |
+
+## Authors and supporting resources
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| `author/assignedAuthor/id`, `assignedPerson/name` | Practitioner (deduplicated) | done | `the_same_person_becomes_one_practitioner` | |
+| `representedOrganization` | Organization, `Provenance.agent.onBehalfOf` | done | `organization_is_shared_and_linked_with_on_behalf_of` | |
+| `author/time` | `recordedDate` (earliest), `Provenance.recorded` | done | `recorder_is_latest_and_recorded_date_is_earliest` | |
+| `assignedAuthor/code` (role/specialty) | PractitionerRole | todo | | |
+| `assignedAuthoringDevice` | Device | reported | `software_authors_are_noted_not_mapped` | |
+| Author telecom, address | Practitioner.telecom, address | todo | | |

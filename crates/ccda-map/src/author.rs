@@ -1,0 +1,387 @@
+//! C-CDA authors to `Practitioner`, `Organization`, `recorder`, `recordedDate` and `Provenance`.
+//!
+//! The IG does not say when to use attributes versus Provenance resources, so this crate does
+//! both (ADR 0004): `recorder` is the latest author, `recordedDate` the earliest author time,
+//! each distinct person and organization becomes one resource, and every target with usable
+//! authors gets a US Core `Provenance`.
+
+use ccda_model::Author;
+use serde_json::{json, Map, Value};
+
+use crate::{map_datetime, map_identifier, Context};
+
+const PARTICIPANT_TYPE_SYSTEM: &str =
+    "http://terminology.hl7.org/CodeSystem/provenance-participant-type";
+
+/// A sortable key for an HL7 timestamp: its leading digits padded to 14. Offsets are ignored,
+/// which is accurate enough to order authors within one document.
+fn time_key(raw: &str) -> String {
+    let digits: String = raw.chars().take_while(char::is_ascii_digit).collect();
+    format!("{digits:0<14}")
+}
+
+/// The identity key of an author's identifiers or, failing that, name.
+fn person_key(author: &Author) -> Option<String> {
+    author
+        .ids
+        .iter()
+        .find_map(|id| {
+            Some(format!(
+                "id:{}|{}",
+                id.root.as_deref()?,
+                id.extension.as_deref()?
+            ))
+        })
+        .or_else(|| {
+            (author.family.is_some() || !author.given.is_empty()).then(|| {
+                format!(
+                    "name:{}|{}",
+                    author.given.join(" "),
+                    author.family.as_deref().unwrap_or_default()
+                )
+            })
+        })
+}
+
+fn register_organization(author: &Author, ctx: &mut Context) -> Option<String> {
+    let org = author.organization.as_ref()?;
+    let key = org
+        .ids
+        .iter()
+        .find_map(|id| {
+            Some(format!(
+                "id:{}|{}",
+                id.root.as_deref()?,
+                id.extension.as_deref()?
+            ))
+        })
+        .or_else(|| org.name.as_ref().map(|n| format!("name:{n}")))?;
+    if let Some(existing) = ctx.organizations.get(&key) {
+        return Some(existing.clone());
+    }
+    let id = ctx.next_id("organization");
+    let mut resource = Map::new();
+    resource.insert("resourceType".into(), json!("Organization"));
+    resource.insert("id".into(), json!(id));
+    let identifiers: Vec<Value> = org
+        .ids
+        .iter()
+        .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
+        .collect();
+    if !identifiers.is_empty() {
+        resource.insert("identifier".into(), json!(identifiers));
+    }
+    if let Some(name) = &org.name {
+        resource.insert("name".into(), json!(name));
+    }
+    let reference = ctx.reference("Organization", &id);
+    ctx.organizations.insert(key, reference.clone());
+    ctx.push_extra(Value::Object(resource));
+    Some(reference)
+}
+
+fn register_practitioner(author: &Author, ctx: &mut Context) -> Option<String> {
+    let Some(key) = person_key(author) else {
+        if author.device_name.is_some() {
+            ctx.report.info(
+                "author.device.unsupported",
+                "an author is software, not a person; it was not mapped to a Practitioner",
+            );
+        }
+        return None;
+    };
+    if let Some(existing) = ctx.practitioners.get(&key) {
+        return Some(existing.clone());
+    }
+    let id = ctx.next_id("practitioner");
+    let mut resource = Map::new();
+    resource.insert("resourceType".into(), json!("Practitioner"));
+    resource.insert("id".into(), json!(id));
+    let identifiers: Vec<Value> = author
+        .ids
+        .iter()
+        .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
+        .collect();
+    if !identifiers.is_empty() {
+        resource.insert("identifier".into(), json!(identifiers));
+    }
+    if author.family.is_some() || !author.given.is_empty() {
+        let mut name = Map::new();
+        if let Some(family) = &author.family {
+            name.insert("family".into(), json!(family));
+        }
+        if !author.given.is_empty() {
+            name.insert("given".into(), json!(author.given));
+        }
+        resource.insert("name".into(), json!([name]));
+    }
+    let reference = ctx.reference("Practitioner", &id);
+    ctx.practitioners.insert(key, reference.clone());
+    ctx.push_extra(Value::Object(resource));
+    Some(reference)
+}
+
+/// Add `recorder` and `recordedDate` to `resource` and create its `Provenance`.
+///
+/// `authors` should be the statement's own authors, or its concern's when it has none (the IG
+/// recommends that fallback).
+pub(crate) fn apply_authors(
+    resource: &mut Map<String, Value>,
+    authors: &[&Author],
+    ctx: &mut Context,
+) {
+    if authors.is_empty() {
+        return;
+    }
+
+    // (author, practitioner reference, organization reference)
+    let mut agents: Vec<(&Author, String, Option<String>)> = Vec::new();
+    for author in authors {
+        if let Some(practitioner) = register_practitioner(author, ctx) {
+            let organization = register_organization(author, ctx);
+            agents.push((author, practitioner, organization));
+        }
+    }
+
+    // Latest author wins `recorder`; later in the document breaks ties.
+    if let Some((_, practitioner, _)) = agents
+        .iter()
+        .max_by_key(|(a, _, _)| a.time.as_deref().map(time_key).unwrap_or_default())
+        .filter(|_| !agents.is_empty())
+    {
+        // `max_by_key` returns the last maximum, which is what we want for ties.
+        resource.insert("recorder".into(), json!({ "reference": practitioner }));
+    }
+
+    // Earliest author time wins `recordedDate`; earlier in the document breaks ties.
+    let earliest = authors
+        .iter()
+        .filter_map(|a| a.time.as_deref())
+        .min_by_key(|t| time_key(t));
+    let recorded = earliest.and_then(|raw| map_datetime(raw, ctx.report));
+    if let Some(date) = &recorded {
+        resource.insert("recordedDate".into(), json!(date));
+    }
+
+    if agents.is_empty() {
+        return;
+    }
+    // Provenance.recorded is an `instant`: it needs a time and an offset.
+    let Some(instant) = recorded.filter(|d| d.contains('T')) else {
+        ctx.report.warn(
+            "provenance.recorded.unavailable",
+            "authors have no time with an offset, so no Provenance was created (recorded is required)",
+        );
+        return;
+    };
+    let (Some(resource_type), Some(target_id)) = (
+        resource.get("resourceType").and_then(Value::as_str),
+        resource.get("id").and_then(Value::as_str),
+    ) else {
+        return;
+    };
+    let target = ctx.reference(resource_type, target_id);
+
+    let mut seen: Vec<(String, Option<String>)> = Vec::new();
+    let mut agent_json = Vec::new();
+    for (_, practitioner, organization) in &agents {
+        let key = (practitioner.clone(), organization.clone());
+        if seen.contains(&key) {
+            continue;
+        }
+        let mut agent = Map::new();
+        agent.insert(
+            "type".into(),
+            json!({ "coding": [{ "system": PARTICIPANT_TYPE_SYSTEM, "code": "author" }] }),
+        );
+        agent.insert("who".into(), json!({ "reference": practitioner }));
+        if let Some(org) = organization {
+            agent.insert("onBehalfOf".into(), json!({ "reference": org }));
+        }
+        agent_json.push(Value::Object(agent));
+        seen.push(key);
+    }
+    let id = ctx.next_id("provenance");
+    ctx.push_extra(json!({
+        "resourceType": "Provenance",
+        "id": id,
+        "target": [{ "reference": target }],
+        "recorded": instant,
+        "agent": agent_json,
+    }));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Report;
+    use ccda_model::{AuthorOrganization, Identifier};
+    use ccda_terminology::BuiltinTerminology;
+
+    fn npi(n: &str) -> Identifier {
+        Identifier {
+            root: Some("2.16.840.1.113883.4.6".into()),
+            extension: Some(n.into()),
+            null_flavor: None,
+        }
+    }
+
+    fn person(n: &str, family: &str, time: Option<&str>) -> Author {
+        Author {
+            time: time.map(Into::into),
+            ids: vec![npi(n)],
+            family: Some(family.into()),
+            given: vec!["Pat".into()],
+            ..Author::default()
+        }
+    }
+
+    fn target() -> Map<String, Value> {
+        let Value::Object(map) = json!({ "resourceType": "Condition", "id": "condition-1" }) else {
+            unreachable!()
+        };
+        map
+    }
+
+    fn run(authors: &[Author]) -> (Map<String, Value>, Vec<Value>, Report) {
+        let mut report = Report::default();
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
+        let mut resource = target();
+        let refs: Vec<&Author> = authors.iter().collect();
+        apply_authors(&mut resource, &refs, &mut ctx);
+        let extra = ctx.take_extra();
+        (resource, extra, report)
+    }
+
+    fn of_type<'a>(extra: &'a [Value], t: &str) -> Vec<&'a Value> {
+        extra.iter().filter(|r| r["resourceType"] == t).collect()
+    }
+
+    #[test]
+    fn recorder_is_latest_and_recorded_date_is_earliest() {
+        let authors = [
+            person("1111111111", "First", Some("20200101090000-0500")),
+            person("2222222222", "Second", Some("20210301090000-0500")),
+        ];
+        let (resource, extra, report) = run(&authors);
+        let practitioners = of_type(&extra, "Practitioner");
+        assert_eq!(practitioners.len(), 2);
+        assert_eq!(
+            resource["recorder"]["reference"],
+            fhir_out::urn_for("doc", "Practitioner", "practitioner-2")
+        );
+        assert_eq!(resource["recordedDate"], "2020-01-01T09:00:00-05:00");
+
+        let provenance = of_type(&extra, "Provenance");
+        assert_eq!(provenance.len(), 1);
+        assert_eq!(provenance[0]["recorded"], "2020-01-01T09:00:00-05:00");
+        assert_eq!(
+            provenance[0]["target"][0]["reference"],
+            fhir_out::urn_for("doc", "Condition", "condition-1")
+        );
+        assert_eq!(provenance[0]["agent"].as_array().unwrap().len(), 2);
+        assert_eq!(
+            provenance[0]["agent"][0]["type"]["coding"][0]["code"],
+            "author"
+        );
+        assert!(report.issues.is_empty());
+    }
+
+    #[test]
+    fn practitioner_has_identifier_and_name() {
+        let (_, extra, _) = run(&[person("1234567893", "Doe", Some("20200101090000-0500"))]);
+        assert_eq!(
+            of_type(&extra, "Practitioner")[0],
+            &json!({
+                "resourceType": "Practitioner",
+                "id": "practitioner-1",
+                "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1234567893" }],
+                "name": [{ "family": "Doe", "given": ["Pat"] }]
+            })
+        );
+    }
+
+    #[test]
+    fn the_same_person_becomes_one_practitioner() {
+        let authors = [
+            person("1111111111", "Doe", Some("20200101090000-0500")),
+            person("1111111111", "Doe", Some("20200201090000-0500")),
+        ];
+        let (_, extra, _) = run(&authors);
+        assert_eq!(of_type(&extra, "Practitioner").len(), 1);
+        assert_eq!(
+            of_type(&extra, "Provenance")[0]["agent"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn organization_is_shared_and_linked_with_on_behalf_of() {
+        let mut a = person("1111111111", "A", Some("20200101090000-0500"));
+        let mut b = person("2222222222", "B", Some("20200102090000-0500"));
+        for author in [&mut a, &mut b] {
+            author.organization = Some(AuthorOrganization {
+                ids: vec![Identifier {
+                    root: Some("1.2.3".into()),
+                    extension: Some("ORG".into()),
+                    null_flavor: None,
+                }],
+                name: Some("Example Clinic".into()),
+            });
+        }
+        let (_, extra, _) = run(&[a, b]);
+        let orgs = of_type(&extra, "Organization");
+        assert_eq!(orgs.len(), 1);
+        assert_eq!(orgs[0]["name"], "Example Clinic");
+        let agents = &of_type(&extra, "Provenance")[0]["agent"];
+        assert_eq!(
+            agents[0]["onBehalfOf"]["reference"],
+            fhir_out::urn_for("doc", "Organization", "organization-1")
+        );
+    }
+
+    #[test]
+    fn date_only_times_set_recorded_date_but_cannot_make_provenance() {
+        let (resource, extra, report) = run(&[person("1111111111", "Doe", Some("20200101"))]);
+        assert_eq!(resource["recordedDate"], "2020-01-01");
+        assert!(of_type(&extra, "Provenance").is_empty());
+        assert_eq!(report.issues[0].code, "provenance.recorded.unavailable");
+    }
+
+    #[test]
+    fn author_without_time_still_gets_a_recorder() {
+        let (resource, extra, report) = run(&[person("1111111111", "Doe", None)]);
+        assert!(resource.contains_key("recorder"));
+        assert!(!resource.contains_key("recordedDate"));
+        assert!(of_type(&extra, "Provenance").is_empty());
+        assert_eq!(report.issues[0].code, "provenance.recorded.unavailable");
+    }
+
+    #[test]
+    fn software_authors_are_noted_not_mapped() {
+        let device = Author {
+            time: Some("20200101090000-0500".into()),
+            device_name: Some("EHR".into()),
+            ..Author::default()
+        };
+        let (resource, extra, report) = run(&[device]);
+        assert!(!resource.contains_key("recorder"));
+        assert!(extra.is_empty());
+        assert_eq!(report.issues[0].code, "author.device.unsupported");
+        assert!(report.issues.iter().all(|i| !i.message.contains("EHR")));
+    }
+
+    #[test]
+    fn people_without_ids_are_keyed_by_name() {
+        let nameless_id = |family: &str| Author {
+            family: Some(family.into()),
+            time: Some("20200101090000-0500".into()),
+            ..Author::default()
+        };
+        let (_, extra, _) = run(&[nameless_id("Doe"), nameless_id("Doe"), nameless_id("Roe")]);
+        assert_eq!(of_type(&extra, "Practitioner").len(), 2);
+    }
+}

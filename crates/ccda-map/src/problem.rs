@@ -7,6 +7,7 @@
 use ccda_model::{ClinicalDocument, Section, Statement, Value as Cv};
 use serde_json::{json, Map, Value};
 
+use crate::author::apply_authors;
 use crate::util::{concept, is_coded, LOINC, SNOMED};
 use crate::{
     data_absent_reason_extension, map_age, map_codeable_concept, map_datetime, map_identifier,
@@ -302,6 +303,12 @@ fn map_observation(
     }
 
     resource.insert("subject".into(), json!({ "reference": ctx.patient }));
+    let authors: Vec<_> = if observation.authors.is_empty() {
+        concern.authors.iter().collect()
+    } else {
+        observation.authors.iter().collect()
+    };
+    apply_authors(&mut resource, &authors, ctx);
     Value::Object(resource)
 }
 
@@ -362,7 +369,7 @@ mod tests {
     fn run(xml: &str) -> (Vec<Value>, Report) {
         let doc = ccda_model::parse(xml.as_bytes()).unwrap();
         let mut report = Report::default();
-        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "Patient/patient-1");
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
         let conditions = map_problems(&doc, &mut ctx);
         (conditions, report)
     }
@@ -398,7 +405,7 @@ mod tests {
                     "text": "Essential hypertension"
                 },
                 "onsetDateTime": "2012-08-06",
-                "subject": { "reference": "Patient/patient-1" }
+                "subject": { "reference": fhir_out::urn_for("doc", "Patient", "patient-1") }
             })
         );
         assert!(report.issues.is_empty(), "{:?}", codes(&report));

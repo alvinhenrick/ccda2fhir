@@ -8,6 +8,7 @@
 use ccda_model::{ClinicalDocument, Statement, Value as Cv};
 use serde_json::{json, Map, Value};
 
+use crate::author::apply_authors;
 use crate::util::{concept, is_coded, nested, start_of, LOINC, SNOMED};
 use crate::{
     data_absent_reason_extension, map_codeable_concept, map_datetime, map_identifier, Context,
@@ -375,6 +376,12 @@ fn map_observation(concern: &Statement, observation: &Statement, ctx: &mut Conte
         resource.insert("extension".into(), json!(extensions));
     }
     resource.insert("patient".into(), json!({ "reference": ctx.patient }));
+    let authors: Vec<_> = if observation.authors.is_empty() {
+        concern.authors.iter().collect()
+    } else {
+        observation.authors.iter().collect()
+    };
+    apply_authors(&mut resource, &authors, ctx);
     Value::Object(resource)
 }
 
@@ -452,7 +459,7 @@ mod tests {
     fn run(xml: &str) -> (Vec<Value>, Report) {
         let doc = ccda_model::parse(xml.as_bytes()).unwrap();
         let mut report = Report::default();
-        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "Patient/patient-1");
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
         let out = map_allergies(&doc, &mut ctx);
         (out, report)
     }
@@ -504,7 +511,7 @@ mod tests {
                     "onset": "2020-03-01",
                     "severity": "moderate"
                 }],
-                "patient": { "reference": "Patient/patient-1" }
+                "patient": { "reference": fhir_out::urn_for("doc", "Patient", "patient-1") }
             })
         );
         assert!(report.issues.is_empty(), "{:?}", codes(&report));

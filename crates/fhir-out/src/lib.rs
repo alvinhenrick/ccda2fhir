@@ -8,6 +8,24 @@ use serde_json::{json, Value};
 
 use uuid::Uuid;
 
+fn namespace(seed: &str) -> Uuid {
+    Uuid::new_v5(
+        &Uuid::NAMESPACE_URL,
+        format!("urn:ccda2fhir:{seed}").as_bytes(),
+    )
+}
+
+/// The `urn:uuid:` url of a resource, derived from a namespace seed, its type and its id.
+/// [`Bundle::url_for`] gives the same value for a bundle created with the same seed.
+#[must_use]
+pub fn urn_for(seed: &str, resource_type: &str, id: &str) -> String {
+    let name = format!("{resource_type}/{id}");
+    format!(
+        "urn:uuid:{}",
+        Uuid::new_v5(&namespace(seed), name.as_bytes())
+    )
+}
+
 /// A FHIR R4 Bundle of type `collection`.
 ///
 /// Every entry gets a `fullUrl` of the form `urn:uuid:<v5 uuid>`, derived from a namespace seed
@@ -17,7 +35,7 @@ use uuid::Uuid;
 /// [`Bundle::url_for`], which is what makes them resolve inside the bundle.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Bundle {
-    namespace: Uuid,
+    seed: String,
     entries: Vec<(String, Value)>,
 }
 
@@ -38,10 +56,7 @@ impl Bundle {
     #[must_use]
     pub fn with_namespace_seed(seed: &str) -> Self {
         Self {
-            namespace: Uuid::new_v5(
-                &Uuid::NAMESPACE_URL,
-                format!("urn:ccda2fhir:{seed}").as_bytes(),
-            ),
+            seed: seed.to_owned(),
             entries: Vec::new(),
         }
     }
@@ -49,11 +64,7 @@ impl Bundle {
     /// The `fullUrl` (and reference target) of a resource of `resource_type` with `id`.
     #[must_use]
     pub fn url_for(&self, resource_type: &str, id: &str) -> String {
-        let name = format!("{resource_type}/{id}");
-        format!(
-            "urn:uuid:{}",
-            Uuid::new_v5(&self.namespace, name.as_bytes())
-        )
+        urn_for(&self.seed, resource_type, id)
     }
 
     /// Add a resource (a JSON object with `resourceType` and `id`). The entry's `fullUrl` comes
