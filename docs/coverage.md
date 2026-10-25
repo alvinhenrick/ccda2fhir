@@ -3,12 +3,12 @@
 Status per C-CDA element: **done** (mapped and tested), **partial**, **reported** (not mapped; the
 report says so), **todo**. "Validated" is filled per row once covered by a validator run.
 
-**Validator status (CI workflow "FHIR validation", HL7 validator 7.0.3, FHIR 4.0.1):** the `problems` and
-`allergies` fixtures produce **0 errors** against base R4. Remaining warnings are the best-practice
-`dom-6` (resources lack narrative). **Not yet proven:** US Core profile conformance (resources do not
-declare `meta.profile`, so US Core is loaded but not applied), and dateTimes with a time and offset (no
-fixture has one yet).
-Source of each rule: the IG page and CSV under `ccda-on-fhir` (`CF-*.md`, `mappings/CF/*.csv`).
+**Validator status (CI workflow "FHIR validation", HL7 validator 7.0.3, FHIR 4.0.1, US Core 6.1.0):** the
+`problems` and `allergies` fixtures produce **0 errors** with the US Core profiles declared in `meta.profile`.
+Remaining warnings are the best-practice `dom-6` (resources lack narrative). Timestamps with a time and
+offset pass, including one whose missing seconds we fill with `:00`.
+Not yet proven: US Core "must support" completeness (the validator checks conformance, not coverage),
+and only the two fixtures above have been validated.
 
 ## Problems (Problem Concern Act / Problem Observation) to Condition
 

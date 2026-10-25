@@ -20,7 +20,7 @@ offers options, the choice is recorded here.
   can become configuration later.
 - Missing minutes or seconds are filled with zeros and noted (`timestamp.precision-extended`, info). **Verify:** the IG's
   own example shows `2023-05-31T22:05-05:00`, but FHIR R4 `dateTime` requires `hh:mm:ss`, so we believe that example is
-  not valid R4. Confirm with the validator.
+  not valid R4. Confirmed: the validator accepts our `:00`-filled output; we have not tested the IG's seconds-less form.
 
 **nullFlavor (`nullflavor.rs`)**
 - The table is the IG ConceptMap `CF-NullFlavorDataAbsentReason`. `INV`, `DER`, `UNC` and anything else not in that map
