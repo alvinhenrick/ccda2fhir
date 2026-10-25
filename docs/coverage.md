@@ -112,7 +112,7 @@ See `docs/decisions/0005-medications.md` for the rules and the deliberate differ
 | `performer` | `performer` (first only) | done | golden | |
 | `author` | `requester`, `authoredOn`, Provenance | done | golden | |
 | `approachSiteCode`, `administrationUnitCode`, drug vehicle | not supported (IG) | reported | golden report | |
-| Supply order, Medication Dispense | `dispenseRequest` / MedicationDispense | reported, todo | | |
+| Supply order, Medication Dispense | `dispenseRequest` / MedicationDispense | done (ADR 0041) | golden `dispense` | |
 | Planned immunization (mood INT) | MedicationRequest | todo | | |
 
 ## Vital signs (Vital Signs Organizer / Vital Sign Observation) to Observation

@@ -716,7 +716,9 @@ fn parse_statement_as(
             }),
         administration_unit_code: child(node, "administrationUnitCode")
             .map(|n| parse_code(&n, narrative)),
-        consumable: child(node, "consumable").and_then(|n| parse_consumable(&n, narrative)),
+        consumable: child(node, "consumable")
+            .or_else(|| child(node, "product"))
+            .and_then(|n| parse_consumable(&n, narrative)),
         interpretation_codes: children(node, "interpretationCode")
             .map(|n| parse_code(&n, narrative))
             .collect(),

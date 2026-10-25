@@ -257,3 +257,8 @@ fn sdoh_interventions() {
 fn imaging() {
     check("imaging");
 }
+
+#[test]
+fn dispense() {
+    check("dispense");
+}
