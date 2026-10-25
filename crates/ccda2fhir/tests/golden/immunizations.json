@@ -30,6 +30,64 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:67a52690-c743-53ae-b623-9cfdf6ed934a",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-IMMUNIZATIONS-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "11369-6",
+                    "display": "History of Immunization note",
+                    "system": "http://loinc.org"
+                  }
+                ],
+                "text": "History of Immunization"
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:de19b364-3e9d-58be-bc70-92128a196655"
+                },
+                {
+                  "reference": "urn:uuid:42f5485a-cf6d-5f65-a0b7-385916cfe59b"
+                }
+              ],
+              "title": "Immunizations"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:890211ee-48a4-547d-b71c-dda32434d6ee"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:de19b364-3e9d-58be-bc70-92128a196655",
         "resource": {
           "doseQuantity": {
@@ -263,6 +321,18 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
+      "severity": "info"
     }
   ]
 }

@@ -30,6 +30,60 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:b60386ca-a245-5f41-a866-bd692a4bcc8f",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-TEAM-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "85847-2",
+                    "display": "Patient Care team information",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:7055658d-1536-5123-892f-f04fd3f5f6df"
+                }
+              ],
+              "title": "Care Teams"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:21e87bf3-adf5-539b-b76c-5fd8c8aca8c0"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:7055658d-1536-5123-892f-f04fd3f5f6df",
         "resource": {
           "id": "careteam-1",
@@ -129,6 +183,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

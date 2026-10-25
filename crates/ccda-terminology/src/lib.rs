@@ -127,6 +127,36 @@ impl Terminology for BuiltinTerminology {
     }
 }
 
+/// The official display for a code, for the few systems and codes this library carries.
+///
+/// Real documents often carry a wrong or shortened display for a well-known code, and the HL7
+/// validator rejects those. When a code is listed here the converter uses this display and keeps
+/// the document's own wording as the concept's text (see `docs/decisions/0027-display-names.md`).
+/// A code that is not listed keeps the document's display: nothing is guessed.
+///
+/// Every row is a LOINC long common name checked against the HL7 validator.
+#[must_use]
+pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
+    if system != "http://loinc.org" {
+        return None;
+    }
+    Some(match code {
+        "10160-0" => "History of Medication use Narrative",
+        "11369-6" => "History of Immunization note",
+        "11450-4" => "Problem list - Reported",
+        "18776-5" => "Plan of Care Note",
+        "29762-2" => "Social history note",
+        "30954-2" => "Relevant diagnostic tests/laboratory data note",
+        "34133-9" => "Summary of Episode Note",
+        "46240-8" => "History of Hospitalizations+Outpatient visits Narrative",
+        "47420-5" => "Functional Status Assessment Note",
+        "47519-4" => "History of Procedures Document",
+        "48765-2" => "Allergies and adverse reactions Document",
+        "8716-3" => "Vital signs note",
+        _ => return None,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

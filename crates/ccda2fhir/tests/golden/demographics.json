@@ -126,6 +126,41 @@
             }
           ]
         }
+      },
+      {
+        "fullUrl": "urn:uuid:462dc4df-35af-5a38-bdf4-51b06e754842",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-DEMOGRAPHICS-1"
+          },
+          "resourceType": "Composition",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:8af990c1-141b-536f-9eae-dc3e7f261ecf"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
       }
     ],
     "resourceType": "Bundle",
@@ -135,6 +170,18 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.section.empty",
+      "severity": "info"
     }
   ]
 }

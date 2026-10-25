@@ -30,6 +30,70 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:4da153c9-39f5-5ac9-bf49-7e892ad9840f",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-PLANNED-MED-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "18776-5",
+                    "display": "Plan of Care Note",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:10fa73d1-d165-50ce-bd8c-fdf6b5fb2751"
+                },
+                {
+                  "reference": "urn:uuid:f1e9647a-cc53-5540-8b05-096b3083395a"
+                },
+                {
+                  "reference": "urn:uuid:0941ae54-4aba-5a9c-9f6d-e455622cb50f"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Start clindamycin; education on fever; ECG performed.</p></div>",
+                "status": "generated"
+              },
+              "title": "Plan of Treatment"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:f18d7824-4ac5-5708-8500-02ca3e567ac1"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:10fa73d1-d165-50ce-bd8c-fdf6b5fb2751",
         "resource": {
           "authoredOn": "2025-01-02",
@@ -275,6 +339,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

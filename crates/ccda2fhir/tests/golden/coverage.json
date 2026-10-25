@@ -30,6 +30,41 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:2937dea6-1193-5044-a1ac-1a5ab606269a",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-COVERAGE-1"
+          },
+          "resourceType": "Composition",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:6624eaa8-fd3a-58bb-818a-914b9d1987a5"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:c7de2743-a35c-5242-8780-18e2853287db",
         "resource": {
           "beneficiary": {
@@ -124,6 +159,18 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.section.empty",
+      "severity": "info"
     }
   ]
 }

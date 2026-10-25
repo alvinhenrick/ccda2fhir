@@ -30,6 +30,70 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:6ce502a9-dd06-57cc-a448-49e2d5a82bb0",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-PROCEDURES-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "47519-4",
+                    "display": "History of Procedures Document",
+                    "system": "http://loinc.org"
+                  }
+                ],
+                "text": "History of Procedures"
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:90846148-55d4-5525-b6e5-2e3cc0b2a465"
+                },
+                {
+                  "reference": "urn:uuid:b2b8a0bb-5014-58a7-b3fb-64164f758e31"
+                },
+                {
+                  "reference": "urn:uuid:0f85de29-66af-5b31-aac3-44db9204be83"
+                },
+                {
+                  "reference": "urn:uuid:7f453e40-883c-58fb-b755-c781de68a2e9"
+                }
+              ],
+              "title": "Procedures"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:11ef9a45-f3e9-569f-a57f-e1aa8cdb9e09"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:90846148-55d4-5525-b6e5-2e3cc0b2a465",
         "resource": {
           "bodySite": [
@@ -302,6 +366,18 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
+      "severity": "info"
     }
   ]
 }

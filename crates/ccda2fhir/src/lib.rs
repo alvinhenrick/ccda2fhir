@@ -101,10 +101,9 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     report_unmapped(&document, &mut ctx);
     // The Composition lists the resources above, so it is built last and placed right after the
     // patient.
-    if let Some(mut composition) = map_composition(&document, &mut ctx, &resources) {
-        profiles.apply(&mut composition);
-        bundle.push(composition);
-    }
+    let mut composition = map_composition(&document, &mut ctx, &resources);
+    profiles.apply(&mut composition);
+    bundle.push(composition);
     for mut resource in resources {
         profiles.apply(&mut resource);
         bundle.push(resource);

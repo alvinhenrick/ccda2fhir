@@ -30,6 +30,80 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:47a7e722-3d9a-52d0-88a9-53694e93a5c2",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-PLAN-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "18776-5",
+                    "display": "Plan of Care Note",
+                    "system": "http://loinc.org"
+                  }
+                ],
+                "text": "Plan of care"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
+                "status": "generated"
+              },
+              "title": "Plan of Treatment"
+            },
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "61146-7",
+                    "display": "Goals",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:ff6d4c70-afcc-53fb-b2f1-42f98c07a828"
+                },
+                {
+                  "reference": "urn:uuid:ec9e744e-4b79-5e61-a972-9f4516bc17ae"
+                }
+              ],
+              "title": "Goals"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:41aa114a-323f-5466-8193-213a214875f4"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:ff6d4c70-afcc-53fb-b2f1-42f98c07a828",
         "resource": {
           "description": {
@@ -143,6 +217,18 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
+      "severity": "info"
     }
   ]
 }

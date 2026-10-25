@@ -30,6 +30,64 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:ad82eeaa-d666-53db-a890-4a8c4c016a62",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-NOTES-1"
+          },
+          "resourceType": "Composition",
+          "section": [
+            {
+              "code": {
+                "coding": [
+                  {
+                    "code": "34109-9",
+                    "display": "Note",
+                    "system": "http://loinc.org"
+                  }
+                ]
+              },
+              "entry": [
+                {
+                  "reference": "urn:uuid:5410fc6f-d6d8-5fe5-b0e9-e32e545a9929"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Seen for follow-up. Doing well on current plan.</p></div>",
+                "status": "generated"
+              },
+              "title": "Notes"
+            }
+          ],
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:00803a25-43ff-59da-b206-118dc4f38194"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:5410fc6f-d6d8-5fe5-b0e9-e32e545a9929",
         "resource": {
           "author": [
@@ -185,6 +243,14 @@
     {
       "code": "composition.author.missing",
       "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
     }
   ]
 }

@@ -18,3 +18,13 @@ Status: accepted. The C-CDA on FHIR document profiles are outdated, so this foll
   each mapper to record its source section; tracked in the coverage matrix.)
 - Not mapped yet: `attester` (legal authenticator), `encounter` (encompassing encounter), `event`, `relatesTo`, version and
   set id.
+
+## Update: always built, and `event`
+
+- A document with no usable author or date still gets a Composition. The missing element is marked with the data-absent-reason
+  extension (`author` as an extension-only reference, `_date`), and the report says so (`composition.author.missing`,
+  `composition.date.missing`). We do not invent an author or the current time. Before this, 19 of 29 real-world sample documents
+  got no Composition, and lost their header and section structure.
+- An author that is software becomes a `Device`, one that is only an organization an `Organization`.
+- `documentationOf/serviceEvent` becomes `Composition.event`: `code`, `period` from its effective time, and its performers as
+  Practitioners in `detail` (`event` has no performer element; the performer's function code is not mapped yet).

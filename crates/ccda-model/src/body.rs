@@ -399,6 +399,35 @@ fn parse_statement(
     parse_statement_as(node, narrative, depth, kind)
 }
 
+/// A header `documentationOf/serviceEvent`: the care the document describes.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ServiceEvent {
+    pub code: Option<Code>,
+    pub effective_time: Option<Time>,
+    /// The `performer`s (for example the primary care provider), with their `functionCode`.
+    pub performers: Vec<Author>,
+}
+
+pub(crate) fn parse_service_event(node: &Node, narrative: &Narrative) -> ServiceEvent {
+    ServiceEvent {
+        code: child(node, "code").map(|n| parse_code(&n, narrative)),
+        effective_time: child(node, "effectiveTime").map(|n| parse_time(&n)),
+        performers: children(node, "performer")
+            .map(|n| {
+                let time = child(&n, "time").and_then(|t| {
+                    attr(&t, "value").or_else(|| child(&t, "low").and_then(|l| attr(&l, "value")))
+                });
+                let mut agent = parse_agent(child(&n, "assignedEntity"), time, narrative);
+                // The performer's function (PCP, ...) is more specific than the entity's code.
+                if let Some(f) = child(&n, "functionCode") {
+                    agent.role_code = Some(parse_code(&f, narrative));
+                }
+                agent
+            })
+            .collect(),
+    }
+}
+
 /// The header's `componentOf/encompassingEncounter` as an Encounter statement. Its performers
 /// are the `encounterParticipant`s and its location the `healthCareFacility`.
 pub(crate) fn parse_encompassing_encounter(
