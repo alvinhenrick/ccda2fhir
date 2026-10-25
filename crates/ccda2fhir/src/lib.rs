@@ -9,9 +9,9 @@
 //! The library is pure: bytes in, a [`Conversion`] out. It performs no I/O and keeps no state.
 
 use ccda_map::{
-    map_allergies, map_devices, map_encounters, map_goals, map_immunizations, map_medications,
-    map_notes, map_patient, map_problems, map_procedures, map_results, map_social_history,
-    map_vitals, Context, Profiles, Report,
+    map_allergies, map_care_plans, map_devices, map_encounters, map_goals, map_immunizations,
+    map_medications, map_notes, map_patient, map_problems, map_procedures, map_results,
+    map_social_history, map_vitals, Context, Profiles, Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -85,7 +85,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .chain(map_social_history(&document, &mut ctx))
         .chain(map_notes(&document, &mut ctx))
         .chain(map_devices(&document, &mut ctx))
-        .chain(map_goals(&document, &mut ctx))
+        .chain(goals_and_plans(&document, &mut ctx))
     {
         let mut resource = resource;
         profiles.apply(&mut resource);
@@ -97,6 +97,17 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     }
 
     Ok(Conversion { bundle, report })
+}
+
+/// Goals, then the care plans that point at them.
+fn goals_and_plans(
+    document: &ccda_model::ClinicalDocument,
+    ctx: &mut Context,
+) -> Vec<serde_json::Value> {
+    let mut out = map_goals(document, ctx);
+    let plans = map_care_plans(document, ctx, &out);
+    out.extend(plans);
+    out
 }
 
 #[cfg(test)]

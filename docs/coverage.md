@@ -269,6 +269,19 @@ See `docs/decisions/0014-goals.md`.
 | Goal target measures, priority | `target.measure`, `priority` | todo | | |
 | Links to Care Plan, Health Concerns | `addresses` | todo | | |
 
+## Plan of Treatment to CarePlan
+
+See `docs/decisions/0015-care-plan.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Plan of Treatment section | `CarePlan` (intent plan, category assess-plan) | done | `plan_has_required_fields_and_escaped_narrative` | |
+| Section narrative | `text.div` | done | same | |
+| Goals in the document | `goal` | done | `plan_points_at_goals` | |
+| Planned activities (4.39-4.44, 4.20) | `activity`, ServiceRequest | todo | | |
+| Health Concerns | `addresses` | todo | | |
+| Care team | `careTeam`, `contributor` | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

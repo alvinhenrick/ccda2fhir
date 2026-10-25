@@ -1,0 +1,144 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:41aa114a-323f-5466-8193-213a214875f4",
+        "resource": {
+          "birthDate": "1955-05-05",
+          "gender": "female",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0014"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Example",
+              "given": [
+                "Lee"
+              ]
+            }
+          ],
+          "resourceType": "Patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:ff6d4c70-afcc-53fb-b2f1-42f98c07a828",
+        "resource": {
+          "description": {
+            "coding": [
+              {
+                "code": "289169006",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          },
+          "id": "goal-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-1"
+            }
+          ],
+          "lifecycleStatus": "active",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2025-01-01",
+          "subject": {
+            "reference": "urn:uuid:41aa114a-323f-5466-8193-213a214875f4"
+          },
+          "target": [
+            {
+              "dueDate": "2025-12-31"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:ec9e744e-4b79-5e61-a972-9f4516bc17ae",
+        "resource": {
+          "description": {
+            "text": "Walk 30 minutes a day"
+          },
+          "id": "goal-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.12.1",
+              "value": "GOAL-2"
+            }
+          ],
+          "lifecycleStatus": "completed",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-goal"
+            ]
+          },
+          "resourceType": "Goal",
+          "startDate": "2024-06-01",
+          "subject": {
+            "reference": "urn:uuid:41aa114a-323f-5466-8193-213a214875f4"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:c9a5ddc0-609b-5472-a628-ea0c4ff13556",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "assess-plan",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/careplan-category"
+                }
+              ]
+            }
+          ],
+          "goal": [
+            {
+              "reference": "urn:uuid:ff6d4c70-afcc-53fb-b2f1-42f98c07a828"
+            },
+            {
+              "reference": "urn:uuid:ec9e744e-4b79-5e61-a972-9f4516bc17ae"
+            }
+          ],
+          "id": "careplan-1",
+          "intent": "plan",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-careplan"
+            ]
+          },
+          "resourceType": "CarePlan",
+          "status": "active",
+          "subject": {
+            "reference": "urn:uuid:41aa114a-323f-5466-8193-213a214875f4"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
+            "status": "generated"
+          },
+          "title": "Plan of Treatment"
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "careplan.status.assumed",
+      "severity": "info"
+    }
+  ]
+}
