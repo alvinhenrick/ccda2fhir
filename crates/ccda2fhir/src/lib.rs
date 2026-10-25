@@ -10,12 +10,12 @@
 
 use ccda_map::{
     add_generated_text, attach_comments, link_care_plan_activities, link_encounters,
-    link_managing_organization, map_advance_directives, map_allergies, map_assessments,
-    map_care_plans, map_care_teams, map_composition, map_coverage, map_derivation, map_devices,
-    map_encompassing_encounter, map_encounters, map_family_history, map_goals, map_health_concerns,
-    map_imaging, map_immunizations, map_medications, map_notes, map_patient, map_problems,
-    map_procedures, map_results, map_service_requests, map_social_history, map_unstructured,
-    map_vitals, report_unmapped, tag_sdoh, Context, Profiles, Report,
+    link_goal_addresses, link_managing_organization, map_advance_directives, map_allergies,
+    map_assessments, map_care_plans, map_care_teams, map_composition, map_coverage, map_derivation,
+    map_devices, map_encompassing_encounter, map_encounters, map_family_history, map_goals,
+    map_health_concerns, map_imaging, map_immunizations, map_medications, map_notes, map_patient,
+    map_problems, map_procedures, map_results, map_service_requests, map_social_history,
+    map_unstructured, map_vitals, report_unmapped, tag_sdoh, Context, Profiles, Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -106,6 +106,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     let concerns = map_health_concerns(&document, &mut ctx, &mut resources);
     resources.extend(concerns);
     link_encounters(&document, &mut ctx, &mut resources);
+    link_goal_addresses(&document, &mut ctx, &mut resources);
     attach_comments(&document, &mut ctx, &mut resources);
     tag_sdoh(&mut ctx, &mut resources);
     link_care_plan_activities(&document, &mut ctx, &mut resources);

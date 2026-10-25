@@ -13,4 +13,4 @@ Status: accepted. No IG page covers goals; this follows C-CDA Goal Observation (
 
 ## Update (docs refresh)
 
-Still open: progress toward a goal (`achievementStatus`), `priority` and `addresses`.
+Progress, `priority` and `addresses` were done in ADR 0048.
