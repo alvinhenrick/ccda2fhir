@@ -282,6 +282,20 @@ See `docs/decisions/0015-care-plan.md`.
 | Health Concerns | `addresses` | todo | | |
 | Care team | `careTeam`, `contributor` | todo | | |
 
+## Care Team to CareTeam
+
+See `docs/decisions/0016-care-team.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Care Team Organizer | `CareTeam` | done | `member_becomes_participant_with_role_and_period` | |
+| `statusCode` | `status` | done | `status_map_and_fallback` | |
+| Member performer | `participant.member` (Practitioner) | done | same as first | |
+| Performer code | `participant.role` | done | same | |
+| Member effectiveTime | `participant.period` | done | same | |
+| `functionCode`, patient/related-person members | `role`, RelatedPerson | todo | | |
+| PractitionerRole, Location | PractitionerRole, Location | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that
