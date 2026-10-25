@@ -169,7 +169,7 @@ fn clinical_status(
     "active"
 }
 
-fn map_observation(
+pub(crate) fn map_observation(
     category: Option<Value>,
     concern: &Statement,
     observation: &Statement,
