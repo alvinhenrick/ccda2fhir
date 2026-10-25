@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Eli Example</td></tr><tr><td>birthDate</td><td>1975-03-09</td></tr><tr><td>gender</td><td>male</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -99,6 +103,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           },
           "title": "Clinical document",
           "type": {
@@ -180,6 +188,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Vital Signs Panel</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -269,6 +281,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Blood pressure</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -342,6 +358,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Oxygen saturation</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr><tr><td>valueQuantity</td><td>98 %</td></tr></table></div>",
+            "status": "generated"
           },
           "valueQuantity": {
             "code": "%",
@@ -423,6 +443,10 @@
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Heart rate</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr><tr><td>valueQuantity</td><td>72 /min</td></tr></table></div>",
+            "status": "generated"
+          },
           "valueQuantity": {
             "code": "/min",
             "system": "http://unitsofmeasure.org",
@@ -476,6 +500,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Body weight</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr><tr><td>valueQuantity</td><td>154.5 lb</td></tr></table></div>",
+            "status": "generated"
           },
           "valueQuantity": {
             "code": "[lb_av]",
@@ -531,6 +559,10 @@
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Body height</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr><tr><td>valueQuantity</td><td>68 in</td></tr></table></div>",
+            "status": "generated"
+          },
           "valueQuantity": {
             "code": "[in_i]",
             "system": "http://unitsofmeasure.org",
@@ -584,6 +616,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Body temperature</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr><tr><td>valueQuantity</td><td>98.6 F</td></tr></table></div>",
+            "status": "generated"
           },
           "valueQuantity": {
             "code": "[degF]",
@@ -646,6 +682,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Respiratory rate</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -695,6 +735,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Vital Signs Panel</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -777,6 +821,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:1c5def17-a981-5b40-8031-a9e3fde4a3e1"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Blood pressure</td></tr><tr><td>category</td><td>Vital Signs</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-05T08:30:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -803,7 +851,11 @@
               ]
             }
           ],
-          "resourceType": "Practitioner"
+          "resourceType": "Practitioner",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Practitioner</p><table><tr><td>name</td><td>Pat Doe</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -823,7 +875,11 @@
             ]
           },
           "name": "Example Clinic",
-          "resourceType": "Organization"
+          "resourceType": "Organization",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>Example Clinic</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -859,7 +915,11 @@
             {
               "reference": "urn:uuid:862488d5-8ac0-5bf4-baef-ee095de1f364"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -895,7 +955,11 @@
             {
               "reference": "urn:uuid:fdd36ebf-3cef-574c-b0db-2bc997fb1a33"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -931,7 +995,11 @@
             {
               "reference": "urn:uuid:d8220efe-af5b-586b-9d03-f4abddda15bf"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -967,7 +1035,11 @@
             {
               "reference": "urn:uuid:d5e8a125-06da-5356-be77-b852be05b171"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -1003,7 +1075,11 @@
             {
               "reference": "urn:uuid:b70d607c-f7b9-54b3-97a3-72c552a2dd2f"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -1039,7 +1115,11 @@
             {
               "reference": "urn:uuid:dedb0dd6-6126-56fd-9ef1-2caeb187c367"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -1075,7 +1155,11 @@
             {
               "reference": "urn:uuid:49b5ad17-9693-558e-88c5-65672fa4088b"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -1111,7 +1195,11 @@
             {
               "reference": "urn:uuid:0d9b5819-3156-52a6-a7c3-cca96f7cfcde"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       }
     ],

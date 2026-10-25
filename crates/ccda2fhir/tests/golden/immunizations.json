@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Carol Example</td></tr><tr><td>birthDate</td><td>1990-05-20</td></tr><tr><td>gender</td><td>female</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -75,6 +79,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:890211ee-48a4-547d-b71c-dda32434d6ee"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           },
           "title": "Clinical document",
           "type": {
@@ -157,6 +165,10 @@
             ]
           },
           "status": "completed",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Immunization</p><table><tr><td>vaccineCode</td><td>Influenza, split virus, trivalent, PF</td></tr><tr><td>status</td><td>completed</td></tr><tr><td>occurrenceDateTime</td><td>2024-10-10</td></tr></table></div>",
+            "status": "generated"
+          },
           "vaccineCode": {
             "coding": [
               {
@@ -198,6 +210,10 @@
               }
             ]
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Immunization</p><table><tr><td>vaccineCode</td><td>Tdap</td></tr><tr><td>status</td><td>not-done</td></tr><tr><td>occurrenceDateTime</td><td>2023-10-01</td></tr></table></div>",
+            "status": "generated"
+          },
           "vaccineCode": {
             "coding": [
               {
@@ -220,7 +236,11 @@
             ]
           },
           "name": "Example Vaccines Inc",
-          "resourceType": "Organization"
+          "resourceType": "Organization",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>Example Vaccines Inc</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -246,7 +266,11 @@
               ]
             }
           ],
-          "resourceType": "Practitioner"
+          "resourceType": "Practitioner",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Practitioner</p><table><tr><td>name</td><td>Pat Doe</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -266,7 +290,11 @@
             ]
           },
           "name": "Example Clinic",
-          "resourceType": "Organization"
+          "resourceType": "Organization",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>Example Clinic</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -302,7 +330,11 @@
             {
               "reference": "urn:uuid:de19b364-3e9d-58be-bc70-92128a196655"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       }
     ],

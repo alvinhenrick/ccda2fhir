@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Fay Example</td></tr><tr><td>birthDate</td><td>1988-11-22</td></tr><tr><td>gender</td><td>female</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -90,6 +94,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           },
           "title": "Clinical document",
           "type": {
@@ -159,6 +167,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>DiagnosticReport</p><table><tr><td>code</td><td>CBC panel - Blood by Automated count</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>issued</td><td>2024-11-06T08:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -234,6 +246,10 @@
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Hemoglobin [Mass/volume] in Blood</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-06T07:15:00-05:00</td></tr><tr><td>valueQuantity</td><td>17.2 g/dL</td></tr></table></div>",
+            "status": "generated"
+          },
           "valueQuantity": {
             "code": "g/dL",
             "system": "http://unitsofmeasure.org",
@@ -287,6 +303,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Leukocytes [#/volume] in Blood by Automated count</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-06T07:15:00-05:00</td></tr><tr><td>valueQuantity</td><td>6.8 10*3/uL</td></tr></table></div>",
+            "status": "generated"
           },
           "valueQuantity": {
             "code": "10*3/uL",
@@ -348,6 +368,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>DiagnosticReport</p><table><tr><td>code</td><td>Urinalysis macro (dipstick) panel - Urine</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-06T07:15:00-05:00</td></tr><tr><td>issued</td><td>2024-11-06T07:15:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -391,6 +415,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Reagin Ab [Presence] in Serum by RPR</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-06T07:15:00-05:00</td></tr><tr><td>valueCodeableConcept</td><td>260385009</td></tr></table></div>",
+            "status": "generated"
           },
           "valueCodeableConcept": {
             "coding": [
@@ -443,6 +471,10 @@
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Color of Urine</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-06T07:15:00-05:00</td></tr><tr><td>valueString</td><td>Yellow</td></tr></table></div>",
+            "status": "generated"
+          },
           "valueString": "Yellow"
         }
       },
@@ -494,6 +526,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:3c38d710-8e30-543a-b4de-d859939c4003"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Sodium [Moles/volume] in Serum or Plasma</td></tr><tr><td>category</td><td>Laboratory</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-11-06T07:15:00-05:00</td></tr></table></div>",
+            "status": "generated"
           }
         }
       },
@@ -520,7 +556,11 @@
               ]
             }
           ],
-          "resourceType": "Practitioner"
+          "resourceType": "Practitioner",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Practitioner</p><table><tr><td>name</td><td>Pat Doe</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -540,7 +580,11 @@
             ]
           },
           "name": "Example Lab",
-          "resourceType": "Organization"
+          "resourceType": "Organization",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>Example Lab</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -576,7 +620,11 @@
             {
               "reference": "urn:uuid:40095c9c-7ef7-5cbe-8e9f-89107b5d5d7a"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -612,7 +660,11 @@
             {
               "reference": "urn:uuid:37c1ea3a-7a75-5526-942e-9c8f1aabe20d"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -648,7 +700,11 @@
             {
               "reference": "urn:uuid:0160c070-20e2-5a04-9574-1a8c1150acad"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       }
     ],

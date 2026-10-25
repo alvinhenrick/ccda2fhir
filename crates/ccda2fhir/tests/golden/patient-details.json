@@ -170,7 +170,11 @@
               "use": "mobile",
               "value": "+1(565)867-5309"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Adam Everyman; Sam Everyman</td></tr><tr><td>birthDate</td><td>1952-10-22</td></tr><tr><td>gender</td><td>male</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -196,6 +200,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:6e08b1bb-f86d-50fb-891c-f20f8a362ae2"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           },
           "title": "Clinical document",
           "type": {
@@ -242,7 +250,11 @@
               "use": "work",
               "value": "+1(401)539-4321"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>River Valley Health Services</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       }
     ],

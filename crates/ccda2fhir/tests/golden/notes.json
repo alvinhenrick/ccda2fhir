@@ -26,7 +26,11 @@
               ]
             }
           ],
-          "resourceType": "Patient"
+          "resourceType": "Patient",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Kai Example</td></tr><tr><td>birthDate</td><td>1970-06-15</td></tr><tr><td>gender</td><td>male</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -75,6 +79,10 @@
           "status": "final",
           "subject": {
             "reference": "urn:uuid:00803a25-43ff-59da-b206-118dc4f38194"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
           },
           "title": "Clinical document",
           "type": {
@@ -138,6 +146,10 @@
           "subject": {
             "reference": "urn:uuid:00803a25-43ff-59da-b206-118dc4f38194"
           },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>DocumentReference</p><table><tr><td>type</td><td>Consult note</td></tr><tr><td>category</td><td>Clinical Note</td></tr><tr><td>status</td><td>current</td></tr><tr><td>date</td><td>2024-09-08T08:32:15-05:00</td></tr></table></div>",
+            "status": "generated"
+          },
           "type": {
             "coding": [
               {
@@ -172,7 +184,11 @@
               ]
             }
           ],
-          "resourceType": "Practitioner"
+          "resourceType": "Practitioner",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Practitioner</p><table><tr><td>name</td><td>Pat Specialist</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -192,7 +208,11 @@
             ]
           },
           "name": "Example Clinic",
-          "resourceType": "Organization"
+          "resourceType": "Organization",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>Example Clinic</td></tr></table></div>",
+            "status": "generated"
+          }
         }
       },
       {
@@ -228,7 +248,11 @@
             {
               "reference": "urn:uuid:5410fc6f-d6d8-5fe5-b0e9-e32e545a9929"
             }
-          ]
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
         }
       }
     ],
