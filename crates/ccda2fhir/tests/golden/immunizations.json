@@ -354,6 +354,83 @@
             "status": "generated"
           }
         }
+      },
+      {
+        "fullUrl": "urn:uuid:cbb00aee-239c-5a4a-98c8-7bdfe7314569",
+        "resource": {
+          "deviceName": [
+            {
+              "name": "ccda2fhir",
+              "type": "user-friendly-name"
+            }
+          ],
+          "id": "device-1",
+          "resourceType": "Device",
+          "status": "active",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Device</p><table><tr><td>status</td><td>active</td></tr></table></div>",
+            "status": "generated"
+          },
+          "version": [
+            {
+              "value": "<crate-version>"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:d2773401-4663-536d-8db2-1526a3fecd4d",
+        "resource": {
+          "activity": {
+            "coding": [
+              {
+                "code": "Derivation",
+                "system": "http://hl7.org/fhir/w3c-provenance-activity-type"
+              }
+            ]
+          },
+          "agent": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "assembler",
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                  }
+                ]
+              },
+              "who": {
+                "reference": "urn:uuid:cbb00aee-239c-5a4a-98c8-7bdfe7314569"
+              }
+            }
+          ],
+          "entity": [
+            {
+              "role": "source",
+              "what": {
+                "reference": "urn:uuid:67a52690-c743-53ae-b623-9cfdf6ed934a"
+              }
+            }
+          ],
+          "id": "provenance-2",
+          "recorded": "2025-01-02T12:00:00-05:00",
+          "resourceType": "Provenance",
+          "target": [
+            {
+              "reference": "urn:uuid:890211ee-48a4-547d-b71c-dda32434d6ee"
+            },
+            {
+              "reference": "urn:uuid:de19b364-3e9d-58be-bc70-92128a196655"
+            },
+            {
+              "reference": "urn:uuid:42f5485a-cf6d-5f65-a0b7-385916cfe59b"
+            }
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provenance</p></div>",
+            "status": "generated"
+          }
+        }
       }
     ],
     "resourceType": "Bundle",

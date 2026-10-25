@@ -11,7 +11,7 @@
 use ccda_map::{
     add_generated_text, attach_comments, link_care_plan_activities, link_encounters,
     link_managing_organization, map_advance_directives, map_allergies, map_assessments,
-    map_care_plans, map_care_teams, map_composition, map_coverage, map_devices,
+    map_care_plans, map_care_teams, map_composition, map_coverage, map_derivation, map_devices,
     map_encompassing_encounter, map_encounters, map_family_history, map_goals, map_health_concerns,
     map_imaging, map_immunizations, map_medications, map_notes, map_patient, map_problems,
     map_procedures, map_results, map_service_requests, map_social_history, map_unstructured,
@@ -113,6 +113,12 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     // The Composition lists the resources above, so it is built last and placed right after the
     // patient.
     let mut composition = map_composition(&document, &mut ctx, &resources);
+    map_derivation(
+        document.effective_time.as_deref(),
+        &composition,
+        &resources,
+        &mut ctx,
+    );
     add_generated_text(&mut composition);
     profiles.apply(&mut composition);
     bundle.push(composition);
@@ -166,12 +172,14 @@ mod tests {
             json["entry"][0]["resource"]["identifier"][0]["system"],
             "http://hl7.org/fhir/sid/us-ssn"
         );
-        // The sample has no author, so the only thing reported is that no Composition was built.
+        // The sample has no author and no document time, so only the Composition and the
+        // derivation Provenance are reported as incomplete.
         assert!(conversion
             .report
             .issues
             .iter()
-            .all(|i| i.code.starts_with("composition.")));
+            .all(|i| i.code.starts_with("composition.")
+                || i.code == "provenance.derivation.unavailable"));
     }
 
     #[test]
