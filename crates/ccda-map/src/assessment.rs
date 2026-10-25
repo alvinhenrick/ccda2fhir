@@ -20,7 +20,12 @@ enum Kind {
     Cognitive,
     Mental,
     Health,
+    Social,
 }
+
+const ASSESSMENT_SCALE: &str = "2.16.840.1.113883.10.20.22.4.69";
+const SCALE_SUPPORTING: &str = "2.16.840.1.113883.10.20.22.4.86";
+const ORDINAL_VALUE: &str = "http://hl7.org/fhir/StructureDefinition/ordinalValue";
 
 /// (template, kind, is an organizer)
 const TEMPLATES: &[(&str, Kind, bool)] = &[
@@ -45,7 +50,20 @@ fn kind_of(s: &Statement) -> Option<(Kind, bool)> {
 
 /// The templates of this family, for the "not mapped" check.
 pub(crate) fn handled_templates() -> impl Iterator<Item = &'static str> {
-    TEMPLATES.iter().map(|(t, _, _)| *t)
+    TEMPLATES
+        .iter()
+        .map(|(t, _, _)| *t)
+        .chain(std::iter::once(ASSESSMENT_SCALE))
+}
+
+/// An Assessment Scale (a questionnaire or score) takes its category from the section it is in.
+fn scale_kind(section: &ccda_model::Section) -> Option<Kind> {
+    match section.code.as_ref().and_then(|c| c.code.as_deref()) {
+        Some("47420-5") => Some(Kind::Functional),
+        Some("10190-7") => Some(Kind::Mental),
+        Some("29762-2") => Some(Kind::Social),
+        _ => None,
+    }
 }
 
 fn category(kind: Kind, ctx: &mut Context) -> Value {
@@ -59,6 +77,7 @@ fn category(kind: Kind, ctx: &mut Context) -> Value {
             );
             (US_CORE_CATEGORY, "cognitive-status")
         }
+        Kind::Social => (OBSERVATION_CATEGORY, "social-history"),
         Kind::Health => {
             ctx.report.info(
                 "assessment.category.assumed",
@@ -76,6 +95,17 @@ pub fn map_assessments(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> 
     for section in doc.all_sections() {
         for entry in &section.entries {
             let s = &entry.statement;
+            if s.kind == StatementKind::Observation && s.has_template(ASSESSMENT_SCALE) {
+                let kind = scale_kind(section).unwrap_or_else(|| {
+                    ctx.report.info(
+                        "assessment.scale.category.assumed",
+                        "an assessment scale is in a section with no known category; the survey category was used",
+                    );
+                    Kind::Health
+                });
+                map_scale(s, kind, ctx, &mut out);
+                continue;
+            }
             let Some((kind, organizer)) = kind_of(s) else {
                 continue;
             };
@@ -89,6 +119,62 @@ pub fn map_assessments(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> 
         }
     }
     out
+}
+
+/// An Assessment Scale Observation (4.69) is a panel: the score, with one Observation per
+/// supporting observation (4.86, one question and its answer) linked by `hasMember`.
+fn map_scale(s: &Statement, kind: Kind, ctx: &mut Context, out: &mut Vec<Value>) {
+    let mut members: Vec<Value> = Vec::new();
+    for related in &s.related {
+        let m = &related.statement;
+        if m.kind != StatementKind::Observation || !m.has_template(SCALE_SUPPORTING) {
+            ctx.report.info(
+                "assessment.member.unsupported",
+                "an assessment scale contains a component that is not a supporting observation; it was not mapped",
+            );
+            continue;
+        }
+        // A supporting observation may carry the score (INT) and the answer concept (coded). The
+        // answer is the value, with the score as the coding's ordinal value.
+        let score = m.values.iter().find_map(|v| match v {
+            ccda_model::Value::Integer(x) => x.value.clone(),
+            _ => None,
+        });
+        let answer = m
+            .values
+            .iter()
+            .find(|v| matches!(v, ccda_model::Value::Coded(_)));
+        let mut r = match (&score, answer) {
+            (Some(_), Some(answer)) => {
+                let mut trimmed = m.clone();
+                trimmed.values = vec![answer.clone()];
+                observation(&trimmed, kind, Some(s), ctx)
+            }
+            _ => observation(m, kind, Some(s), ctx),
+        };
+        if let Some(score) = score.filter(|_| answer.is_some()) {
+            if let (Some(n), Some(coding)) = (
+                crate::decimal(&score),
+                r.get_mut("valueCodeableConcept")
+                    .and_then(|v| v["coding"].get_mut(0)),
+            ) {
+                coding["extension"] = json!([{ "url": ORDINAL_VALUE, "valueDecimal": n }]);
+            }
+        }
+        members.push(Value::Object(r));
+    }
+    let mut r = observation(s, kind, None, ctx);
+    apply_performer(&mut r, s, None, ctx);
+    let refs: Vec<Value> = members
+        .iter()
+        .filter_map(|m| m["id"].as_str())
+        .map(|id| json!({ "reference": ctx.reference("Observation", id) }))
+        .collect();
+    if !refs.is_empty() {
+        r.insert("hasMember".into(), json!(refs));
+    }
+    out.push(Value::Object(r));
+    out.extend(members);
 }
 
 fn observation(

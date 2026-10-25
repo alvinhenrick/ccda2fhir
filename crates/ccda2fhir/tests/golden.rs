@@ -176,3 +176,8 @@ fn encompassing_encounter_already_in_the_body() {
 fn family_history() {
     check("family-history");
 }
+
+#[test]
+fn scales_and_supplies() {
+    check("scales-supplies");
+}

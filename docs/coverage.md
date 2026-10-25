@@ -425,6 +425,15 @@ See `docs/decisions/0028-family-history.md`.
 | Age Observation (4.31), Death Observation (4.47) | `onsetAge`, `contributedToDeath` | done | golden `family_history` | |
 | Negated family history | `note` + report | done | golden `family_history` | |
 
+## Assessment scales and supplies
+
+See `docs/decisions/0029-scales-and-supplies.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Assessment Scale Observation (4.69) + Supporting Observation (4.86) | panel `Observation` + member `Observation`s (`ordinalValue`) | done | golden `scales_and_supplies` | |
+| Non-Medicinal Supply Activity (4.50) | `Device` + `DeviceUseStatement` | done | golden `scales_and_supplies` | |
+
 ## Data-loss audit
 
 `cargo run --release -p ccda2fhir --example audit -- <files>` checks every attribute and text value of the source documents (outside
