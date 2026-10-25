@@ -554,6 +554,7 @@ mod tests {
             service_events: Vec::new(),
             encompassing_encounter: None,
             sections: Vec::new(),
+            non_xml_body: None,
         }
     }
 

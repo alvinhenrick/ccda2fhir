@@ -58,7 +58,7 @@ pub(crate) fn base64(bytes: &[u8]) -> String {
     out
 }
 
-fn is_base64(s: &str) -> bool {
+pub(crate) fn is_base64(s: &str) -> bool {
     !s.is_empty()
         && s.len().is_multiple_of(4)
         && s.bytes()

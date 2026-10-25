@@ -773,6 +773,34 @@ fn parse_section(node: &Node, depth: usize) -> Result<Section, ParseError> {
     })
 }
 
+/// The body of an unstructured document (`component/nonXMLBody/text`).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct NonXmlBody {
+    /// `mediaType`, for example `application/pdf`.
+    pub media_type: Option<String>,
+    /// `representation`: `B64` or `TXT`.
+    pub representation: Option<String>,
+    /// The element's own text (base64 or plain), when it has any.
+    pub content: Option<String>,
+    /// `text/reference/@value`: a pointer to a file outside the document.
+    pub reference: Option<String>,
+}
+
+/// Parse `component/nonXMLBody`, if there is one.
+pub(crate) fn parse_non_xml_body(root: &Node) -> Option<NonXmlBody> {
+    let body = child(root, "component").and_then(|c| child(&c, "nonXMLBody"))?;
+    let text = child(&body, "text");
+    Some(NonXmlBody {
+        media_type: text.as_ref().and_then(|n| attr(n, "mediaType")),
+        representation: text.as_ref().and_then(|n| attr(n, "representation")),
+        content: text.as_ref().and_then(text_of),
+        reference: text
+            .as_ref()
+            .and_then(|n| child(n, "reference"))
+            .and_then(|n| attr(&n, "value")),
+    })
+}
+
 /// Parse `component/structuredBody/component/section`.
 pub(crate) fn parse_body(root: &Node) -> Result<Vec<Section>, ParseError> {
     let Some(body) = child(root, "component").and_then(|c| child(&c, "structuredBody")) else {

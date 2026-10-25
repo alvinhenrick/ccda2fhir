@@ -13,9 +13,9 @@ use roxmltree::{Document, ParsingOptions};
 use thiserror::Error;
 
 pub use body::{
-    Author, AuthorOrganization, Consumable, Entry, Link, Participant, ReferenceRange, Related,
-    RelatedDocument, RelatedSubject, Section, ServiceEvent, Specimen, Statement, StatementKind,
-    TextContent,
+    Author, AuthorOrganization, Consumable, Entry, Link, NonXmlBody, Participant, ReferenceRange,
+    Related, RelatedDocument, RelatedSubject, Section, ServiceEvent, Specimen, Statement,
+    StatementKind, TextContent,
 };
 pub use header::{Address, Guardian, Language, Patient, PersonName, Telecom};
 pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
@@ -92,6 +92,8 @@ pub struct ClinicalDocument {
     pub encompassing_encounter: Option<Statement>,
     /// Top-level sections of the structured body, in document order.
     pub sections: Vec<Section>,
+    /// `component/nonXMLBody`: an unstructured document (PDF, text, ...).
+    pub non_xml_body: Option<NonXmlBody>,
 }
 
 impl ClinicalDocument {
@@ -244,6 +246,7 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
             .and_then(|c| child(&c, "encompassingEncounter"))
             .and_then(|e| body::parse_encompassing_encounter(&e, &header_narrative)),
         sections: body::parse_body(&root)?,
+        non_xml_body: body::parse_non_xml_body(&root),
     })
 }
 

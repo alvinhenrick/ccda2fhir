@@ -191,3 +191,8 @@ fn header_participants() {
 fn patient_details() {
     check("patient-details");
 }
+
+#[test]
+fn unstructured() {
+    check("unstructured");
+}
