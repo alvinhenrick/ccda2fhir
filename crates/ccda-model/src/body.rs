@@ -320,7 +320,11 @@ fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
     };
     Participant {
         type_code: attr(node, "typeCode"),
-        template_ids: template_ids(node),
+        // C-CDA puts the templateId on `participantRole`; accept it on `participant` too.
+        template_ids: template_ids(node)
+            .into_iter()
+            .chain(role.as_ref().map(template_ids).unwrap_or_default())
+            .collect(),
         ids: role.as_ref().map(identifiers).unwrap_or_default(),
         role_code: role
             .and_then(|r| child(&r, "code"))

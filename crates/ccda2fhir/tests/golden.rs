@@ -101,3 +101,8 @@ fn demographics() {
 fn notes() {
     check("notes");
 }
+
+#[test]
+fn devices() {
+    check("devices");
+}
