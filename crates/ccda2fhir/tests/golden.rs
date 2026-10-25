@@ -247,3 +247,8 @@ fn sdoh() {
 fn referral() {
     check("referral");
 }
+
+#[test]
+fn sdoh_interventions() {
+    check("sdoh-interventions");
+}

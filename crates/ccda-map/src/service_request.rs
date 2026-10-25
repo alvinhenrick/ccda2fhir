@@ -37,8 +37,7 @@ const FIELDS: AuthorFields = AuthorFields {
 pub fn map_service_requests(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
     let mut out = Vec::new();
     for section in doc.all_sections() {
-        for entry in &section.entries {
-            let s = &entry.statement;
+        for s in crate::util::activities(section) {
             if s.kind == StatementKind::Encounter
                 && s.mood_code.as_deref() == Some("APT")
                 && s.has_template(PLANNED_ENCOUNTER)
