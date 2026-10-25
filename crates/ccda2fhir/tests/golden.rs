@@ -111,3 +111,8 @@ fn devices() {
 fn goals() {
     check("goals");
 }
+
+#[test]
+fn care_plan() {
+    check("care-plan");
+}

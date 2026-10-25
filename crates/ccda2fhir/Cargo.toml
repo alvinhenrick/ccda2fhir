@@ -12,8 +12,6 @@ ccda-terminology.workspace = true
 ccda-map.workspace = true
 fhir-out.workspace = true
 thiserror.workspace = true
-
-[dev-dependencies]
 serde_json.workspace = true
 
 [lints]
