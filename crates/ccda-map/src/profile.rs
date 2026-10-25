@@ -29,7 +29,21 @@ impl Profiles {
             "AllergyIntolerance" => "us-core-allergyintolerance",
             "Immunization" => "us-core-immunization",
             // US Core requires authoredOn and requester; claim it only when both are present.
-            "Observation" => vital_signs_profile(resource)?,
+            "Observation" => observation_profile(resource)?,
+            "DiagnosticReport" => {
+                let lab = resource["category"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .flat_map(|c| c["coding"].as_array().into_iter().flatten())
+                    .any(|c| c["code"] == "LAB");
+                let timed = resource["effectiveDateTime"].is_string()
+                    || resource["effectivePeriod"].is_object();
+                if !(lab && timed && resource["code"]["coding"].is_array()) {
+                    return None;
+                }
+                "us-core-diagnosticreport-lab"
+            }
             "MedicationRequest" => {
                 if !(resource["authoredOn"].is_string() && resource["requester"].is_object()) {
                     return None;
@@ -96,6 +110,29 @@ impl Profiles {
             resource["meta"] = json!({ "profile": [url] });
         }
     }
+}
+
+/// The US Core profile of an Observation: vital signs or laboratory result.
+fn observation_profile(resource: &Value) -> Option<&'static str> {
+    let in_category = |wanted: &str| {
+        resource["category"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .flat_map(|c| c["coding"].as_array().into_iter().flatten())
+            .any(|c| c["code"] == wanted)
+    };
+    if in_category("laboratory") {
+        let has_value = resource.as_object().is_some_and(|o| {
+            o.keys()
+                .any(|k| k.starts_with("value") || k == "dataAbsentReason")
+        });
+        let timed =
+            resource["effectiveDateTime"].is_string() || resource["effectivePeriod"].is_object();
+        let coded = resource["code"]["coding"].is_array();
+        return (has_value && timed && coded).then_some("us-core-observation-lab");
+    }
+    vital_signs_profile(resource)
 }
 
 /// The US Core vital sign profile an Observation meets, or `None`. A specific profile is claimed

@@ -132,6 +132,22 @@ See `docs/decisions/0006-vital-signs-and-observations.md`.
 | Per-vital US Core profile | `meta.profile` | done (unit-checked) | golden | |
 | Author fallback from the organizer | `performer` | done | golden | |
 
+## Results (Result Organizer / Result Observation) to DiagnosticReport + Observation
+
+See `docs/decisions/0007-results.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Organizer `id`, `code`, `statusCode` | DiagnosticReport `identifier`, `code`, `status` | done | `organizer_is_a_report_that_lists_its_observations` | |
+| Organizer `effectiveTime` | `effective[x]` (span of members if missing) | done | same | |
+| Result Observations | `result` references + Observations | done | golden `results` | |
+| Observation `value` by type | `value[x]` / `dataAbsentReason` | done | `value_types_map_to_value_elements` | |
+| `interpretationCode`, `methodCode`, `targetSiteCode` | `interpretation`, `method`, `bodySite` | done | golden | |
+| `referenceRange` | `referenceRange` (normal only) | done | `only_normal_reference_ranges_are_kept` | |
+| Category from LOINC class | `category` | assumed laboratory, todo | | |
+| `author` | `performer` + Provenance | done | golden | |
+| Specimen, specimen collection procedure | Specimen | reported, todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that

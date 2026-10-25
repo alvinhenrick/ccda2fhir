@@ -326,3 +326,26 @@ pub(crate) fn apply_performer(
         r.insert("performer".into(), json!([p]));
     }
 }
+
+/// Set `effectiveDateTime` or `effectivePeriod` on `r` from the span of the members' own times.
+/// Used when an organizer has no time of its own.
+pub(crate) fn insert_span(r: &mut Map<String, Value>, members: &[Value]) {
+    let mut times: Vec<&str> = members
+        .iter()
+        .filter_map(|m| {
+            m["effectiveDateTime"]
+                .as_str()
+                .or_else(|| m["effectivePeriod"]["start"].as_str())
+        })
+        .collect();
+    times.sort_unstable();
+    match (times.first(), times.last()) {
+        (Some(a), Some(b)) if a == b => {
+            r.insert("effectiveDateTime".into(), json!(a));
+        }
+        (Some(a), Some(b)) => {
+            r.insert("effectivePeriod".into(), json!({ "start": a, "end": b }));
+        }
+        _ => {}
+    }
+}

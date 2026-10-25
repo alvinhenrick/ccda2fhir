@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-RESULTS-1"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <effectiveTime value="20250102120000-0500"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0006"/>
+      <patient>
+        <name><given>Fay</given><family>Example</family></name>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19881122"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.3.1"/>
+    <code code="30954-2" codeSystem="2.16.840.1.113883.6.1" displayName="Relevant diagnostic tests and/or laboratory data"/>
+    <title>Results</title>
+    <text/>
+    <entry typeCode="DRIV"><organizer classCode="BATTERY" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.1"/>
+      <id root="1.3.6.1.4.1.22812.8.1" extension="ORG-1"/>
+      <code code="58410-2" codeSystem="2.16.840.1.113883.6.1" displayName="CBC panel - Blood by Automated count"/>
+      <statusCode code="completed"/>
+      <effectiveTime><low value="20241106071500-0500"/><high value="20241106073000-0500"/></effectiveTime>
+      <author>
+        <time value="20241106080000-0500"/>
+        <assignedAuthor>
+          <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+          <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+          <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="LAB-1"/><name>Example Lab</name></representedOrganization>
+        </assignedAuthor>
+      </author>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.2"/>
+        <id root="1.3.6.1.4.1.22812.8.1" extension="R-1"/>
+        <code code="718-7" codeSystem="2.16.840.1.113883.6.1" displayName="Hemoglobin [Mass/volume] in Blood"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241106071500-0500"/>
+        <value xsi:type="PQ" value="17.2" unit="g/dL"/>
+        <interpretationCode code="H" codeSystem="2.16.840.1.113883.5.83"/>
+        <referenceRange><observationRange><value xsi:type="IVL_PQ"><low value="13.5" unit="g/dL"/><high value="17.5" unit="g/dL"/></value></observationRange></referenceRange>
+        <referenceRange><observationRange><interpretationCode code="H" codeSystem="2.16.840.1.113883.5.83"/><value xsi:type="IVL_PQ"><low value="17.5" unit="g/dL"/></value></observationRange></referenceRange>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.2"/>
+        <id root="1.3.6.1.4.1.22812.8.1" extension="R-2"/>
+        <code code="6690-2" codeSystem="2.16.840.1.113883.6.1" displayName="Leukocytes [#/volume] in Blood by Automated count"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241106071500-0500"/>
+        <value xsi:type="PQ" value="6.8" unit="10*3/uL"/>
+      </observation></component>
+    </organizer></entry>
+    <entry typeCode="DRIV"><organizer classCode="BATTERY" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.1"/>
+      <id root="1.3.6.1.4.1.22812.8.1" extension="ORG-2"/>
+      <code code="24357-6" codeSystem="2.16.840.1.113883.6.1" displayName="Urinalysis macro (dipstick) panel"/>
+      <statusCode code="completed"/>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.2"/>
+        <id root="1.3.6.1.4.1.22812.8.1" extension="R-3"/>
+        <code code="20507-0" codeSystem="2.16.840.1.113883.6.1" displayName="Reagin Ab [Presence] in Serum by RPR"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241106071500-0500"/>
+        <value xsi:type="CD" code="260385009" codeSystem="2.16.840.1.113883.6.96"/>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.2"/>
+        <id root="1.3.6.1.4.1.22812.8.1" extension="R-4"/>
+        <code code="5778-6" codeSystem="2.16.840.1.113883.6.1" displayName="Color of Urine"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241106071500-0500"/>
+        <value xsi:type="ST">Yellow</value>
+      </observation></component>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.2"/>
+        <id root="1.3.6.1.4.1.22812.8.1" extension="R-5"/>
+        <code code="2951-2" codeSystem="2.16.840.1.113883.6.1" displayName="Sodium [Moles/volume] in Serum or Plasma"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20241106071500-0500"/>
+        <value xsi:type="PQ" nullFlavor="NI"/>
+      </observation></component>
+    </organizer></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>

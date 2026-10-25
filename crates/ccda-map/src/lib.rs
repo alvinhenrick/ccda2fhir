@@ -21,6 +21,7 @@ mod problem;
 mod profile;
 mod quantity;
 mod report;
+mod results;
 mod timestamp;
 mod util;
 mod vitals;
@@ -39,6 +40,7 @@ pub use problem::map_problems;
 pub use profile::Profiles;
 pub use quantity::{decimal, map_age, map_quantity};
 pub use report::{Issue, Report, Severity};
+pub use results::map_results;
 pub use timestamp::{
     hl7_date_to_fhir_date, hl7_ts_to_fhir_datetime, map_datetime, Converted, InvalidTimestamp, Loss,
 };

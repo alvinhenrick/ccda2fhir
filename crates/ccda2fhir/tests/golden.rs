@@ -71,3 +71,8 @@ fn medications() {
 fn vitals() {
     check("vitals");
 }
+
+#[test]
+fn results() {
+    check("results");
+}
