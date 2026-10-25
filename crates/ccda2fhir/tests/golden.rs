@@ -201,3 +201,39 @@ fn unstructured() {
 fn small_templates() {
     check("small-templates");
 }
+
+#[test]
+fn social_3_0() {
+    check("social-3-0");
+}
+
+/// C-CDA R1.1 templates carry no version (`extension`); R2.1 and 3.0 do. Templates are matched
+/// by root, so removing every template version must not change the output.
+#[test]
+fn template_versions_do_not_change_the_output() {
+    for name in ["small-templates", "social-3-0", "problems", "care-plan"] {
+        let xml = std::fs::read_to_string(dir("fixtures").join(format!("{name}.xml"))).unwrap();
+        let mut unversioned = String::new();
+        for line in xml.lines() {
+            if line.contains("<templateId") {
+                let mut l = line.to_owned();
+                if let Some(i) = l.find(" extension=\"") {
+                    if let Some(j) = l[i + 12..].find('"') {
+                        l.replace_range(i..i + 12 + j + 1, "");
+                    }
+                }
+                unversioned.push_str(&l);
+            } else {
+                unversioned.push_str(line);
+            }
+            unversioned.push('\n');
+        }
+        let a = convert(xml.as_bytes(), &Options::default()).unwrap();
+        let b = convert(unversioned.as_bytes(), &Options::default()).unwrap();
+        assert_eq!(
+            a.bundle.to_json(),
+            b.bundle.to_json(),
+            "{name}: output depends on template versions"
+        );
+    }
+}
