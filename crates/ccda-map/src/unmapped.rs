@@ -15,6 +15,7 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.3",   // Problem Concern Act
     "2.16.840.1.113883.10.20.22.4.136", // Risk Concern Act
     "2.16.840.1.113883.10.20.22.4.140", // Referral
+    "2.16.840.1.113883.10.20.6.2.6",    // DICOM Study Act
     "2.16.840.1.113883.10.20.22.4.131", // Intervention Act (its activities are mapped)
     "2.16.840.1.113883.10.20.22.4.146", // Planned Intervention Act
     "2.16.840.1.113883.10.20.22.4.12",  // Procedure Activity Act

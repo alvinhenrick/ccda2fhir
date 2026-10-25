@@ -44,6 +44,8 @@ pub struct Code {
     pub null_flavor: Option<String>,
     /// Alternative codings of the same concept.
     pub translations: Vec<Code>,
+    /// `qualifier`s as (name, value) pairs, for example a DICOM series modality.
+    pub qualifiers: Vec<(Code, Code)>,
 }
 
 /// One end of an interval, or a point in time. Raw HL7 `TS`, not yet normalized.
@@ -178,6 +180,14 @@ pub(crate) fn parse_code(node: &Node, narrative: &Narrative) -> Code {
         null_flavor: attr(node, "nullFlavor"),
         translations: children(node, "translation")
             .map(|c| parse_code(&c, narrative))
+            .collect(),
+        qualifiers: children(node, "qualifier")
+            .filter_map(|q| {
+                Some((
+                    parse_code(&child(&q, "name")?, narrative),
+                    parse_code(&child(&q, "value")?, narrative),
+                ))
+            })
             .collect(),
     }
 }

@@ -1,0 +1,385 @@
+{
+  "bundle": {
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:3c41f06f-591e-5cb3-9b0f-6d452efa48e2",
+        "resource": {
+          "address": [
+            {
+              "city": "Shelburne",
+              "country": "US",
+              "line": [
+                "152 Creek Lane"
+              ],
+              "period": {
+                "start": "2011-08-22"
+              },
+              "postalCode": "05455",
+              "state": "VT",
+              "use": "home"
+            },
+            {
+              "city": "Burlington",
+              "country": "US",
+              "line": [
+                "191 S Oak Ave"
+              ],
+              "period": {
+                "end": "2011-08-21",
+                "start": "2011-01-31"
+              },
+              "postalCode": "05422",
+              "state": "VT",
+              "use": "home"
+            }
+          ],
+          "birthDate": "1952-10-22",
+          "communication": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "level",
+                      "valueCoding": {
+                        "code": "E",
+                        "system": "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityProficiency"
+                      }
+                    },
+                    {
+                      "url": "type",
+                      "valueCoding": {
+                        "code": "ESP",
+                        "system": "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityMode"
+                      }
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/StructureDefinition/patient-proficiency"
+                }
+              ],
+              "language": {
+                "coding": [
+                  {
+                    "code": "en",
+                    "system": "urn:ietf:bcp:47"
+                  }
+                ]
+              },
+              "preferred": true
+            }
+          ],
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "ombCategory",
+                  "valueCoding": {
+                    "code": "2106-3",
+                    "display": "White",
+                    "system": "urn:oid:2.16.840.1.113883.6.238"
+                  }
+                },
+                {
+                  "url": "text",
+                  "valueString": "White"
+                }
+              ],
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+            },
+            {
+              "extension": [
+                {
+                  "url": "ombCategory",
+                  "valueCoding": {
+                    "code": "2186-5",
+                    "display": "Not Hispanic or Latino",
+                    "system": "urn:oid:2.16.840.1.113883.6.238"
+                  }
+                },
+                {
+                  "url": "text",
+                  "valueString": "Not Hispanic or Latino"
+                }
+              ],
+              "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/patient-religion",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "1013",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation"
+                  }
+                ]
+              }
+            }
+          ],
+          "gender": "male",
+          "id": "patient-1",
+          "identifier": [
+            {
+              "assigner": {
+                "display": "Example Hospital MRN"
+              },
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "MRN-0029"
+            }
+          ],
+          "managingOrganization": {
+            "reference": "urn:uuid:4cd4eb17-d23e-5170-b87f-eb221cff6e7b"
+          },
+          "maritalStatus": {
+            "coding": [
+              {
+                "code": "M",
+                "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"
+              }
+            ]
+          },
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+            ]
+          },
+          "name": [
+            {
+              "family": "Everyman",
+              "given": [
+                "Adam"
+              ],
+              "use": "official"
+            },
+            {
+              "family": "Everyman",
+              "given": [
+                "Sam"
+              ],
+              "period": {
+                "end": "2010-05-10",
+                "start": "2000-05-05"
+              },
+              "use": "official"
+            }
+          ],
+          "resourceType": "Patient",
+          "telecom": [
+            {
+              "system": "phone",
+              "use": "mobile",
+              "value": "+1(565)867-5309"
+            }
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Patient</p><table><tr><td>name</td><td>Adam Everyman; Sam Everyman</td></tr><tr><td>birthDate</td><td>1952-10-22</td></tr><tr><td>gender</td><td>male</td></tr></table></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:996cc501-9989-501f-aeda-5c19694b728e",
+        "resource": {
+          "author": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
+          "custodian": {
+            "reference": "urn:uuid:f4fe812e-78ae-59fc-be92-6f37f13fa7d6"
+          },
+          "date": "2025-01-02T12:00:00-05:00",
+          "id": "composition-1",
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.19.5",
+            "value": "SYNTH-IMAGING-1"
+          },
+          "resourceType": "Composition",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:3c41f06f-591e-5cb3-9b0f-6d452efa48e2"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>34133-9</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Clinical document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "status": "generated"
+          },
+          "title": "Clinical document",
+          "type": {
+            "coding": [
+              {
+                "code": "34133-9",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:57ad3aaa-2273-5b7c-a823-0daebb8506fa",
+        "resource": {
+          "id": "imagingstudy-1",
+          "identifier": [
+            {
+              "system": "urn:dicom:uid",
+              "value": "urn:oid:1.2.840.113619.2.55.3.604688119.971.1271864541.1"
+            }
+          ],
+          "numberOfInstances": 2,
+          "numberOfSeries": 2,
+          "resourceType": "ImagingStudy",
+          "series": [
+            {
+              "instance": [
+                {
+                  "number": 1,
+                  "sopClass": {
+                    "code": "urn:oid:1.2.840.10008.5.1.4.1.1.2",
+                    "system": "urn:ietf:rfc:3986"
+                  },
+                  "uid": "1.2.840.113619.2.55.3.604688119.971.1271864541.1.1.1"
+                },
+                {
+                  "number": 2,
+                  "sopClass": {
+                    "code": "urn:oid:1.2.840.10008.5.1.4.1.1.2",
+                    "system": "urn:ietf:rfc:3986"
+                  },
+                  "uid": "1.2.840.113619.2.55.3.604688119.971.1271864541.1.1.2"
+                }
+              ],
+              "modality": {
+                "code": "CT",
+                "system": "http://dicom.nema.org/resources/ontology/DCM"
+              },
+              "number": 1,
+              "numberOfInstances": 2,
+              "uid": "1.2.840.113619.2.55.3.604688119.971.1271864541.1.1"
+            },
+            {
+              "modality": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              },
+              "number": 2,
+              "uid": "1.2.840.113619.2.55.3.604688119.971.1271864541.1.2"
+            }
+          ],
+          "started": "2025-01-02T09:30:00-05:00",
+          "status": "available",
+          "subject": {
+            "reference": "urn:uuid:3c41f06f-591e-5cb3-9b0f-6d452efa48e2"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>ImagingStudy</p><table><tr><td>status</td><td>available</td></tr></table></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:4cd4eb17-d23e-5170-b87f-eb221cff6e7b",
+        "resource": {
+          "active": true,
+          "address": [
+            {
+              "city": "River Valley",
+              "line": [
+                "823 Main Street"
+              ],
+              "postalCode": "02832",
+              "state": "RI"
+            }
+          ],
+          "id": "organization-1",
+          "identifier": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.19.5",
+              "value": "ORG-9"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "River Valley Health Services",
+          "resourceType": "Organization",
+          "telecom": [
+            {
+              "system": "phone",
+              "use": "work",
+              "value": "+1(401)539-4321"
+            }
+          ],
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>River Valley Health Services</td></tr></table></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:f4fe812e-78ae-59fc-be92-6f37f13fa7d6",
+        "resource": {
+          "active": true,
+          "id": "organization-2",
+          "identifier": [
+            {
+              "system": "urn:ietf:rfc:3986",
+              "value": "urn:oid:2.16.840.1.113883.19.5"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "name": "Example Hospital",
+          "resourceType": "Organization",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>Example Hospital</td></tr></table></div>",
+            "status": "generated"
+          }
+        }
+      }
+    ],
+    "resourceType": "Bundle",
+    "type": "collection"
+  },
+  "report": [
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "imaging.modality.missing",
+      "severity": "warning"
+    },
+    {
+      "code": "composition.author.missing",
+      "severity": "warning"
+    },
+    {
+      "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "composition.section.empty",
+      "severity": "info"
+    }
+  ]
+}
