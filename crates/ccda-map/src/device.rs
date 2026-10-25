@@ -25,26 +25,31 @@ pub fn map_devices(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
             collect(&entry.statement, &mut found);
         }
     }
-    let mut seen: Vec<(String, String)> = Vec::new();
+    let mut seen: Vec<String> = Vec::new();
     let mut out = Vec::new();
     for (owner, p) in found {
         let hrf = udi_of(p);
         let known = hrf
             .as_ref()
-            .and_then(|h| seen.iter().find(|(k, _)| k == h))
-            .map(|(_, id)| id.clone());
+            .filter(|h| seen.contains(h))
+            .and_then(|h| ctx.devices.get(h))
+            .cloned();
         let device_id = if let Some(id) = known {
             id
         } else {
+            let id = match &hrf {
+                Some(h) => device_id_for(h, ctx),
+                None => ctx.next_id("device"),
+            };
             let device = map_device(
                 p,
                 hrf.clone(),
                 !owner.has_template(NON_MEDICINAL_SUPPLY),
+                id.clone(),
                 ctx,
             );
-            let id = device["id"].as_str().unwrap_or_default().to_owned();
             if let Some(h) = hrf {
-                seen.push((h, id.clone()));
+                seen.push(h);
             }
             out.push(device);
             id
@@ -117,6 +122,84 @@ fn device_use_statement(s: &Statement, device_id: &str, ctx: &mut Context) -> Va
     Value::Object(r)
 }
 
+/// The id of the Device for a UDI, allocated on first use so that a procedure can reference it
+/// before the devices are mapped.
+fn device_id_for(hrf: &str, ctx: &mut Context) -> String {
+    if let Some(id) = ctx.devices.get(hrf) {
+        return id.clone();
+    }
+    let id = ctx.next_id("device");
+    ctx.devices.insert(hrf.to_owned(), id.clone());
+    id
+}
+
+/// References to the Devices whose Product Instance is a participant of this statement.
+pub(crate) fn device_references(s: &Statement, ctx: &mut Context) -> Vec<String> {
+    let mut refs: Vec<String> = Vec::new();
+    for p in s
+        .participants
+        .iter()
+        .filter(|p| p.template_ids.iter().any(|t| t.root == PRODUCT_INSTANCE))
+    {
+        if let Some(hrf) = udi_of(p) {
+            let id = device_id_for(&hrf, ctx);
+            let reference = ctx.reference("Device", &id);
+            if !refs.contains(&reference) {
+                refs.push(reference);
+            }
+        }
+    }
+    refs
+}
+
+/// The fields of a GS1 UDI in human readable form, e.g. `(01)0064...(17)180421(10)LOT(21)SER`.
+#[derive(Default, Debug, PartialEq, Eq)]
+struct Gs1 {
+    manufacture: Option<String>,
+    expiration: Option<String>,
+    lot: Option<String>,
+    serial: Option<String>,
+}
+
+/// GS1 dates are `YYMMDD`; a day of `00` means "the month" and gives a partial date.
+fn gs1_date(v: &str) -> Option<String> {
+    if v.len() != 6 || !v.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    let (yy, mm, dd) = (&v[..2], &v[2..4], &v[4..]);
+    if !(1..=12).contains(&mm.parse::<u32>().ok()?) {
+        return None;
+    }
+    if dd == "00" {
+        Some(format!("20{yy}-{mm}"))
+    } else if (1..=31).contains(&dd.parse::<u32>().ok()?) {
+        Some(format!("20{yy}-{mm}-{dd}"))
+    } else {
+        None
+    }
+}
+
+fn parse_gs1(hrf: &str) -> Gs1 {
+    let mut out = Gs1::default();
+    for part in hrf.split('(').skip(1) {
+        let Some((ai, value)) = part.split_once(')') else {
+            continue;
+        };
+        let value = value.trim();
+        if value.is_empty() {
+            continue;
+        }
+        match ai {
+            "11" => out.manufacture = gs1_date(value),
+            "17" => out.expiration = gs1_date(value),
+            "10" => out.lot = Some(value.to_owned()),
+            "21" => out.serial = Some(value.to_owned()),
+            _ => {}
+        }
+    }
+    out
+}
+
 fn udi_of(p: &Participant) -> Option<String> {
     p.ids
         .iter()
@@ -135,13 +218,25 @@ fn map_device(
     p: &Participant,
     hrf: Option<String>,
     udi_expected: bool,
+    id: String,
     ctx: &mut Context,
 ) -> Value {
     let mut r = Map::new();
     r.insert("resourceType".into(), json!("Device"));
-    r.insert("id".into(), json!(ctx.next_id("device")));
+    r.insert("id".into(), json!(id));
     match hrf {
         Some(h) => {
+            let gs1 = parse_gs1(&h);
+            for (key, value) in [
+                ("manufactureDate", gs1.manufacture),
+                ("expirationDate", gs1.expiration),
+                ("lotNumber", gs1.lot),
+                ("serialNumber", gs1.serial),
+            ] {
+                if let Some(v) = value {
+                    r.insert(key.into(), json!(v));
+                }
+            }
             let mut udi = Map::new();
             if let Some(di) = device_identifier(&h) {
                 udi.insert("deviceIdentifier".into(), json!(di));
@@ -203,6 +298,17 @@ mod tests {
   </participantRole></participant>
 </procedure></entry>"#
         )
+    }
+
+    #[test]
+    fn gs1_fields_are_read() {
+        let g = parse_gs1("(01)00643169001763(11)170101(17)180400(10)LOT7(21)SN-9");
+        assert_eq!(g.manufacture.as_deref(), Some("2017-01-01"));
+        assert_eq!(g.expiration.as_deref(), Some("2018-04"));
+        assert_eq!(g.lot.as_deref(), Some("LOT7"));
+        assert_eq!(g.serial.as_deref(), Some("SN-9"));
+        assert_eq!(gs1_date("181332"), None);
+        assert_eq!(parse_gs1("not a udi"), Gs1::default());
     }
 
     #[test]

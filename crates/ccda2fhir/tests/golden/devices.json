@@ -102,6 +102,13 @@
               }
             ]
           },
+          "focalDevice": [
+            {
+              "manipulated": {
+                "reference": "urn:uuid:c87d95eb-5e1c-5a91-a090-fc7731acb8e5"
+              }
+            }
+          ],
           "id": "procedure-1",
           "identifier": [
             {
@@ -129,7 +136,10 @@
       {
         "fullUrl": "urn:uuid:c87d95eb-5e1c-5a91-a090-fc7731acb8e5",
         "resource": {
+          "expirationDate": "2030-12-31",
           "id": "device-1",
+          "lotNumber": "LOT1",
+          "manufactureDate": "2023-01-01",
           "meta": {
             "profile": [
               "http://hl7.org/fhir/us/core/StructureDefinition/us-core-implantable-device"
@@ -139,6 +149,7 @@
             "reference": "urn:uuid:d5360fac-a147-5ebb-9cec-fbc7e2eb4493"
           },
           "resourceType": "Device",
+          "serialNumber": "SER1",
           "text": {
             "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Device</p><table><tr><td>type</td><td>14106009</td></tr></table></div>",
             "status": "generated"

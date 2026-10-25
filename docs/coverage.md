@@ -251,8 +251,8 @@ See `docs/decisions/0013-devices.md`.
 | `participantRole/id` (FDA UDI root) | `udiCarrier.carrierHRF` (+ `deviceIdentifier` for GS1) | done | `udi_gives_carrier_with_device_identifier_and_type` | |
 | `playingDevice/code` | `type` | done | same | |
 | Same UDI seen twice | one Device | done | `the_same_udi_twice_is_one_device` | |
-| Lot, serial, dates in the UDI | `lotNumber`, `serialNumber`, `expirationDate` | todo | | |
-| Link from the procedure | `Procedure.focalDevice` | todo | | |
+| Lot, serial, dates in the UDI | `lotNumber`, `serialNumber`, `expirationDate`, `manufactureDate` | done (GS1 AIs 10, 21, 17, 11; ADR 0042) | golden `devices` | |
+| Link from the procedure | `Procedure.focalDevice` | done (ADR 0042) | golden `devices` | |
 | Non-implantable Device uses (assessment scales, software) | other Devices | todo | | |
 
 ## Goals to Goal
