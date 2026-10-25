@@ -9,3 +9,7 @@ Status: accepted. No IG page covers care plans; this follows C-CDA Plan of Treat
 - The document does not carry a plan status. `active` is assumed and reported (`careplan.status.assumed`).
 - Planned activities (planned medication, procedure, encounter, observation, supply, instructions) are not yet turned into
   `activity` entries or ServiceRequests; that comes with the ServiceRequest work.
+
+## Update (docs refresh)
+
+Done since: `CarePlan.activity` points at the requests and appointments of the Plan of Treatment section (ADR 0034); planned medications are MedicationRequests (ADR 0024).

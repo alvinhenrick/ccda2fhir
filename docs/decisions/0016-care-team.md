@@ -10,3 +10,7 @@ Status: accepted. No IG page covers care teams; this follows C-CDA Care Team Org
 - A missing or unknown status becomes `active` and is reported (`careteam.status.assumed`).
 - `us-core-careteam` is claimed only when every participant has a role and a member.
 - Patients and related persons as team members, and `functionCode`, are not mapped yet.
+
+## Update (docs refresh)
+
+Still open: patients and related persons as members, and `functionCode`. The member role comes from the performer's role code.

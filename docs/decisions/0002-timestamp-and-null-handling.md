@@ -38,3 +38,7 @@ offers options, the choice is recorded here.
 ## Consequences
 - All reports use stable codes and never contain document values.
 - The OID table in `ccda-terminology` still needs a full review against the HL7 registry.
+
+## Update (docs refresh)
+
+References into the section narrative are resolved when the narrative has the referenced element; one that cannot be found is reported as `coding.original-text.reference-unresolved`.

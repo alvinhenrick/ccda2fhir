@@ -14,3 +14,7 @@ Status: accepted
 ## Consequences
 
 Forks can run `docker compose up` and have a working converter. Authentication must be added in front until the security layer lands.
+
+## Update (docs refresh)
+
+The security layer (authentication, TLS, authorization) is still to come; run the service behind your own gateway until then.

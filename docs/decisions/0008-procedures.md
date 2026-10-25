@@ -10,3 +10,7 @@ Status: accepted. Source: IG page "CF-procedures", CSV and ConceptMap `CF-Proced
 - The author is `recorder` (with Provenance). Performers are `performer.actor`; the IG's PractitionerRole is deferred
   until that resource is mapped.
 - `us-core-procedure` is claimed when code and a performed element are present.
+
+## Update (docs refresh)
+
+Done since: mood INT procedures are ServiceRequests (ADR 0019), PractitionerRole for performers (ADR 0038), the Service Delivery Location (ADR 0018), the link to the encounter (ADR 0025), `focalDevice` (ADR 0042).

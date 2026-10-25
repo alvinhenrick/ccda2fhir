@@ -14,3 +14,7 @@ Status: accepted. No IG page covers insurance; this follows C-CDA Payers section
   missing payer is reported (`coverage.payor.missing`).
 - `us-core-coverage` is claimed only with payor, relationship and subscriberId.
 - Not mapped yet: subscriber as RelatedPerson, plan name, authorizations, participant `time` as the member's period.
+
+## Update (docs refresh)
+
+Still open: the subscriber as a person, plan name, authorizations and the participant time as period.

@@ -3,12 +3,25 @@
 Status per C-CDA element: **done** (mapped and tested), **partial**, **reported** (not mapped; the
 report says so), **todo**. "Validated" is filled per row once covered by a validator run.
 
-**Validator status (CI workflow "FHIR validation", HL7 validator 7.0.3, FHIR 4.0.1, US Core 6.1.0):** the
-`problems` and `allergies` fixtures produce **0 errors** with the US Core profiles declared in `meta.profile`.
-Remaining warnings are the best-practice `dom-6` (resources lack narrative). Timestamps with a time and
-offset pass, including one whose missing seconds we fill with `:00`.
-Not yet proven: US Core "must support" completeness (the validator checks conformance, not coverage),
-and only the two fixtures above have been validated.
+**Validator status (CI workflow "FHIR validation", HL7 validator 7.0.3, FHIR 4.0.1, US Core 6.1.0):** every synthetic fixture
+(39 of them, one or more per domain) converts to a bundle that the validator accepts with **0 errors** on every merged PR; the
+workflow runs the validator once as a web service and takes about a minute. US Core profiles are declared in `meta.profile` only
+when the required elements exist (ADR 0001, 0021). The remaining warnings are known: best-practice notes such as "observations
+should have a performer", and value-set bindings that C-CDA data cannot always satisfy. The validator checks conformance, not
+coverage: US Core "must support" completeness is tracked in `docs/uscdi.md`.
+
+**Known gaps (everything else in this file is done or deliberately reported).** Each is reported by the converter, never dropped
+silently.
+
+- Planned immunization (mood INT), supply request, authorization (4.123).
+- Goal: progress toward goal (`achievementStatus`), `priority`, `addresses` links; CarePlan and health concern `addresses`.
+- `reasonReference` from an indication to its problem; procedure instruction (`followUp`).
+- Coverage: the subscriber as a person (`subscriber`), plan name.
+- Patient and related-person members and `functionCode` of a care team; Specimen condition; Location status and organization.
+- Narrative `text/reference` as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
+- Immunization dose range and reaction; Problem supporting observations (SPRT); software authors as Devices.
+- Advance directive verifier, witness and custodian participants.
+- Imaging, laboratory and pathology report narratives stay text.
 
 ## Problems (Problem Concern Act / Problem Observation) to Condition
 
@@ -113,7 +126,7 @@ See `docs/decisions/0005-medications.md` for the rules and the deliberate differ
 | `author` | `requester`, `authoredOn`, Provenance | done | golden | |
 | `approachSiteCode`, `administrationUnitCode`, drug vehicle | not supported (IG) | reported | golden report | |
 | Supply order, Medication Dispense | `dispenseRequest` / MedicationDispense | done (ADR 0041) | golden `dispense` | |
-| Planned immunization (mood INT) | MedicationRequest | todo | | |
+| Planned immunization (mood INT) | MedicationRequest | todo (reported, `planned_immunizations_are_reported_not_mapped`) | | |
 
 ## Vital signs (Vital Signs Organizer / Vital Sign Observation) to Observation
 
@@ -144,9 +157,9 @@ See `docs/decisions/0007-results.md`.
 | Observation `value` by type | `value[x]` / `dataAbsentReason` | done | `value_types_map_to_value_elements` | |
 | `interpretationCode`, `methodCode`, `targetSiteCode` | `interpretation`, `method`, `bodySite` | done | golden | |
 | `referenceRange` | `referenceRange` (normal only) | done | `only_normal_reference_ranges_are_kept` | |
-| Category from LOINC class | `category` | assumed laboratory, todo | | |
+| Category from LOINC class | `category` | assumed laboratory and reported (`results.category.assumed-laboratory`) | golden | |
 | `author` | `performer` + Provenance | done | golden | |
-| Specimen, specimen collection procedure | Specimen | reported, todo | | |
+| Specimen, specimen collection procedure | Specimen | done (ADR 0018) | golden `location_and_specimen` | |
 
 ## Procedures (Procedure Activity Procedure / Act) to Procedure
 
@@ -163,9 +176,10 @@ See `docs/decisions/0008-procedures.md`.
 | Indication | `reasonCode` | done | golden | |
 | Act variant | Procedure | done | `the_act_variant_maps_the_same_way` | |
 | `methodCode`, `priorityCode`, approach | not supported (IG) | reported | | |
-| Service Delivery Location | `location` | reported, todo (needs Location) | | |
-| Encounter link, comment, instruction (`followUp`) | `encounter`, `note`, `followUp` | todo | | |
-| Procedure Activity Observation | Observation | reported, todo | | |
+| Service Delivery Location | `location` | done (ADR 0018) | golden `location_and_specimen` | |
+| Encounter link, comment | `encounter`, `note` | done (ADR 0025, 0034) | golden | |
+| Instruction (`followUp`) | `followUp` | todo | | |
+| Procedure Activity Observation | Observation | done (ADR 0008) | golden | |
 | Planned procedure (mood INT/RQO/PRP) | ServiceRequest | done | `planned_procedure_becomes_a_plan` | |
 
 ## Encounters (Encounter Activity) to Encounter
@@ -181,11 +195,11 @@ See `docs/decisions/0009-encounters.md`.
 | `effectiveTime` | `period` | done | `point_time_is_a_period_with_both_ends` | |
 | `sdtc:dischargeDispositionCode` | `hospitalization.dischargeDisposition` | done | `discharge_disposition_is_read_from_the_sdtc_element` | |
 | `performer` | `participant.individual` | done (function code todo) | golden | |
-| Indication | `reasonCode` (`reasonReference` to a problem todo) | partial | golden | |
+| Indication | `reasonCode` (`reasonReference` to a problem is todo) | partial | golden | |
 | Encounter Diagnosis | Condition (encounter-diagnosis) + `diagnosis.condition` | done | `encounter_diagnoses_become_conditions_linked_both_ways` | |
-| Location participant | `location` | reported, todo (needs Location) | | |
-| Header `encompassingEncounter`, same encounter seen twice | one Encounter | todo | | |
-| Links from procedures, conditions and results to the encounter | `encounter` | todo | | |
+| Location participant | `location` | done (ADR 0018) | golden | |
+| Header `encompassingEncounter`, same encounter seen twice | one Encounter | done (ADR 0026) | golden | |
+| Links from procedures, conditions and results to the encounter | `encounter` | done (ADR 0025) | golden | |
 | Planned encounter (mood INT) | ServiceRequest | done | golden `planned_activities` | |
 
 ## Social history (Social History / Smoking / Tobacco / Pregnancy Observation) to Observation
@@ -200,7 +214,7 @@ See `docs/decisions/0010-social-history.md`.
 | Pregnancy Observation | Pregnancy status / intent Observation (LOINC code) | done | `pregnancy_uses_the_loinc_code_one_time_and_an_edd_component` | |
 | Estimated delivery date | component 11778-8 | done | same | |
 | Unknown pregnancy value | v3 NullFlavor UNK coding | done | `unknown_pregnancy_value_is_a_null_flavor_coding` | |
-| Birth sex, gender identity, tribal affiliation | Patient extensions | reported, todo (with Patient demographics) | `birth_sex_is_left_for_the_patient_and_reported` | |
+| Birth sex, gender identity, tribal affiliation, sex | Patient extensions | done (ADR 0011, 0046) | `birth_sex_and_gender_identity_come_from_social_history`, `tribal_affiliation_and_sex_become_patient_extensions` | |
 | SDOH categories, assessment scales | `sdoh` category by code list; scales as panels | partial | golden `sdoh` | |
 
 ## Patient demographics (recordTarget) to Patient
@@ -221,9 +235,10 @@ See `docs/decisions/0011-patient-demographics.md`.
 | Gender Identity Observation | US Core gender identity extension | done | same | |
 | `languageCommunication` | `communication` | done | `language_marital_status_and_guardian` | |
 | `guardian` | `contact` | done | same | |
-| `providerOrganization` | `managingOrganization` | todo | | |
-| Sex, sexual orientation, tribal affiliation | US Core extensions / Observations | todo | | |
-| Religious affiliation, birthplace | not supported (IG) | not mapped, not yet reported | | |
+| `providerOrganization` | `managingOrganization` | done (ADR 0031) | golden `patient_details` | |
+| Sexual orientation | `Observation` (US Core Sexual Orientation) | done (ADR 0035) | golden `social_3_0` | |
+| Religious affiliation | `patient-religion` extension | done (ADR 0031) | golden `patient_details` | |
+| Birthplace | not supported (IG) | not mapped, not yet reported | | |
 
 ## Clinical notes (Note Activity) to DocumentReference
 
@@ -235,12 +250,12 @@ See `docs/decisions/0012-notes.md`.
 | `code` translation (LOINC) | `type` (root 34109-9 if none) | done | `narrative_reference_becomes_plain_text_content` | |
 | fixed | `category` clinical-note, `status` current | done | same | |
 | `text` (embedded base64 + mediaType) | `content.attachment` | done | `embedded_base64_keeps_its_media_type` | |
-| `text/reference` (narrative) | `content.attachment` as text/plain | done (XHTML todo) | `narrative_reference_becomes_plain_text_content` | |
+| `text/reference` (narrative) | `content.attachment` as text/plain | done (XHTML is todo) | `narrative_reference_becomes_plain_text_content` | |
 | `effectiveTime` | `context.period` | done | `author_and_time_set_author_date_and_period` | |
 | `author` | `author`, `date`, Provenance | done | same | |
-| Encounter link | `context.encounter` | todo | | |
+| Encounter link | `context.encounter` | done (ADR 0025) | golden | |
 | `reference/externalDocument` | `relatesTo` | todo | | |
-| The document itself | Composition / DocumentReference | todo | | |
+| The document itself | Composition | done (ADR 0020); a source DocumentReference is todo | golden `composition` | |
 
 ## Devices (Product Instance / UDI) to Device
 
@@ -253,7 +268,7 @@ See `docs/decisions/0013-devices.md`.
 | Same UDI seen twice | one Device | done | `the_same_udi_twice_is_one_device` | |
 | Lot, serial, dates in the UDI | `lotNumber`, `serialNumber`, `expirationDate`, `manufactureDate` | done (GS1 AIs 10, 21, 17, 11; ADR 0042) | golden `devices` | |
 | Link from the procedure | `Procedure.focalDevice` | done (ADR 0042) | golden `devices` | |
-| Non-implantable Device uses (assessment scales, software) | other Devices | todo | | |
+| Non-implantable Device uses (assessment scales, software) | other Devices | todo (supplies done: DeviceUseStatement, ADR 0029) | | |
 
 ## Goals to Goal
 
@@ -265,8 +280,9 @@ See `docs/decisions/0014-goals.md`.
 | `statusCode` | `lifecycleStatus` | done | `status_map` | |
 | `effectiveTime` | `startDate`, `target.dueDate` | done | `dates_become_start_and_target` | |
 | `author` | `expressedBy`, Provenance | done | | |
-| Progress Toward Goal (4.110) | `achievementStatus` | todo | | |
-| Goal target measures, priority | `target.measure`, `priority` | todo | | |
+| Progress Toward Goal (4.110) | `achievementStatus` | todo (reported, `goal.progress.unsupported`) | | |
+| Goal target | `target` | done (ADR 0014) | golden `goals` | |
+| Goal priority | `priority` | todo | | |
 | Links to Care Plan, Health Concerns | `addresses` | todo | | |
 
 ## Plan of Treatment to CarePlan
@@ -281,7 +297,7 @@ See `docs/decisions/0015-care-plan.md`.
 | Planned activities (4.39-4.41, 4.44) | ServiceRequest | done | see below | |
 | Planned activities as `CarePlan.activity` | `activity.reference` | done | golden `planned_activities` | |
 | Health Concerns | `addresses` | todo | | |
-| Care team | `careTeam`, `contributor` | todo | | |
+| Care team | `CareTeam` | done (ADR 0016) | golden `care_team` | |
 
 ## Care Team to CareTeam
 
@@ -294,7 +310,9 @@ See `docs/decisions/0016-care-team.md`.
 | Member performer | `participant.member` (Practitioner) | done | same as first | |
 | Performer code | `participant.role` | done | same | |
 | Member effectiveTime | `participant.period` | done | same | |
-| `functionCode`, patient/related-person members | `role`, RelatedPerson | todo | | |
+| Member role (the performer's role code) | `role` | done (ADR 0016) | `care_team` tests | |
+| `functionCode` | `role` | todo | | |
+| Patient and related-person members | RelatedPerson | todo | | |
 | PractitionerRole, Location | PractitionerRole, Location | done | golden `care_team` | |
 
 ## Insurance (Policy Activity) to Coverage
@@ -309,8 +327,9 @@ See `docs/decisions/0017-coverage.md`.
 | Policy holder id | `subscriberId` | done | same | |
 | Policy ids | `class` (group) | done | same | |
 | Payer performer | `payor` (Organization) | done | `missing_payer_and_role_are_reported` | |
-| Subscriber as person, plan name | `subscriber`, `class` (plan) | todo | | |
-| Authorization (4.123) | ServiceRequest / ClaimResponse | todo | | |
+| Subscriber id, group | `subscriberId`, `class` | done (ADR 0017) | golden `coverage` | |
+| Subscriber as person, plan name | `subscriber` | todo | | |
+| Authorization (4.123) | ServiceRequest / ClaimResponse | todo (reported as unmapped) | | |
 
 ## Locations and Specimens
 
@@ -342,8 +361,9 @@ See `docs/decisions/0019-service-requests.md`.
 | statusCode | `status` | done | | |
 | Indication, targetSiteCode | `reasonCode`, `bodySite` | done | golden | |
 | Author | `requester`, `authoredOn`, Provenance | done | golden | |
-| Planned medication / supply | MedicationRequest / SupplyRequest | todo | | |
-| Instructions (4.20) | `patientInstruction`, Communication | todo | | |
+| Planned medication | MedicationRequest | done (ADR 0024) | golden `planned_medication` | |
+| Planned supply | SupplyRequest | todo | | |
+| Instructions (4.20) | `patientInstruction` | done (ADR 0024); Communication is todo | golden `planned_medication` | |
 
 ## Document header to Composition
 
@@ -360,11 +380,11 @@ See `docs/decisions/0020-composition.md`.
 | `confidentialityCode` | `confidentiality` | done | `unknown_confidentiality_is_reported` | |
 | `languageCode` | `language` | done | `header_fields_and_sections` | |
 | Sections | `section` (title, code, text, entry) | done | same | |
-| Resources without an identifier | `section.entry` | todo | | |
-| `legalAuthenticator`, `authenticator` | `attester` | todo | | |
-| `componentOf/encompassingEncounter` | `encounter` | todo | | |
-| `documentationOf/serviceEvent` | `event` | todo | | |
-| `relatedDocument` | `relatesTo` | todo | | |
+| Entries in a section | `section.entry` | done (ADR 0020) | golden `composition` | |
+| `legalAuthenticator`, `authenticator` | `attester` | done (ADR 0030) | golden `composition` | |
+| `componentOf/encompassingEncounter` | `encounter` | done (ADR 0026) | golden `composition` | |
+| `documentationOf/serviceEvent` | `event` | done (ADR 0030) | golden `composition` | |
+| `relatedDocument` | `relatesTo` | done (ADR 0030) | golden `composition` | |
 
 ## Health Concerns
 
@@ -376,7 +396,7 @@ See `docs/decisions/0022-health-concerns.md`.
 | Health Concern Act (4.132) pointing by Entry Reference (4.122) | adds category `health-concern` | done | `a_pointed_at_condition_gains_the_health_concern_category_once` | |
 | Problem Observation inside a Health Concern Act | `Condition` (health-concern) | done | `a_wrapped_problem_observation_becomes_a_health_concern_condition` | |
 | Unresolved pointer, empty concern | report entries | done | `an_unresolved_pointer_is_reported` | |
-| Pointer at allergy, result, social history | category / `addresses` | todo | | |
+| Pointer at allergy, result, social history | category / `addresses` | todo (the pointer is reported) | | |
 | Risk Concern Act (4.136) | `Condition` (like a Problem Concern Act) | done | golden `small_templates` | |
 
 ## Functional, cognitive, mental and health status
@@ -390,7 +410,7 @@ See `docs/decisions/0023-status-assessments.md`.
 | Cognitive Status Organizer / Observation (4.75 / 4.74) | `Observation` (cognitive-status) | done | `cognitive_and_mental_and_health_status_categories` | |
 | Mental Status Organizer / Observation / Problem | `Observation` (cognitive-status, assumed) | done | same | |
 | Health Status Observation (4.5) | `Observation` (survey) | done | same | |
-| Assessment Scale Observation (4.69) | `Observation` + components | todo | | |
+| Assessment Scale Observation (4.69) | `Observation` + components | done (ADR 0029) | golden `assessments` | |
 | Caregiver Characteristics (4.72), Disability Status (4.505) | `Observation` (functional-status) | done | golden `small_templates` | |
 
 ## Planned medications, instructions, procedure observations
@@ -451,34 +471,32 @@ See `docs/decisions/0030-header-participants.md`.
 
 `cargo run --release -p ccda2fhir --example audit -- <files>` checks every attribute and text value of the source documents (outside
 section narrative) for presence in the converted bundle, and prints counts by element path (no values). Misses are candidates, not
-proof: a status mapped to another vocabulary is expected. On the 29 sample documents the first run found:
+proof: a status mapped to another vocabulary is expected. The first run over 29 sample documents found these, all since fixed:
 
-- 19 of 29 documents have no header author. Fixed: the Composition is always built, with the author marked absent (ADR 0020).
-- Not mapped at all: `authenticator`, `legalAuthenticator`, `dataEnterer`, `informant`,
-  `participant/associatedEntity` (contacts), and the `telecom` of authors and organizations.
-- Section titles and codes (they go with the Composition), `originalText` references, translations on observation codes.
+- 19 of 29 documents had no header author. The Composition is always built, with the author marked absent (ADR 0020).
+- `authenticator`, `legalAuthenticator`, `dataEnterer`, `informant`, `participant/associatedEntity` and the `telecom` and
+  `addr` of authors and organizations (ADR 0030).
+- Section titles and codes go with the Composition; `originalText` references are resolved from the narrative; software and
+  organization authors become a Device or Organization.
 
-Authors that are software or an organization now become a Device or Organization for `Composition.author` (they were skipped).
+Still not mapped, and reported where they are entries: `informationRecipient`, `inFulfillmentOf`, `authorization` (no
+Composition element), and translations on observation codes.
 
 ## Running real-world samples
 
 `cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
 code `entry.unmapped`, with the template OID). On the 29 sample documents in the Medplum repository (ONC 170.315(b)(1) samples and
 small unit samples) nothing fails to convert and no entry is unmapped. Gaps it found earlier are now covered: Health Concerns,
-status assessments, planned medications, instructions and procedure observations.
+status assessments, planned medications, instructions, procedure observations, hospital-course wrappers, advance directives and
+the C-CDA 3.0 observations.
 
-## Open policy questions
+## Policy questions
 
-- **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that
-  differ from the code system's official display, and the validator reports those as errors on our
-  output (found with a deliberately realistic Immunization fixture). Options for later, as configuration:
-  keep (lossless, current), drop when the system is known, or replace from a terminology source.
-- **Prior art on codes** (read from source): Medplum and Microsoft both pass `displayName` through
-  unchanged. Medplum uses `displayName` or the raw `#ref` string as `text`; Microsoft emits no `text`
-  and drops most translations. Microsoft also maps a value-set OID mistakenly used as a code system to
-  SNOMED, a robustness hack worth considering as an opt-in repair.
-- **OID table.** Entries are added as fixtures need them (NCI Thesaurus, v3 ActReason so far); the table
-  still needs a full review against the HL7 OID registry.
+- **Display names.** Settled in ADR 0027: the official display replaces a wrong one when the code is in our checked table, and the
+  document's wording is kept as `text`; unknown codes keep the document's display. The table grows from validator findings.
+- **Prior art on codes** (read from source): Medplum and Microsoft both pass `displayName` through unchanged. Microsoft also maps
+  a value-set OID mistakenly used as a code system to SNOMED, a robustness hack worth considering as an opt-in repair.
+- **OID table.** Entries are added as fixtures need them; the table still needs a full review against the HL7 OID registry.
 
 ## Patient completeness
 
@@ -534,3 +552,38 @@ See `docs/decisions/0039-interventions-sdoh.md`.
 | Intervention Act (4.131) and its Procedure Activity | `Procedure` | done | golden `sdoh_interventions` |
 | Planned Intervention Act (4.146) and its planned activity | `ServiceRequest` | done | golden `sdoh_interventions` |
 | SDOH Z-code on an intervention or goal | `sdoh` category (Procedure: social service procedure) | done | golden `sdoh_interventions` |
+
+## Imaging (DICOM Object Catalog)
+
+| C-CDA | FHIR | Status | Test |
+|---|---|---|---|
+| Study Act (6.2.6) | `ImagingStudy` | done (ADR 0040) | golden `imaging` |
+| Series Act (22.4.63) | `ImagingStudy.series` (modality from DCM 121139) | done; missing modality is marked absent and reported | golden `imaging` |
+| SOP Instance Observation (6.2.8) | `series.instance` | done | golden `imaging` |
+
+## Supply orders and dispenses
+
+| C-CDA | FHIR | Status | Test |
+|---|---|---|---|
+| Supply Order (4.17) | `MedicationRequest.dispenseRequest` | done (ADR 0041); a second order is reported | golden `dispense` |
+| Medication Dispense (4.18) | `MedicationDispense` | done (ADR 0041) | golden `dispense` |
+
+## Hospital course, directives and the remaining 3.0 templates
+
+| C-CDA | FHIR | Status | Test |
+|---|---|---|---|
+| Admission / Discharge Diagnosis (4.34, 4.33), Pre / Postprocedure Diagnosis (4.65, 4.51) | `Condition` (encounter-diagnosis plus the role as a second category) | done (ADR 0043) | golden `hospital_course` |
+| Admission / Discharge Medication (4.36, 4.35) | `MedicationRequest` (discharge category) | done (ADR 0043) | golden `hospital_course` |
+| Advance Directive Observation / Organizer (4.48, 4.108) | `Consent` (scope adr) | done (ADR 0044) | golden `advance_directive` |
+| Medication Adherence, Care Experience / Treatment Intervention Preference (4.508 to 4.510) | `Observation` (survey) | done (ADR 0047) | `adherence_and_preferences_are_survey_observations` |
+| Advance Directive Existence, Interpreter Needed, Age Range (4.513, 4.515, 4.516) | `Observation` (social-history) | done (ADR 0047) | `every_3_0_template_becomes_a_social_history_observation` |
+| Average Blood Pressure Organizer (4.512) | `Observation` (vital-signs), one per average | done (ADR 0047) | `average_blood_pressure_keeps_each_average_as_its_own_vital_sign` |
+| Deceased Observation (4.79) | `Patient.deceased[x]` | done (ADR 0047) | `deceased_observation_sets_deceased_when_the_header_is_silent` |
+| Date of Diagnosis (4.502) | `assertedDate` extension | done | golden `problems` |
+
+## Provenance of the conversion
+
+| Source | FHIR | Status | Test |
+|---|---|---|---|
+| The whole document | one derivation `Provenance` (targets, source Composition, assembler Device) | done (ADR 0045) | every golden |
+

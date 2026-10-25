@@ -10,3 +10,7 @@ Status: accepted. No IG page covers goals; this follows C-CDA Goal Observation (
 - `effectiveTime` low (or value) becomes `startDate`; high becomes `target.dueDate`. Both are dates, so time is dropped.
 - The latest author becomes `expressedBy` (and a Provenance as elsewhere).
 - Progress toward a goal (4.110) is reported (`goal.progress.unsupported`) until `achievementStatus` is mapped.
+
+## Update (docs refresh)
+
+Still open: progress toward a goal (`achievementStatus`), `priority` and `addresses`.

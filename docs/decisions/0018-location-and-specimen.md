@@ -22,3 +22,7 @@ US Core Location profile.
   Observation (it stays on the report).
 - A specimen with no code, name or id is not mapped and is reported (`specimen.empty`).
 - Specimen Condition Observation (`condition`) is not mapped yet.
+
+## Update (docs refresh)
+
+Still open: `Encounter.location.status`/`period`, `serviceProvider` from the location's organization, Location `managingOrganization`, and Specimen condition.
