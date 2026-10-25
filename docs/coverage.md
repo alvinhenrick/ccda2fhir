@@ -13,7 +13,7 @@ coverage: US Core "must support" completeness is tracked in `docs/uscdi.md`.
 **Known gaps (everything else in this file is done or deliberately reported).** Each is reported by the converter, never dropped
 silently.
 
-- Planned immunization (mood INT), supply request, authorization (4.123).
+- Supply request, authorization (4.123).
 - CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
 - `reasonReference` from an indication to its problem; procedure instruction (`followUp`).
 - Coverage: the subscriber as a person (`subscriber`), plan name.
@@ -96,7 +96,7 @@ silently.
 | Not Given Reason (4.53) | `statusReason` | done | `reasons_split_by_template` | |
 | Indication (4.19) | `reasonCode` | done | same | |
 | Reaction (4.9) | `reaction` (Observation) | reported | `dose_range_and_reaction_are_reported` | |
-| mood INT (planned) | MedicationRequest | reported | `planned_immunizations_are_reported_not_mapped` | |
+| mood INT (planned) | MedicationRequest | done (ADR 0049) | `planned_immunization_becomes_a_medication_request` | |
 | `primarySource` | not in C-CDA; omitted (R4/US Core 6.1.0 decide) | n/a | | |
 | Comment Activity (4.64) | `note` on the parent resource | done | golden `small_templates`, `comment_becomes_a_note_on_the_parent` | |
 
@@ -126,7 +126,7 @@ See `docs/decisions/0005-medications.md` for the rules and the deliberate differ
 | `author` | `requester`, `authoredOn`, Provenance | done | golden | |
 | `approachSiteCode`, `administrationUnitCode`, drug vehicle | not supported (IG) | reported | golden report | |
 | Supply order, Medication Dispense | `dispenseRequest` / MedicationDispense | done (ADR 0041) | golden `dispense` | |
-| Planned immunization (mood INT) | MedicationRequest | todo (reported, `planned_immunizations_are_reported_not_mapped`) | | |
+| Planned Immunization Activity (4.120) | MedicationRequest | done (ADR 0049) | golden `planned-medication` | |
 
 ## Vital signs (Vital Signs Organizer / Vital Sign Observation) to Observation
 

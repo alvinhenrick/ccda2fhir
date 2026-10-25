@@ -19,4 +19,4 @@ Observation (4.44), Planned Act (4.39), the activity templates written with a no
 
 ## Update (docs refresh)
 
-Done since: planned medications and Instructions (ADR 0024), `Appointment` for scheduled visits and `CarePlan.activity` links (ADR 0034), referral performers (ADR 0036 onward). Planned supplies and planned immunizations are still not mapped.
+Done since: planned medications and Instructions (ADR 0024), `Appointment` for scheduled visits and `CarePlan.activity` links (ADR 0034), referral performers (ADR 0036 onward). Planned immunizations were mapped in ADR 0049; planned supplies are still not mapped.

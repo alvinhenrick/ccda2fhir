@@ -37,12 +37,9 @@ pub fn map_immunizations(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value
             {
                 continue;
             }
-            match s.mood_code.as_deref() {
-                Some("EVN") | None => out.push(map_activity(s, ctx)),
-                Some(_) => ctx.report.info(
-                    "immunization.intent.unsupported",
-                    "a planned or proposed immunization (not an event) was not mapped; the IG maps it to MedicationRequest",
-                ),
+            // A planned or proposed immunization is a MedicationRequest (the medication mapper).
+            if matches!(s.mood_code.as_deref(), Some("EVN") | None) {
+                out.push(map_activity(s, ctx));
             }
         }
     }
@@ -493,11 +490,11 @@ mod tests {
     }
 
     #[test]
-    fn planned_immunizations_are_reported_not_mapped() {
+    fn planned_immunizations_are_left_to_the_medication_mapper() {
         let xml = document("", FLU).replace(r#"moodCode="EVN""#, r#"moodCode="INT""#);
         let (out, _, report) = run(&xml);
         assert!(out.is_empty());
-        assert_eq!(codes(&report), ["immunization.intent.unsupported"]);
+        assert!(codes(&report).is_empty());
     }
 
     #[test]
