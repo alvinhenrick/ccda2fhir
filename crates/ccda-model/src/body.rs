@@ -395,10 +395,55 @@ fn parse_statement(
     narrative: &Narrative,
     depth: usize,
 ) -> Result<Statement, ParseError> {
+    let kind = StatementKind::from_element(node).ok_or(ParseError::Xml)?;
+    parse_statement_as(node, narrative, depth, kind)
+}
+
+/// The header's `componentOf/encompassingEncounter` as an Encounter statement. Its performers
+/// are the `encounterParticipant`s and its location the `healthCareFacility`.
+pub(crate) fn parse_encompassing_encounter(
+    node: &Node,
+    narrative: &Narrative,
+) -> Option<Statement> {
+    let mut s = parse_statement_as(node, narrative, 0, StatementKind::Encounter).ok()?;
+    s.mood_code.get_or_insert_with(|| "EVN".to_owned());
+    s.performers = children(node, "encounterParticipant")
+        .map(|n| {
+            let time = child(&n, "time").and_then(|t| {
+                attr(&t, "value").or_else(|| child(&t, "low").and_then(|l| attr(&l, "value")))
+            });
+            parse_agent(child(&n, "assignedEntity"), time, narrative)
+        })
+        .collect();
+    if let Some(facility) = child(node, "location").and_then(|l| child(&l, "healthCareFacility")) {
+        let place = child(&facility, "location");
+        s.participants.push(Participant {
+            type_code: Some("LOC".to_owned()),
+            ids: identifiers(&facility),
+            role_code: child(&facility, "code").map(|n| parse_code(&n, narrative)),
+            name: place
+                .and_then(|p| child(&p, "name"))
+                .and_then(|n| text_of(&n)),
+            addresses: place
+                .iter()
+                .flat_map(|p| children(p, "addr"))
+                .map(|n| crate::header::parse_address(&n))
+                .collect(),
+            ..Participant::default()
+        });
+    }
+    Some(s)
+}
+
+fn parse_statement_as(
+    node: &Node,
+    narrative: &Narrative,
+    depth: usize,
+    kind: StatementKind,
+) -> Result<Statement, ParseError> {
     if depth > MAX_DEPTH {
         return Err(ParseError::TooDeep);
     }
-    let kind = StatementKind::from_element(node).ok_or(ParseError::Xml)?;
 
     let mut related = Vec::new();
     for rel in node.children().filter(Node::is_element) {

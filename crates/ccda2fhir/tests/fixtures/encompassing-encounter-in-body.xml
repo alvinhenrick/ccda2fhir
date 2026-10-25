@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic document. No real patient data. -->
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <id root="2.16.840.1.113883.19.5" extension="SYNTH-ENCOMPASS-2"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" displayName="Summary of Episode Note"/>
+  <title>Continuity of Care Document</title>
+  <effectiveTime value="20250102120000-0500"/>
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
+  <languageCode code="en-US"/>
+  <recordTarget>
+    <patientRole>
+      <id root="2.16.840.1.113883.19.5" extension="MRN-0025"/>
+      <patient>
+        <name><given>Lee</given><family>Example</family></name>
+        <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+        <birthTime value="19550505"/>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <author><time value="20250102115500-0500"/><assignedAuthor>
+    <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+    <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+    <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="CLINIC-1"/><name>Example Clinic</name></representedOrganization>
+  </assignedAuthor></author>
+  <custodian><assignedCustodian><representedCustodianOrganization>
+    <id root="1.3.6.1.4.1.22812.9" extension="CLINIC-1"/><name>Example Clinic</name>
+  </representedCustodianOrganization></assignedCustodian></custodian>
+  <componentOf><encompassingEncounter>
+    <id root="1.3.6.1.4.1.22812.4.1" extension="ENC-B"/>
+    <code code="99213" codeSystem="2.16.840.1.113883.6.12"/>
+    <effectiveTime><low value="20250102090000-0500"/><high value="20250102094500-0500"/></effectiveTime>
+    <encounterParticipant typeCode="ATND"><assignedEntity>
+      <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
+      <assignedPerson><name><given>Pat</given><family>Doe</family></name></assignedPerson>
+    </assignedEntity></encounterParticipant>
+    <location><healthCareFacility>
+      <id root="1.3.6.1.4.1.22812.9" extension="FAC-1"/>
+      <location><name>Example Clinic</name></location>
+    </healthCareFacility></location>
+  </encompassingEncounter></componentOf>
+  <component><structuredBody><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.22.1"/>
+    <code code="46240-8" codeSystem="2.16.840.1.113883.6.1" displayName="History of encounters"/>
+    <title>Encounters</title><text/>
+    <entry typeCode="DRIV"><encounter classCode="ENC" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.49"/>
+      <id root="1.3.6.1.4.1.22812.4.1" extension="ENC-B"/>
+      <code code="99213" codeSystem="2.16.840.1.113883.6.12"/>
+      <effectiveTime><low value="20250102090000-0500"/><high value="20250102094500-0500"/></effectiveTime>
+    </encounter></entry>
+  </section></component><component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.10"/>
+    <code code="18776-5" codeSystem="2.16.840.1.113883.6.1" displayName="Plan of Care Note"/>
+    <title>Plan of Treatment</title>
+    <text>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</text>
+  </section></component>
+  <component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.60"/>
+    <code code="61146-7" codeSystem="2.16.840.1.113883.6.1" displayName="Goals"/>
+    <title>Goals</title>
+    <text/>
+    <entry><observation classCode="OBS" moodCode="INT">
+      <templateId root="2.16.840.1.113883.10.20.22.4.121"/>
+      <id root="1.3.6.1.4.1.22812.12.1" extension="GOAL-1"/>
+      <code code="289169006" codeSystem="2.16.840.1.113883.6.96"/>
+      <statusCode code="active"/>
+      <effectiveTime><low value="20250101"/><high value="20251231"/></effectiveTime>
+    </observation></entry>
+    <entry><observation classCode="OBS" moodCode="INT">
+      <templateId root="2.16.840.1.113883.10.20.22.4.121"/>
+      <id root="1.3.6.1.4.1.22812.12.1" extension="GOAL-2"/>
+      <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20240601"/>
+      <value xsi:type="ST">Walk 30 minutes a day</value>
+    </observation></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>
