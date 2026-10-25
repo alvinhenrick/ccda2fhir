@@ -28,6 +28,12 @@ impl Profiles {
             "Patient" => "us-core-patient",
             "AllergyIntolerance" => "us-core-allergyintolerance",
             "Provenance" => "us-core-provenance",
+            "Organization" => {
+                if !(resource["name"].is_string() && resource["active"].is_boolean()) {
+                    return None;
+                }
+                "us-core-organization"
+            }
             // Only claim the profile when its required elements are present: identifier with a
             // system and value, and a name with a family.
             "Practitioner" => {
@@ -120,6 +126,14 @@ mod tests {
             "name": [{ "family": "Doe" }]
         });
         assert_eq!(Profiles::UsCore610.profile_for(&no_system), None);
+    }
+
+    #[test]
+    fn organization_profile_needs_name_and_active() {
+        let ok = json!({ "resourceType": "Organization", "name": "X", "active": true });
+        assert!(Profiles::UsCore610.profile_for(&ok).is_some());
+        let no_active = json!({ "resourceType": "Organization", "name": "X" });
+        assert_eq!(Profiles::UsCore610.profile_for(&no_active), None);
     }
 
     #[test]

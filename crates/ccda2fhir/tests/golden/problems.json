@@ -232,6 +232,7 @@
       {
         "fullUrl": "urn:uuid:f62bc18a-4042-5fe1-b9a9-9fa6dce39cee",
         "resource": {
+          "active": true,
           "id": "organization-1",
           "identifier": [
             {
@@ -239,6 +240,11 @@
               "value": "ORG-1"
             }
           ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
           "name": "Example Clinic",
           "resourceType": "Organization"
         }
@@ -284,6 +290,10 @@
     "type": "collection"
   },
   "report": [
+    {
+      "code": "organization.active.assumed",
+      "severity": "info"
+    },
     {
       "code": "timestamp.precision-extended",
       "severity": "info"

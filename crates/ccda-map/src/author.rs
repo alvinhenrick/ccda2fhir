@@ -45,6 +45,14 @@ fn person_key(author: &Author) -> Option<String> {
 
 fn register_organization(author: &Author, ctx: &mut Context) -> Option<String> {
     let org = author.organization.as_ref()?;
+    if org.name.is_none() {
+        // US Core Organization (required by Provenance.agent.onBehalfOf) needs a name.
+        ctx.report.info(
+            "author.organization.no-name",
+            "an author's organization has no name; it was not mapped",
+        );
+        return None;
+    }
     let key = org
         .ids
         .iter()
@@ -63,6 +71,13 @@ fn register_organization(author: &Author, ctx: &mut Context) -> Option<String> {
     let mut resource = Map::new();
     resource.insert("resourceType".into(), json!("Organization"));
     resource.insert("id".into(), json!(id));
+    // C-CDA does not say whether an organization is still active, but US Core requires the
+    // element. Assumed true and reported (ADR 0004).
+    resource.insert("active".into(), json!(true));
+    ctx.report.info(
+        "organization.active.assumed",
+        "Organization.active is required by US Core but absent in C-CDA; it was set to true",
+    );
     let identifiers: Vec<Value> = org
         .ids
         .iter()
@@ -336,6 +351,7 @@ mod tests {
         let orgs = of_type(&extra, "Organization");
         assert_eq!(orgs.len(), 1);
         assert_eq!(orgs[0]["name"], "Example Clinic");
+        assert_eq!(orgs[0]["active"], true);
         let agents = &of_type(&extra, "Provenance")[0]["agent"];
         assert_eq!(
             agents[0]["onBehalfOf"]["reference"],
@@ -372,6 +388,21 @@ mod tests {
         assert!(extra.is_empty());
         assert_eq!(report.issues[0].code, "author.device.unsupported");
         assert!(report.issues.iter().all(|i| !i.message.contains("EHR")));
+    }
+
+    #[test]
+    fn organization_without_a_name_is_skipped_with_a_note() {
+        let mut author = person("1111111111", "A", Some("20200101090000-0500"));
+        author.organization = Some(AuthorOrganization {
+            ids: vec![npi("9")],
+            name: None,
+        });
+        let (_, extra, report) = run(&[author]);
+        assert!(of_type(&extra, "Organization").is_empty());
+        assert!(of_type(&extra, "Provenance")[0]["agent"][0]
+            .get("onBehalfOf")
+            .is_none());
+        assert_eq!(report.issues[0].code, "author.organization.no-name");
     }
 
     #[test]

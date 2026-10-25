@@ -22,8 +22,12 @@ mapped when the observation has none.
   time/offset, no Provenance is created and `provenance.recorded.unavailable` is reported;
   `recordedDate` is still set. We do not invent a time.
 - A profile is declared only when the resource meets it: `Practitioner` claims US Core only with an
-  identifier (system and value) and a family name. `Organization` claims none (its required `active` is
-  not in C-CDA).
+  identifier (system and value) and a family name.
+- **Assumption:** US Core requires `Provenance.agent.onBehalfOf` to be a US Core Organization, which
+  requires `active` and `name`. C-CDA has no `active`, so we set `active: true` and report
+  `organization.active.assumed`. (Found by the validator; author organization is a USCDI Provenance
+  element, so we keep it.) An organization with no name cannot conform and is skipped with
+  `author.organization.no-name`.
 - References between resources are `urn:uuid:` values from `Context::reference`, identical to the entries'
   `fullUrl`.
 
