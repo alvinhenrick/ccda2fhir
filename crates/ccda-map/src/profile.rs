@@ -36,7 +36,17 @@ impl Profiles {
                 "us-core-medicationrequest"
             }
             "Medication" => "us-core-medication",
-            "Provenance" => "us-core-provenance",
+            // provenance-1: an agent that is a Practitioner needs onBehalfOf. We cannot see the
+            // type behind a urn reference, so claim the profile only when every agent has one.
+            "Provenance" => {
+                let all_on_behalf = resource["agent"].as_array().is_some_and(|a| {
+                    !a.is_empty() && a.iter().all(|x| x["onBehalfOf"].is_object())
+                });
+                if !all_on_behalf {
+                    return None;
+                }
+                "us-core-provenance"
+            }
             "Organization" => {
                 if !(resource["name"].is_string() && resource["active"].is_boolean()) {
                     return None;
@@ -99,6 +109,15 @@ mod tests {
             patient["meta"]["profile"][0],
             "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
         );
+    }
+
+    #[test]
+    fn provenance_is_claimed_only_when_every_agent_acts_on_behalf_of_someone() {
+        let with =
+            json!({ "resourceType": "Provenance", "agent": [{ "who": {}, "onBehalfOf": {} }] });
+        let without = json!({ "resourceType": "Provenance", "agent": [{ "who": {} }] });
+        assert!(Profiles::UsCore610.profile_for(&with).is_some());
+        assert!(Profiles::UsCore610.profile_for(&without).is_none());
     }
 
     #[test]
