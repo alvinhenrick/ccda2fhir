@@ -2,7 +2,7 @@
 <!-- Synthetic document. No real patient data. -->
 <ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <id root="2.16.840.1.113883.19.5" extension="SYNTH-COMPOSITION-1"/>
-  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" displayName="Summarization of episode note"/>
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" displayName="Summary of Episode Note"/>
   <title>Continuity of Care Document</title>
   <effectiveTime value="20250102120000-0500"/>
   <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
@@ -27,7 +27,7 @@
   </representedCustodianOrganization></assignedCustodian></custodian>
   <component><structuredBody><component><section>
     <templateId root="2.16.840.1.113883.10.20.22.2.10"/>
-    <code code="18776-5" codeSystem="2.16.840.1.113883.6.1" displayName="Plan of care"/>
+    <code code="18776-5" codeSystem="2.16.840.1.113883.6.1" displayName="Plan of Care Note"/>
     <title>Plan of Treatment</title>
     <text>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</text>
   </section></component>

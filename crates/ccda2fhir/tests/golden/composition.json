@@ -55,7 +55,7 @@
                 "coding": [
                   {
                     "code": "18776-5",
-                    "display": "Plan of care",
+                    "display": "Plan of Care Note",
                     "system": "http://loinc.org"
                   }
                 ]
@@ -96,7 +96,7 @@
             "coding": [
               {
                 "code": "34133-9",
-                "display": "Summarization of episode note",
+                "display": "Summary of Episode Note",
                 "system": "http://loinc.org"
               }
             ]
