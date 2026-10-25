@@ -31,6 +31,7 @@ const HANDLED: &[&str] = &[
     "2.16.840.1.113883.10.20.22.4.78",  // Smoking Status
     "2.16.840.1.113883.10.20.22.4.85",  // Tobacco Use
     "2.16.840.1.113883.10.20.22.4.121", // Goal Observation
+    "2.16.840.1.113883.10.20.22.4.132", // Health Concern Act
     "2.16.840.1.113883.10.20.22.4.200", // Birth Sex (Patient)
     "2.16.840.1.113883.10.20.22.4.202", // Note Activity
     "2.16.840.1.113883.10.20.22.4.500", // Care Team Organizer
@@ -94,10 +95,10 @@ mod tests {
     #[test]
     fn unhandled_template_is_reported_by_oid() {
         let out = run(
-            r#"<entry><act><templateId root="2.16.840.1.113883.10.20.22.4.132"/></act></entry>"#,
+            r#"<entry><act><templateId root="2.16.840.1.113883.10.20.22.4.66"/></act></entry>"#,
         );
         assert_eq!(out.len(), 1);
-        assert!(out[0].contains("2.16.840.1.113883.10.20.22.4.132"));
+        assert!(out[0].contains("2.16.840.1.113883.10.20.22.4.66"));
     }
 
     #[test]

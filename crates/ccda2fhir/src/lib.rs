@@ -10,9 +10,9 @@
 
 use ccda_map::{
     map_allergies, map_care_plans, map_care_teams, map_composition, map_coverage, map_devices,
-    map_encounters, map_goals, map_immunizations, map_medications, map_notes, map_patient,
-    map_problems, map_procedures, map_results, map_service_requests, map_social_history,
-    map_vitals, report_unmapped, Context, Profiles, Report,
+    map_encounters, map_goals, map_health_concerns, map_immunizations, map_medications, map_notes,
+    map_patient, map_problems, map_procedures, map_results, map_service_requests,
+    map_social_history, map_vitals, report_unmapped, Context, Profiles, Report,
 };
 use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
@@ -74,7 +74,7 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
     bundle.push(patient);
 
     let mut ctx = Context::new(&BuiltinTerminology, &mut report, &seed);
-    let resources: Vec<serde_json::Value> = map_problems(&document, &mut ctx)
+    let mut resources: Vec<serde_json::Value> = map_problems(&document, &mut ctx)
         .into_iter()
         .chain(map_allergies(&document, &mut ctx))
         .chain(map_immunizations(&document, &mut ctx))
@@ -91,6 +91,9 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .chain(map_coverage(&document, &mut ctx))
         .chain(map_service_requests(&document, &mut ctx))
         .collect();
+    // Health concerns mark or add Conditions, so they run after everything else is mapped.
+    let concerns = map_health_concerns(&document, &mut ctx, &mut resources);
+    resources.extend(concerns);
     report_unmapped(&document, &mut ctx);
     // The Composition lists the resources above, so it is built last and placed right after the
     // patient.

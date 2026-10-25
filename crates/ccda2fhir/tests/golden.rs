@@ -141,3 +141,8 @@ fn planned_activities() {
 fn composition() {
     check("composition");
 }
+
+#[test]
+fn health_concerns() {
+    check("health-concerns");
+}

@@ -366,6 +366,19 @@ See `docs/decisions/0020-composition.md`.
 | `documentationOf/serviceEvent` | `event` | todo | | |
 | `relatedDocument` | `relatesTo` | todo | | |
 
+## Health Concerns
+
+See `docs/decisions/0022-health-concerns.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Problem Concern Act in the Health Concerns section | `Condition` (category health-concern) | done | `category_follows_the_section_code` | |
+| Health Concern Act (4.132) pointing by Entry Reference (4.122) | adds category `health-concern` | done | `a_pointed_at_condition_gains_the_health_concern_category_once` | |
+| Problem Observation inside a Health Concern Act | `Condition` (health-concern) | done | `a_wrapped_problem_observation_becomes_a_health_concern_condition` | |
+| Unresolved pointer, empty concern | report entries | done | `an_unresolved_pointer_is_reported` | |
+| Pointer at allergy, result, social history | category / `addresses` | todo | | |
+| Risk Concern Act | Condition / RiskAssessment | todo | | |
+
 ## Gaps found by running real-world samples
 
 `cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
@@ -374,7 +387,6 @@ transition-of-care samples plus small unit samples), nothing failed to convert, 
 
 | Template | Name | FHIR target | Status |
 |---|---|---|---|
-| 4.132 | Health Concern Act | `Condition` (category health-concern) | todo |
 | 4.5 | Health Status Observation | `Observation` | todo |
 | 4.66 / 4.67 / 4.68 | Functional Status Organizer / Observation | `Observation` (functional-status) | todo |
 | 4.74 / 4.75 | Cognitive / Mental Status Organizer / Observation | `Observation` | todo |
