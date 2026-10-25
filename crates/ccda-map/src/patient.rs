@@ -89,6 +89,7 @@ mod tests {
             code: None,
             effective_time: None,
             patient,
+            sections: Vec::new(),
         }
     }
 

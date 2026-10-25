@@ -1,14 +1,23 @@
 //! Typed, version-neutral model of a C-CDA document, plus a safe parser.
 //!
-//! Lesson 1 scope: parse the document header (document id, effective time,
-//! and the patient's name, birth date and gender) with input limits.
-//! Later phases add sections, entries, authors, and so on.
+//! The parser enforces input limits, refuses DTDs, and produces plain Rust data: header,
+//! sections, and a generic tree of clinical statements. It does not interpret clinical meaning;
+//! that is the mappers' job.
 
-use roxmltree::{Document, Node, ParsingOptions};
+mod body;
+mod header;
+mod types;
+mod xml;
+
+use roxmltree::{Document, ParsingOptions};
 use thiserror::Error;
 
-/// The HL7 v3 namespace that C-CDA elements live in.
-const HL7_NS: &str = "urn:hl7-org:v3";
+pub use body::{Entry, Link, Related, Section, Statement, StatementKind};
+pub use header::Patient;
+pub use types::{Code, Identifier, Quantity, Scalar, TemplateId, Time, TimePoint, Value};
+
+use types::{identifier, parse_code, Narrative};
+use xml::{child, is_hl7};
 
 /// Limits applied before and during parsing. Safe by default.
 #[derive(Debug, Clone)]
@@ -40,52 +49,11 @@ pub enum ParseError {
     Xml,
     #[error("root element is not a ClinicalDocument in the HL7 v3 namespace")]
     NotClinicalDocument,
+    #[error("sections or clinical statements are nested deeper than the supported limit")]
+    TooDeep,
 }
 
-/// An identifier: `<id root="..." extension="..." nullFlavor="..."/>`.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Identifier {
-    /// The OID or UUID that names the assigning namespace.
-    pub root: Option<String>,
-    /// The identifier value within that namespace.
-    pub extension: Option<String>,
-    /// HL7 `nullFlavor` if the identifier is intentionally absent, e.g. `NI`.
-    pub null_flavor: Option<String>,
-}
-
-/// A coded value (`CD`/`CE`): `<code code=".." codeSystem=".." displayName=".."/>`.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Code {
-    /// The code itself.
-    pub code: Option<String>,
-    /// OID of the code system.
-    pub code_system: Option<String>,
-    /// Display name for the code.
-    pub display_name: Option<String>,
-    /// Plain text from `originalText`, if it holds text directly.
-    pub original_text: Option<String>,
-    /// A `#reference` into the section narrative from `originalText`, if present.
-    pub original_text_reference: Option<String>,
-    /// HL7 `nullFlavor` if the code is intentionally absent.
-    pub null_flavor: Option<String>,
-    /// Alternative codings of the same concept.
-    pub translations: Vec<Code>,
-}
-
-/// The patient as described in the header's `recordTarget`.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Patient {
-    pub given: Vec<String>,
-    pub family: Option<String>,
-    /// Raw HL7 v3 timestamp, e.g. `19700101` (normalization comes later).
-    pub birth_time: Option<String>,
-    /// Administrative gender code, e.g. `M` or `F`.
-    pub gender_code: Option<String>,
-    /// Identifiers from `patientRole/id` (MRN, SSN and so on).
-    pub identifiers: Vec<Identifier>,
-}
-
-/// The parts of a C-CDA document we model so far.
+/// A parsed C-CDA document.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClinicalDocument {
     pub id: Option<Identifier>,
@@ -93,14 +61,24 @@ pub struct ClinicalDocument {
     pub code: Option<Code>,
     pub effective_time: Option<String>,
     pub patient: Patient,
+    /// Top-level sections of the structured body, in document order.
+    pub sections: Vec<Section>,
 }
 
 /// Parse a C-CDA document with the default [`Limits`].
+///
+/// # Errors
+///
+/// See [`ParseError`].
 pub fn parse(xml: &[u8]) -> Result<ClinicalDocument, ParseError> {
     parse_with_limits(xml, &Limits::default())
 }
 
 /// Parse a C-CDA document with explicit limits.
+///
+/// # Errors
+///
+/// See [`ParseError`].
 pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument, ParseError> {
     if xml.len() > limits.max_bytes {
         return Err(ParseError::TooLarge {
@@ -123,121 +101,14 @@ pub fn parse_with_limits(xml: &[u8], limits: &Limits) -> Result<ClinicalDocument
         return Err(ParseError::NotClinicalDocument);
     }
 
+    let header_narrative = Narrative::new();
     Ok(ClinicalDocument {
         id: child(&root, "id").map(|n| identifier(&n)),
-        code: child(&root, "code").map(|n| parse_code(&n)),
-        effective_time: child(&root, "effectiveTime")
-            .and_then(|n| n.attribute("value"))
-            .map(str::to_owned),
-        patient: parse_patient(&root),
+        code: child(&root, "code").map(|n| parse_code(&n, &header_narrative)),
+        effective_time: child(&root, "effectiveTime").and_then(|n| xml::attr(&n, "value")),
+        patient: header::parse_patient(&root),
+        sections: body::parse_body(&root)?,
     })
-}
-
-/// True if `node` is an element named `name` in the HL7 v3 namespace.
-fn is_hl7(node: &Node, name: &str) -> bool {
-    node.is_element()
-        && node.tag_name().name() == name
-        && node.tag_name().namespace() == Some(HL7_NS)
-}
-
-/// First direct child element with the given HL7 name.
-fn child<'a, 'input>(node: &Node<'a, 'input>, name: &str) -> Option<Node<'a, 'input>> {
-    node.children().find(|c| is_hl7(c, name))
-}
-
-/// Follow a path of child element names, e.g. `["recordTarget", "patientRole"]`.
-fn path<'a, 'input>(node: &Node<'a, 'input>, names: &[&str]) -> Option<Node<'a, 'input>> {
-    names
-        .iter()
-        .try_fold(*node, |current, name| child(&current, name))
-}
-
-fn attr(node: &Node, name: &str) -> Option<String> {
-    node.attribute(name)
-        .filter(|v| !v.is_empty())
-        .map(str::to_owned)
-}
-
-fn identifier(node: &Node) -> Identifier {
-    Identifier {
-        root: attr(node, "root"),
-        extension: attr(node, "extension"),
-        null_flavor: attr(node, "nullFlavor"),
-    }
-}
-
-/// Parse a coded element and its `translation` children.
-fn parse_code(node: &Node) -> Code {
-    let original_text = child(node, "originalText");
-    Code {
-        code: attr(node, "code"),
-        code_system: attr(node, "codeSystem"),
-        display_name: attr(node, "displayName"),
-        original_text: original_text
-            .as_ref()
-            .filter(|n| child(n, "reference").is_none())
-            .and_then(text_of),
-        original_text_reference: original_text
-            .as_ref()
-            .and_then(|n| child(n, "reference"))
-            .and_then(|n| attr(&n, "value")),
-        null_flavor: attr(node, "nullFlavor"),
-        translations: node
-            .children()
-            .filter(|c| is_hl7(c, "translation"))
-            .map(|c| parse_code(&c))
-            .collect(),
-    }
-}
-
-/// Text content of an element, trimmed; `None` if empty.
-fn text_of(node: &Node) -> Option<String> {
-    let text: String = node
-        .descendants()
-        .filter(|n| n.is_text())
-        .filter_map(|n| n.text())
-        .collect();
-    let trimmed = text.trim();
-    (!trimmed.is_empty()).then(|| trimmed.to_owned())
-}
-
-fn parse_patient(root: &Node) -> Patient {
-    let Some(role) = path(root, &["recordTarget", "patientRole"]) else {
-        return Patient::default();
-    };
-    let identifiers: Vec<Identifier> = role
-        .children()
-        .filter(|c| is_hl7(c, "id"))
-        .map(|c| identifier(&c))
-        .collect();
-    let Some(patient) = child(&role, "patient") else {
-        return Patient {
-            identifiers,
-            ..Patient::default()
-        };
-    };
-
-    let name = child(&patient, "name");
-    let given = name
-        .iter()
-        .flat_map(|n| n.children().filter(|c| is_hl7(c, "given")))
-        .filter_map(|c| text_of(&c))
-        .collect();
-    let family = name
-        .and_then(|n| child(&n, "family"))
-        .and_then(|n| text_of(&n));
-
-    Patient {
-        given,
-        family,
-        birth_time: child(&patient, "birthTime")
-            .and_then(|n| n.attribute("value"))
-            .map(str::to_owned),
-        gender_code: child(&patient, "administrativeGenderCode")
-            .and_then(|n| n.attribute("code"))
-            .map(str::to_owned),
-        identifiers,
-    }
 }
 
 #[cfg(test)]
@@ -369,5 +240,208 @@ mod tests {
     fn error_messages_contain_no_document_content() {
         let msg = parse(b"<Secret-Patient-Name/>").unwrap_err().to_string();
         assert!(!msg.contains("Secret"));
+    }
+
+    // Synthetic problem list modelled on the IG's example (no real patient data).
+    const PROBLEMS: &str = r##"<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <component><structuredBody>
+    <component><section>
+      <templateId root="2.16.840.1.113883.10.20.22.2.5.1" extension="2015-08-01"/>
+      <code code="11450-4" codeSystem="2.16.840.1.113883.6.1"/>
+      <title>Problems</title>
+      <text><table><tbody><tr>
+        <td ID="prob1">Essential
+           hypertension</td><td ID="stat1">Active</td>
+      </tr></tbody></table></text>
+      <entry typeCode="DRIV">
+        <act classCode="ACT" moodCode="EVN">
+          <templateId root="2.16.840.1.113883.10.20.22.4.3" extension="2015-08-01"/>
+          <id root="1.2.3" extension="C1"/>
+          <code code="CONC" codeSystem="2.16.840.1.113883.5.6"/>
+          <statusCode code="active"/>
+          <effectiveTime><low value="20120806"/><high nullFlavor="UNK"/></effectiveTime>
+          <entryRelationship typeCode="SUBJ">
+            <observation classCode="OBS" moodCode="EVN" negationInd="false">
+              <templateId root="2.16.840.1.113883.10.20.22.4.4" extension="2015-08-01"/>
+              <code code="55607006" codeSystem="2.16.840.1.113883.6.96"/>
+              <text><reference value="#prob1"/></text>
+              <value xsi:type="CD" code="59621000" codeSystem="2.16.840.1.113883.6.96">
+                <originalText><reference value="#prob1"/></originalText>
+              </value>
+              <entryRelationship typeCode="REFR">
+                <observation classCode="OBS" moodCode="EVN">
+                  <templateId root="2.16.840.1.113883.10.20.22.4.6"/>
+                  <code code="33999-4" codeSystem="2.16.840.1.113883.6.1"/>
+                  <value xsi:type="CD" code="55561003" codeSystem="2.16.840.1.113883.6.96"/>
+                </observation>
+              </entryRelationship>
+            </observation>
+          </entryRelationship>
+        </act>
+      </entry>
+      <component><section><title>Sub</title></section></component>
+    </section></component>
+  </structuredBody></component>
+</ClinicalDocument>"##;
+
+    #[test]
+    fn parses_sections_entries_and_nested_statements() {
+        let doc = parse(PROBLEMS.as_bytes()).unwrap();
+        assert_eq!(doc.sections.len(), 1);
+        let section = &doc.sections[0];
+        assert!(section.has_template("2.16.840.1.113883.10.20.22.2.5.1"));
+        assert_eq!(section.title.as_deref(), Some("Problems"));
+        assert_eq!(
+            section.code.as_ref().unwrap().code.as_deref(),
+            Some("11450-4")
+        );
+        assert_eq!(section.sections.len(), 1);
+
+        let concern = &section.entries[0].statement;
+        assert_eq!(section.entries[0].type_code.as_deref(), Some("DRIV"));
+        assert_eq!(concern.kind, StatementKind::Act);
+        assert!(concern.has_template("2.16.840.1.113883.10.20.22.4.3"));
+        assert_eq!(concern.status_code.as_deref(), Some("active"));
+        let time = concern.effective_time.as_ref().unwrap();
+        assert_eq!(
+            time.low.as_ref().unwrap().value.as_deref(),
+            Some("20120806")
+        );
+        assert_eq!(
+            time.high.as_ref().unwrap().null_flavor.as_deref(),
+            Some("UNK")
+        );
+
+        let observation = concern.related_by("SUBJ").next().unwrap();
+        assert!(observation.has_template("2.16.840.1.113883.10.20.22.4.4"));
+        assert!(!observation.negation_ind);
+        assert_eq!(observation.related_by("REFR").count(), 1);
+        assert_eq!(observation.related_by("SUBJ").count(), 0);
+    }
+
+    #[test]
+    fn resolves_narrative_references_and_collapses_whitespace() {
+        let doc = parse(PROBLEMS.as_bytes()).unwrap();
+        let observation = doc.sections[0].entries[0]
+            .statement
+            .related_by("SUBJ")
+            .next()
+            .unwrap();
+        assert_eq!(observation.text.as_deref(), Some("Essential hypertension"));
+        let Value::Coded(code) = &observation.values[0] else {
+            panic!("expected a coded value");
+        };
+        assert_eq!(code.code.as_deref(), Some("59621000"));
+        assert_eq!(
+            code.original_text.as_deref(),
+            Some("Essential hypertension")
+        );
+        assert_eq!(code.original_text_reference.as_deref(), Some("#prob1"));
+    }
+
+    #[test]
+    fn unresolvable_reference_leaves_text_empty_but_keeps_the_reference() {
+        let xml = PROBLEMS.replace("#prob1", "#missing");
+        let doc = parse(xml.as_bytes()).unwrap();
+        let observation = doc.sections[0].entries[0]
+            .statement
+            .related_by("SUBJ")
+            .next()
+            .unwrap();
+        assert_eq!(observation.text, None);
+        let Value::Coded(code) = &observation.values[0] else {
+            panic!("expected a coded value");
+        };
+        assert_eq!(code.original_text, None);
+        assert_eq!(code.original_text_reference.as_deref(), Some("#missing"));
+    }
+
+    #[test]
+    fn values_are_typed_by_xsi_type() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <component><structuredBody><component><section>
+    <entry><observation classCode="OBS" moodCode="EVN">
+      <value xsi:type="PQ" value="5.4" unit="mg/dL"/>
+      <value xsi:type="INT" value="3"/>
+      <value xsi:type="ST">free text</value>
+      <value xsi:type="BL" value="true"/>
+      <value xsi:type="IVL_PQ"/>
+      <value/>
+    </observation></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>"#;
+        let doc = parse(xml.as_bytes()).unwrap();
+        let values = &doc.sections[0].entries[0].statement.values;
+        assert_eq!(
+            values[0],
+            Value::Quantity(Quantity {
+                value: Some("5.4".into()),
+                unit: Some("mg/dL".into()),
+                null_flavor: None
+            })
+        );
+        assert!(matches!(&values[1], Value::Integer(s) if s.value.as_deref() == Some("3")));
+        assert!(matches!(&values[2], Value::Text(s) if s.value.as_deref() == Some("free text")));
+        assert!(matches!(&values[3], Value::Boolean(s) if s.value.as_deref() == Some("true")));
+        assert_eq!(
+            values[4],
+            Value::Other {
+                xsi_type: Some("IVL_PQ".into())
+            }
+        );
+        assert_eq!(values[5], Value::Other { xsi_type: None });
+    }
+
+    #[test]
+    fn negation_and_organizer_components() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <component><structuredBody><component><section>
+    <entry><organizer classCode="BATTERY" moodCode="EVN">
+      <component><observation classCode="OBS" moodCode="EVN" negationInd="true"/></component>
+      <component><observation classCode="OBS" moodCode="EVN"/></component>
+    </organizer></entry>
+  </section></component></structuredBody></component>
+</ClinicalDocument>"#;
+        let doc = parse(xml.as_bytes()).unwrap();
+        let organizer = &doc.sections[0].entries[0].statement;
+        assert_eq!(organizer.kind, StatementKind::Organizer);
+        assert_eq!(organizer.related.len(), 2);
+        assert_eq!(organizer.related[0].link, Link::Component);
+        assert!(organizer.related[0].statement.negation_ind);
+        assert!(!organizer.related[1].statement.negation_ind);
+    }
+
+    #[test]
+    fn section_with_null_flavor_has_no_entries() {
+        let xml = r#"<ClinicalDocument xmlns="urn:hl7-org:v3">
+  <component><structuredBody><component>
+    <section nullFlavor="NI"><title>Allergies</title></section>
+  </component></structuredBody></component>
+</ClinicalDocument>"#;
+        let doc = parse(xml.as_bytes()).unwrap();
+        assert_eq!(doc.sections[0].null_flavor.as_deref(), Some("NI"));
+        assert!(doc.sections[0].entries.is_empty());
+    }
+
+    #[test]
+    fn rejects_runaway_nesting() {
+        let depth = body::MAX_DEPTH + 3;
+        let open = r#"<entryRelationship typeCode="COMP"><act classCode="ACT" moodCode="EVN">"#
+            .repeat(depth);
+        let close = "</act></entryRelationship>".repeat(depth);
+        let xml = format!(
+            r#"<ClinicalDocument xmlns="urn:hl7-org:v3"><component><structuredBody><component><section>
+<entry><act classCode="ACT" moodCode="EVN">{open}{close}</act></entry>
+</section></component></structuredBody></component></ClinicalDocument>"#
+        );
+        assert_eq!(parse(xml.as_bytes()), Err(ParseError::TooDeep));
+    }
+
+    #[test]
+    fn parsing_is_deterministic() {
+        assert_eq!(
+            parse(PROBLEMS.as_bytes()).unwrap(),
+            parse(PROBLEMS.as_bytes()).unwrap()
+        );
     }
 }
