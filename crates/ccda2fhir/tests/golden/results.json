@@ -588,6 +588,24 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:2a799b37-0b0d-51b5-a3b0-3d729eecaf4c",
+        "resource": {
+          "active": true,
+          "id": "practitionerrole-1",
+          "organization": {
+            "reference": "urn:uuid:e1859fe9-75a4-5684-90bc-8bddcae78033"
+          },
+          "practitioner": {
+            "reference": "urn:uuid:e3baafa5-ea8c-5923-b6d7-6ea5c3bd5371"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:1a50c0e7-6926-5257-92ed-8e7fbbce66a0",
         "resource": {
           "agent": [

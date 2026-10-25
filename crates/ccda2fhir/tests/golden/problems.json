@@ -345,6 +345,24 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:89e3f6d7-3bff-59d7-a9da-a1b1f41dd386",
+        "resource": {
+          "active": true,
+          "id": "practitionerrole-1",
+          "organization": {
+            "reference": "urn:uuid:f62bc18a-4042-5fe1-b9a9-9fa6dce39cee"
+          },
+          "practitioner": {
+            "reference": "urn:uuid:9d9b1d63-8903-56a2-9402-f5a7cc08240e"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:b7bfa1eb-7c29-56b1-8781-a5791212a9d5",
         "resource": {
           "agent": [

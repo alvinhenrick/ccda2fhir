@@ -287,6 +287,49 @@
             "status": "generated"
           }
         }
+      },
+      {
+        "fullUrl": "urn:uuid:80fbd7c2-94f0-5576-b5f8-2d1b5d1df526",
+        "resource": {
+          "active": true,
+          "id": "practitionerrole-1",
+          "organization": {
+            "reference": "urn:uuid:807d7531-de2a-5ad3-be3c-a8a929725b50"
+          },
+          "practitioner": {
+            "reference": "urn:uuid:46bb9956-8f3d-5c36-8349-94608c630be8"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:bcab1cc0-fcbd-547f-933b-29e742267b7d",
+        "resource": {
+          "active": true,
+          "code": [
+            {
+              "coding": [
+                {
+                  "code": "PCP",
+                  "system": "urn:oid:2.16.840.1.113883.5.88"
+                }
+              ]
+            }
+          ],
+          "id": "practitionerrole-2",
+          "practitioner": {
+            "reference": "urn:uuid:46bb9956-8f3d-5c36-8349-94608c630be8"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p><table><tr><td>code</td><td>PCP</td></tr></table></div>",
+            "status": "generated"
+          }
+        }
       }
     ],
     "resourceType": "Bundle",
@@ -298,11 +341,11 @@
       "severity": "info"
     },
     {
-      "code": "composition.status.assumed",
+      "code": "organization.active.assumed",
       "severity": "info"
     },
     {
-      "code": "organization.active.assumed",
+      "code": "composition.status.assumed",
       "severity": "info"
     }
   ]

@@ -350,6 +350,24 @@
             "status": "generated"
           }
         }
+      },
+      {
+        "fullUrl": "urn:uuid:b29d50db-b16d-5d32-8168-faa41c24fe39",
+        "resource": {
+          "active": true,
+          "id": "practitionerrole-1",
+          "organization": {
+            "reference": "urn:uuid:bab307f7-be74-5b8b-946f-fab9eed65d68"
+          },
+          "practitioner": {
+            "reference": "urn:uuid:0b3623bd-672b-5b1d-a1c3-229cb41d071d"
+          },
+          "resourceType": "PractitionerRole",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
+            "status": "generated"
+          }
+        }
       }
     ],
     "resourceType": "Bundle",

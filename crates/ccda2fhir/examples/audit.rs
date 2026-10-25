@@ -76,9 +76,18 @@ fn present(haystack: &str, value: &str) -> bool {
     false
 }
 
+/// Short form of the first template root on an element, e.g. `22.4.4`.
+fn template_of(node: Node) -> Option<String> {
+    node.children()
+        .filter(|c| c.is_element() && c.tag_name().name() == "templateId")
+        .find_map(|t| t.attribute("root"))
+        .map(|r| r.trim_start_matches("2.16.840.1.113883.10.20.").to_owned())
+}
+
 fn walk(
     node: Node,
     path: &str,
+    owner: &str,
     haystack: &str,
     stats: &mut BTreeMap<String, (usize, usize)>,
     narrative: &mut usize,
@@ -93,9 +102,14 @@ fn walk(
             continue;
         }
         let here = format!("{path}/{name}");
+        // Group by the nearest templated ancestor, so a miss points at a template.
+        let child_owner = template_of(child).unwrap_or_else(|| owner.to_owned());
         let short: String = {
             let parts: Vec<&str> = here.split('/').filter(|p| !p.is_empty()).collect();
-            parts[parts.len().saturating_sub(4)..].join("/")
+            format!(
+                "[{child_owner}] {}",
+                parts[parts.len().saturating_sub(3)..].join("/")
+            )
         };
         for a in child.attributes() {
             let key = a.name();
@@ -104,7 +118,18 @@ fn walk(
             }
             let entry = stats.entry(format!("{short}@{key}")).or_default();
             entry.0 += 1;
-            let found = present(haystack, a.value())
+            let value = a.value();
+            // The mapper stores telecom values without their scheme.
+            let value = if name == "telecom" && key == "value" {
+                value.split_once(':').map_or(value, |(_, rest)| rest)
+            } else {
+                value
+            };
+            // The administrative gender code system is implied by the FHIR code.
+            if name == "administrativeGenderCode" && key == "codeSystem" {
+                continue;
+            }
+            let found = present(haystack, value)
                 || (matches!(key, "codeSystem" | "root")
                     && present(haystack, &BuiltinTerminology.system_for_oid(a.value())));
             if !found {
@@ -123,7 +148,7 @@ fn walk(
                 entry.1 += 1;
             }
         }
-        walk(child, &here, haystack, stats, narrative);
+        walk(child, &here, &child_owner, haystack, stats, narrative);
     }
 }
 
@@ -152,7 +177,14 @@ fn main() {
         files += 1;
         let mut haystack = String::new();
         leaves(&c.bundle.to_json(), &mut haystack);
-        walk(doc.root(), "", &haystack, &mut stats, &mut narrative);
+        walk(
+            doc.root(),
+            "",
+            "header",
+            &haystack,
+            &mut stats,
+            &mut narrative,
+        );
     }
     let total: usize = stats.values().map(|s| s.0).sum();
     let missing: usize = stats.values().map(|s| s.1).sum();
@@ -163,7 +195,7 @@ fn main() {
     let mut rows: Vec<_> = stats.iter().filter(|(_, s)| s.1 > 0).collect();
     rows.sort_by(|a, b| b.1 .1.cmp(&a.1 .1).then(a.0.cmp(b.0)));
     println!("{:>6} {:>6}  path", "missing", "total");
-    for (k, (t, m)) in rows.iter().take(80).map(|(k, s)| (k, (s.0, s.1))) {
+    for (k, (t, m)) in rows.iter().take(120).map(|(k, s)| (k, (s.0, s.1))) {
         println!("{m:>6} {t:>6}  {k}");
     }
 }

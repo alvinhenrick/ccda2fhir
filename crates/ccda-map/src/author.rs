@@ -120,8 +120,9 @@ pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Optio
         }
         return None;
     };
-    if let Some(existing) = ctx.practitioners.get(&key) {
-        return Some(existing.clone());
+    if let Some(existing) = ctx.practitioners.get(&key).cloned() {
+        add_role(author, &existing, ctx);
+        return Some(existing);
     }
     let id = ctx.next_id("practitioner");
     let mut resource = Map::new();
@@ -164,7 +165,63 @@ pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Optio
     let reference = ctx.reference("Practitioner", &id);
     ctx.practitioners.insert(key, reference.clone());
     ctx.push_extra(Value::Object(resource));
+    add_role(author, &reference, ctx);
     Some(reference)
+}
+
+const NUCC: &str = "2.16.840.1.113883.6.101";
+
+/// A `PractitionerRole` for an author's role or specialty code and organization. One per
+/// practitioner, role and organization, however many times the author appears.
+fn add_role(author: &Author, practitioner: &str, ctx: &mut Context) {
+    let role = author
+        .role_code
+        .as_ref()
+        .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report));
+    let organization = author
+        .organization
+        .as_ref()
+        .and_then(|o| register_organization(o, ctx));
+    if role.is_none() && organization.is_none() {
+        return;
+    }
+    let key = format!(
+        "role:{practitioner}|{}|{}",
+        author
+            .role_code
+            .as_ref()
+            .and_then(|c| c.code.as_deref())
+            .unwrap_or_default(),
+        organization.as_deref().unwrap_or_default()
+    );
+    if ctx.practitioners.contains_key(&key) {
+        return;
+    }
+    let id = ctx.next_id("practitionerrole");
+    let mut r = Map::new();
+    r.insert("resourceType".into(), json!("PractitionerRole"));
+    r.insert("id".into(), json!(id));
+    r.insert("active".into(), json!(true));
+    r.insert("practitioner".into(), json!({ "reference": practitioner }));
+    if let Some(o) = &organization {
+        r.insert("organization".into(), json!({ "reference": o }));
+    }
+    if let Some(role) = role {
+        // A taxonomy code is a specialty; any other role code is the role itself.
+        let is_specialty = author
+            .role_code
+            .as_ref()
+            .and_then(|c| c.code_system.as_deref())
+            == Some(NUCC);
+        if is_specialty {
+            r.insert("specialty".into(), json!([role]));
+        } else {
+            r.insert("code".into(), json!([role]));
+        }
+    }
+    let reference = ctx.reference("PractitionerRole", &id);
+    ctx.practitioners.insert(key, reference);
+    ctx.push_extra(Value::Object(r));
 }
 
 /// A person related to the patient who is named in the header (an informant who is a relative or
