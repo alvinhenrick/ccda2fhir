@@ -106,3 +106,8 @@ fn notes() {
 fn devices() {
     check("devices");
 }
+
+#[test]
+fn goals() {
+    check("goals");
+}

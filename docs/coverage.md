@@ -255,6 +255,20 @@ See `docs/decisions/0013-devices.md`.
 | Link from the procedure | `Procedure.focalDevice` | todo | | |
 | Non-implantable Device uses (assessment scales, software) | other Devices | todo | | |
 
+## Goals to Goal
+
+See `docs/decisions/0014-goals.md`.
+
+| C-CDA | FHIR | Status | Test | Validated |
+|---|---|---|---|---|
+| Goal Observation code / value | `description` | done | `description_is_the_code_or_the_value_for_assertion` | |
+| `statusCode` | `lifecycleStatus` | done | `status_map` | |
+| `effectiveTime` | `startDate`, `target.dueDate` | done | `dates_become_start_and_target` | |
+| `author` | `expressedBy`, Provenance | done | | |
+| Progress Toward Goal (4.110) | `achievementStatus` | todo | | |
+| Goal target measures, priority | `target.measure`, `priority` | todo | | |
+| Links to Care Plan, Health Concerns | `addresses` | todo | | |
+
 ## Open policy questions
 
 - **Display names.** We pass `displayName` through unchanged. Real documents often carry displays that
