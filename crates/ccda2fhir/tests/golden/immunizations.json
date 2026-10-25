@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "11369-6",
-                    "display": "History of Immunization",
+                    "display": "History of Immunization note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "History of Immunization"
               },
               "entry": [
                 {
@@ -327,6 +328,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

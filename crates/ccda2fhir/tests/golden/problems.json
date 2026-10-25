@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "11450-4",
-                    "display": "Problem list",
+                    "display": "Problem list - Reported",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Problem list"
               },
               "entry": [
                 {
@@ -369,6 +370,10 @@
     },
     {
       "code": "composition.status.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "30954-2",
-                    "display": "Relevant diagnostic tests and/or laboratory data",
+                    "display": "Relevant diagnostic tests/laboratory data note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Relevant diagnostic tests and/or laboratory data"
               },
               "entry": [
                 {
@@ -709,6 +710,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

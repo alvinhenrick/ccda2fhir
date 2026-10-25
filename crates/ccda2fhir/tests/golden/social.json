@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "29762-2",
-                    "display": "Social history",
+                    "display": "Social history note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Social history"
               },
               "entry": [
                 {
@@ -264,6 +265,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "46240-8",
-                    "display": "History of encounters",
+                    "display": "History of Hospitalizations+Outpatient visits Narrative",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "History of encounters"
               },
               "entry": [
                 {
@@ -72,10 +73,11 @@
                 "coding": [
                   {
                     "code": "30954-2",
-                    "display": "Relevant diagnostic tests and/or laboratory data",
+                    "display": "Relevant diagnostic tests/laboratory data note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Relevant diagnostic tests and/or laboratory data"
               },
               "entry": [
                 {
@@ -506,6 +508,14 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

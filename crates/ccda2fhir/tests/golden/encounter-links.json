@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "46240-8",
-                    "display": "History of encounters",
+                    "display": "History of Hospitalizations+Outpatient visits Narrative",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "History of encounters"
               },
               "entry": [
                 {
@@ -72,10 +73,11 @@
                 "coding": [
                   {
                     "code": "47519-4",
-                    "display": "History of Procedures",
+                    "display": "History of Procedures Document",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "History of Procedures"
               },
               "entry": [
                 {
@@ -230,6 +232,14 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

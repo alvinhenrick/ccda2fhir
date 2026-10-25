@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "47420-5",
-                    "display": "Functional status assessment",
+                    "display": "Functional Status Assessment Note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Functional status assessment"
               },
               "entry": [
                 {
@@ -262,6 +263,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]

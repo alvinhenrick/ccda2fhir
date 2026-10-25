@@ -55,10 +55,11 @@
                 "coding": [
                   {
                     "code": "18776-5",
-                    "display": "Plan of care",
+                    "display": "Plan of Care Note",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Plan of care"
               },
               "text": {
                 "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
@@ -223,6 +224,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     }
   ]
