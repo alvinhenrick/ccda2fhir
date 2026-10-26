@@ -84,13 +84,87 @@ fn outcome(status: StatusCode, code: &str, diagnostics: &str) -> Response {
         .into_response()
 }
 
-fn is_xml(headers: &HeaderMap) -> bool {
-    let Some(value) = headers.get(header::CONTENT_TYPE) else {
-        return true;
+/// The media type of the request, lower case, without parameters. Empty when absent.
+fn media_type(headers: &HeaderMap) -> String {
+    headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.split(';').next())
+        .map(|m| m.trim().to_ascii_lowercase())
+        .unwrap_or_default()
+}
+
+fn is_xml_type(media: &str) -> bool {
+    media.is_empty() || media == "application/xml" || media == "text/xml" || media.ends_with("+xml")
+}
+
+fn is_json_type(media: &str) -> bool {
+    media == "application/json" || media == "application/fhir+json"
+}
+
+/// Standard base64 (RFC 4648); whitespace is ignored, anything else invalid is an error.
+fn base64_decode(input: &str) -> Option<Vec<u8>> {
+    let mut out = Vec::with_capacity(input.len() / 4 * 3);
+    let mut acc = 0u32;
+    let mut bits = 0u32;
+    let mut padding = 0usize;
+    for c in input.chars().filter(|c| !c.is_whitespace()) {
+        let v = match c {
+            'A'..='Z' => c as u32 - 'A' as u32,
+            'a'..='z' => c as u32 - 'a' as u32 + 26,
+            '0'..='9' => c as u32 - '0' as u32 + 52,
+            '+' => 62,
+            '/' => 63,
+            '=' => {
+                padding += 1;
+                continue;
+            }
+            _ => return None,
+        };
+        if padding > 0 {
+            return None;
+        }
+        acc = (acc << 6) | v;
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            out.push(u8::try_from((acc >> bits) & 0xff).ok()?);
+        }
+    }
+    (padding <= 2).then_some(out)
+}
+
+/// The C-CDA XML carried in a JSON request: `{ "document": "<base64>" }`, or a FHIR
+/// `DocumentReference` whose attachment holds the XML as base64 `data`.
+fn document_from_json(body: &[u8]) -> Result<Vec<u8>, &'static str> {
+    let value: Value =
+        serde_json::from_slice(body).map_err(|_| "the request body is not valid JSON")?;
+    let data = if value["resourceType"] == "DocumentReference" {
+        value["content"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|c| &c["attachment"])
+            .find(|a| {
+                a["data"].is_string()
+                    && a["contentType"].as_str().is_some_and(|t| {
+                        is_xml_type(
+                            &t.split(';')
+                                .next()
+                                .unwrap_or("")
+                                .trim()
+                                .to_ascii_lowercase(),
+                        )
+                    })
+            })
+            .and_then(|a| a["data"].as_str())
+            .ok_or("the DocumentReference has no XML attachment with inline data")?
+    } else {
+        value["document"]
+            .as_str()
+            .ok_or("send { \"document\": \"<base64 C-CDA>\" } or a DocumentReference")?
     };
-    let value = value.to_str().unwrap_or_default().to_ascii_lowercase();
-    let media = value.split(';').next().unwrap_or_default().trim();
-    media == "application/xml" || media == "text/xml" || media.ends_with("+xml")
+    base64_decode(data).ok_or("the document data is not valid base64")
 }
 
 async fn convert_handler(
@@ -99,13 +173,21 @@ async fn convert_handler(
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {
-    if !is_xml(&headers) {
+    let media = media_type(&headers);
+    let body = if is_xml_type(&media) {
+        body
+    } else if is_json_type(&media) {
+        match document_from_json(&body) {
+            Ok(xml) => Bytes::from(xml),
+            Err(message) => return outcome(StatusCode::BAD_REQUEST, "invalid", message),
+        }
+    } else {
         return outcome(
             StatusCode::UNSUPPORTED_MEDIA_TYPE,
             "not-supported",
-            "send the C-CDA document as application/xml",
+            "send the C-CDA document as application/xml, or as JSON (base64 or a DocumentReference)",
         );
-    }
+    };
     let options = Options {
         profiles: if query.profiles.as_deref() == Some("none") {
             Profiles::None
@@ -121,6 +203,12 @@ async fn convert_handler(
     let result = tokio::task::spawn_blocking(move || {
         convert(&body, &options).map(|c| {
             let issues = c.report.issues.len();
+            let warnings = c
+                .report
+                .issues
+                .iter()
+                .filter(|i| i.severity == ccda_map::Severity::Warning)
+                .count();
             let report: Vec<Value> = c
                 .report
                 .issues
@@ -133,15 +221,23 @@ async fn convert_handler(
                     })
                 })
                 .collect();
-            (c.bundle.to_json(), report, issues)
+            (c.bundle.to_json(), report, issues, warnings)
         })
     })
     .await;
 
     match result {
-        Ok(Ok((bundle, report, issues))) => {
+        Ok(Ok((bundle, report, issues, warnings))) => {
+            // `complete`: nothing was dropped, defaulted or approximated. `partial`: at least one
+            // warning says something was (see the report for which).
+            let status = if warnings == 0 { "complete" } else { "partial" };
             let payload = if with_report {
-                json!({ "bundle": bundle, "report": report })
+                json!({
+                    "status": status,
+                    "issues": { "total": issues, "warnings": warnings },
+                    "bundle": bundle,
+                    "report": report,
+                })
             } else {
                 bundle
             };
@@ -152,6 +248,10 @@ async fn convert_handler(
                     (
                         header::HeaderName::from_static("x-ccda2fhir-issues"),
                         HeaderValue::from(issues),
+                    ),
+                    (
+                        header::HeaderName::from_static("x-ccda2fhir-status"),
+                        HeaderValue::from_static(status),
                     ),
                 ],
                 Json(payload),
@@ -229,10 +329,88 @@ mod tests {
         assert!(!body.to_string().contains("secret-name"));
     }
 
+    fn b64(input: &str) -> String {
+        const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        let mut out = String::new();
+        for chunk in input.as_bytes().chunks(3) {
+            let b = [
+                chunk[0],
+                *chunk.get(1).unwrap_or(&0),
+                *chunk.get(2).unwrap_or(&0),
+            ];
+            let n = (u32::from(b[0]) << 16) | (u32::from(b[1]) << 8) | u32::from(b[2]);
+            for i in 0..4 {
+                if i <= chunk.len() {
+                    out.push(char::from(T[((n >> (18 - 6 * i)) & 63) as usize]));
+                } else {
+                    out.push('=');
+                }
+            }
+        }
+        out
+    }
+
+    #[tokio::test]
+    async fn base64_json_and_document_reference_are_accepted() {
+        let wrapped = json!({ "document": b64(DOC) }).to_string();
+        let (status, body) = call(
+            post_doc(Some("application/json"), &wrapped, "/convert"),
+            &Config::default(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["resourceType"], "Bundle");
+
+        let docref = json!({
+            "resourceType": "DocumentReference",
+            "content": [
+                { "attachment": { "contentType": "application/pdf", "data": "AAAA" } },
+                { "attachment": { "contentType": "application/xml", "data": b64(DOC) } }
+            ]
+        })
+        .to_string();
+        let (status, body) = call(
+            post_doc(Some("application/fhir+json"), &docref, "/convert"),
+            &Config::default(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(body["resourceType"], "Bundle");
+    }
+
+    #[tokio::test]
+    async fn bad_json_input_is_a_400_without_content() {
+        for body in [
+            r#"{"document":"not base64 !!"}"#,
+            r#"{"nothing":1}"#,
+            r#"{"resourceType":"DocumentReference","content":[]}"#,
+            "{secret",
+        ] {
+            let (status, out) = call(
+                post_doc(Some("application/json"), body, "/convert"),
+                &Config::default(),
+            )
+            .await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "{body}");
+            assert!(!out.to_string().contains("secret"));
+        }
+    }
+
+    #[tokio::test]
+    async fn status_says_complete_or_partial() {
+        let (_, body) = call(
+            post_doc(None, DOC, "/convert?report=true"),
+            &Config::default(),
+        )
+        .await;
+        assert!(["complete", "partial"].contains(&body["status"].as_str().unwrap()));
+        assert!(body["issues"]["total"].is_number());
+    }
+
     #[tokio::test]
     async fn wrong_content_type_is_a_415() {
         let (status, _) = call(
-            post_doc(Some("application/json"), "{}", "/convert"),
+            post_doc(Some("text/plain"), "{}", "/convert"),
             &Config::default(),
         )
         .await;
