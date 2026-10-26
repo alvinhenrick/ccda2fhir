@@ -137,9 +137,8 @@
                 {
                   "coding": [
                     {
-                      "code": "CAREGIVER",
-                      "display": "caregiver",
-                      "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                      "code": "133932002",
+                      "system": "http://snomed.info/sct"
                     }
                   ]
                 }

@@ -36,7 +36,7 @@
       </act></component>
       <component><act classCode="PCPR" moodCode="EVN">
         <templateId root="2.16.840.1.113883.10.20.22.4.500.1"/>
-        <performer><functionCode code="CAREGIVER" codeSystem="2.16.840.1.113883.5.111" displayName="caregiver"/><assignedEntity>
+        <performer><functionCode code="133932002" codeSystem="2.16.840.1.113883.6.96"/><assignedEntity>
           <telecom use="MC" value="tel:+1-555-0100"/>
           <assignedPerson xmlns:sdtc="urn:hl7-org:sdtc"><name><given>Sam</given><family>Doe</family></name>
             <sdtc:asPatientRelationship classCode="PRS"><sdtc:code code="SIB" codeSystem="2.16.840.1.113883.5.111" displayName="sibling"/></sdtc:asPatientRelationship>
