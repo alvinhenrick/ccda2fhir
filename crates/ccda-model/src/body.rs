@@ -103,6 +103,9 @@ pub struct Author {
     pub is_related_person: bool,
     /// `performer/functionCode`: the role the performer plays in the statement.
     pub function_code: Option<Code>,
+    /// `assignedPerson/sdtc:asPatientRelationship/sdtc:code`: the person is a relative of the
+    /// patient (a family caregiver on a care team, for example), not a care provider.
+    pub patient_relationship: Option<Code>,
 }
 
 /// A `relatedDocument` of the header: this document replaces, appends to or transforms another.
@@ -452,6 +455,16 @@ fn parse_agent(assigned: Option<Node>, time: Option<String>, narrative: &Narrati
         signature_code: None,
         is_related_person: false,
         function_code: None,
+        patient_relationship: person
+            .and_then(|p| {
+                p.children()
+                    .find(|c| c.is_element() && c.tag_name().name() == "asPatientRelationship")
+            })
+            .and_then(|r| {
+                r.children()
+                    .find(|c| c.is_element() && c.tag_name().name() == "code")
+            })
+            .map(|n| parse_code(&n, narrative)),
     }
 }
 
