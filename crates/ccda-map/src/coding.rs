@@ -14,7 +14,11 @@ fn coding(
     terminology: &dyn Terminology,
     report: &mut Report,
 ) -> Option<(Value, Option<String>)> {
-    let value = code.code.as_deref()?;
+    // A code with stray whitespace around it is not a valid code (LOINC rejects '46008-9 ').
+    let value = code.code.as_deref()?.trim();
+    if value.is_empty() {
+        return None;
+    }
     let mut coding = Map::new();
     match code.code_system.as_deref() {
         Some(oid) if is_oid(oid) => {
@@ -35,8 +39,8 @@ fn coding(
         let official = coding
             .get("system")
             .and_then(Value::as_str)
-            .and_then(|system| ccda_terminology::official_display(system, value));
-        match official {
+            .and_then(|system| terminology.official_display(system, value));
+        match official.as_deref() {
             Some(o) if o != display => {
                 report.info(
                     "coding.display.replaced",
@@ -53,6 +57,18 @@ fn coding(
     Some((Value::Object(coding), replaced))
 }
 
+fn is_nucc_grouping(code: &Code, terminology: &dyn Terminology) -> bool {
+    let (Some(value), Some(oid)) = (code.code.as_deref(), code.code_system.as_deref()) else {
+        return false;
+    };
+    let v = value.trim().as_bytes();
+    v.len() == 10
+        && v[..9].iter().all(u8::is_ascii_digit)
+        && v[9] == b'X'
+        && is_oid(oid)
+        && terminology.system_for_oid(oid) == "http://nucc.org/provider-taxonomy"
+}
+
 /// Map a coded value (and its translations) to a FHIR `CodeableConcept`.
 ///
 /// Returns `None` if there is no code, no translation with a code, and no text. A coded value
@@ -62,9 +78,22 @@ pub fn map_codeable_concept(
     terminology: &dyn Terminology,
     report: &mut Report,
 ) -> Option<Value> {
+    // A NUCC grouping code (nine digits and an X, like 200000000X) names a whole family of
+    // specialties and is not in the code system the validators carry. The words are kept as text.
+    let mut grouping_text: Option<String> = None;
     let mapped: Vec<(Value, Option<String>)> = std::iter::once(code)
         .chain(code.translations.iter())
-        .filter_map(|c| coding(c, terminology, report))
+        .filter_map(|c| {
+            if is_nucc_grouping(c, terminology) {
+                report.info(
+                    "coding.nucc-grouping.text-only",
+                    "a NUCC grouping code is not a code the validators know; its wording was kept as text and the code left out",
+                );
+                grouping_text = grouping_text.take().or_else(|| c.display_name.clone());
+                return None;
+            }
+            coding(c, terminology, report)
+        })
         .collect();
     // The first replaced display is the wording the document used for this concept.
     let original_display = mapped.iter().find_map(|(_, r)| r.clone());
@@ -77,14 +106,19 @@ pub fn map_codeable_concept(
         );
     }
 
-    if codings.is_empty() && code.original_text.is_none() {
+    if codings.is_empty() && code.original_text.is_none() && grouping_text.is_none() {
         return None;
     }
     let mut concept = Map::new();
     if !codings.is_empty() {
         concept.insert("coding".into(), json!(codings));
     }
-    if let Some(text) = code.original_text.as_ref().or(original_display.as_ref()) {
+    if let Some(text) = code
+        .original_text
+        .as_ref()
+        .or(original_display.as_ref())
+        .or(grouping_text.as_ref())
+    {
         concept.insert("text".into(), json!(text));
     }
     Some(Value::Object(concept))
@@ -109,6 +143,23 @@ mod tests {
             map_codeable_concept(c, &BuiltinTerminology, &mut report),
             report,
         )
+    }
+
+    #[test]
+    fn nucc_grouping_code_is_kept_as_text_and_codes_are_trimmed() {
+        let mut g = code("200000000X", "2.16.840.1.113883.6.101");
+        g.display_name = Some("Allopathic & Osteopathic Physicians".into());
+        let (v, r) = map(&g);
+        assert_eq!(
+            v.unwrap(),
+            json!({ "text": "Allopathic & Osteopathic Physicians" })
+        );
+        assert!(r
+            .issues
+            .iter()
+            .any(|i| i.code == "coding.nucc-grouping.text-only"));
+        let (v, _) = map(&code("46008-9 ", "2.16.840.1.113883.6.1"));
+        assert_eq!(v.unwrap()["coding"][0]["code"], "46008-9");
     }
 
     #[test]

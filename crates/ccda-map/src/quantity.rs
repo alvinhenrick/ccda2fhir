@@ -34,9 +34,11 @@ pub fn decimal(text: &str) -> Option<Number> {
 }
 
 /// The UCUM code for a unit string. Documents often use common non-UCUM spellings (`lb`, `in`,
-/// `F`); the well-known ones are replaced, anything else is passed through unchanged.
-fn ucum_code(unit: &str) -> &str {
-    match unit {
+/// `F`, `mcg`, `10+3/ul`); the well-known ones are replaced, anything else is passed through
+/// unchanged.
+fn ucum_code(unit: &str) -> std::borrow::Cow<'_, str> {
+    use std::borrow::Cow;
+    let whole = match unit {
         "lb" | "lbs" | "lb_av" => "[lb_av]",
         "oz" | "oz_av" => "[oz_av]",
         "in" | "inch" | "inches" | "in_i" => "[in_i]",
@@ -44,7 +46,31 @@ fn ucum_code(unit: &str) -> &str {
         "F" | "degF" | "deg F" => "[degF]",
         "C" | "degC" | "deg C" => "Cel",
         "bpm" | "beats/min" | "breaths/min" | "/minute" => "/min",
-        other => other,
+        _ => "",
+    };
+    if !whole.is_empty() {
+        return Cow::Borrowed(whole);
+    }
+    // Pieces: `mcg` is `ug`, `10+3` and `10^3` are `10*3`, a litre is `L` after a prefix, and a
+    // bare count such as `actuat` is an annotation.
+    let mut code = unit.to_owned();
+    if let Some(rest) = code.strip_prefix("mcg") {
+        code = format!("ug{rest}");
+    }
+    code = code.replace("10+", "10*").replace("10^", "10*");
+    for (from, to) in [("/ul", "/uL"), ("/ml", "/mL"), ("/dl", "/dL"), ("/l", "/L")] {
+        if code.ends_with(from) {
+            code.truncate(code.len() - from.len());
+            code.push_str(to);
+        }
+    }
+    if let Some(i) = code.find("/actuat") {
+        code.replace_range(i + 1..i + 7, "{actuat}");
+    }
+    if code == unit {
+        Cow::Borrowed(unit)
+    } else {
+        Cow::Owned(code)
     }
 }
 
@@ -71,7 +97,7 @@ pub fn map_quantity(quantity: &Quantity, report: &mut Report) -> Option<Value> {
         }
         out.insert("unit".into(), json!(unit));
         out.insert("system".into(), json!(UCUM));
-        out.insert("code".into(), json!(code));
+        out.insert("code".into(), json!(code.as_ref()));
     }
     Some(Value::Object(out))
 }
@@ -112,6 +138,20 @@ mod tests {
         // Written precision survives: 5.40, not 5.4.
         assert_eq!(v["value"].to_string(), "5.40");
         assert!(report.issues.is_empty());
+    }
+
+    #[test]
+    fn common_non_ucum_spellings_become_ucum() {
+        for (from, to) in [
+            ("mcg", "ug"),
+            ("mcg/mL", "ug/mL"),
+            ("10+3/ul", "10*3/uL"),
+            ("10^3/ml", "10*3/mL"),
+            ("mg/actuat", "mg/{actuat}"),
+            ("mg", "mg"),
+        ] {
+            assert_eq!(ucum_code(from), to, "{from}");
+        }
     }
 
     #[test]

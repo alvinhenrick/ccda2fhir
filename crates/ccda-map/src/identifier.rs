@@ -80,7 +80,41 @@ fn map_root_and_extension(
         );
         return Some(json!({ "value": extension }));
     };
+    // Under the NPI system an identifier has to be a real NPI (US Core: 10 digits and a valid
+    // check digit). A made-up one (the HL7 examples use some) is kept, under its OID.
+    if system == NPI_SYSTEM && !is_valid_npi(extension) {
+        report.warn(
+            "identifier.npi.invalid",
+            "an NPI is not 10 digits with a valid check digit; it was kept under the OID system instead of the NPI system",
+        );
+        return Some(json!({ "system": format!("urn:oid:{root}"), "value": extension }));
+    }
     Some(json!({ "system": system, "value": extension }))
+}
+
+const NPI_SYSTEM: &str = "http://hl7.org/fhir/sid/us-npi";
+
+/// 10 digits whose Luhn check, with the card prefix 80840, passes.
+fn is_valid_npi(value: &str) -> bool {
+    if value.len() != 10 || !value.bytes().all(|b| b.is_ascii_digit()) {
+        return false;
+    }
+    let digits = format!("80840{value}");
+    let sum: u32 = digits
+        .bytes()
+        .rev()
+        .enumerate()
+        .map(|(i, b)| {
+            let d = u32::from(b - b'0');
+            if i % 2 == 1 {
+                let doubled = d * 2;
+                doubled / 10 + doubled % 10
+            } else {
+                d
+            }
+        })
+        .sum();
+    sum.is_multiple_of(10)
 }
 
 fn map_without_extension(
@@ -252,6 +286,19 @@ mod tests {
             v.unwrap(),
             json!({ "system": "urn:myNID:myOrg", "value": "Z3321" })
         );
+    }
+
+    #[test]
+    fn an_invalid_npi_is_kept_under_its_oid() {
+        let (v, r) = map(&id(Some("2.16.840.1.113883.4.6"), Some("1234567890"), None));
+        let v = v.unwrap();
+        assert_eq!(v["system"], "urn:oid:2.16.840.1.113883.4.6");
+        assert_eq!(v["value"], "1234567890");
+        assert!(r.issues.iter().any(|i| i.code == "identifier.npi.invalid"));
+        let (v, _) = map(&id(Some("2.16.840.1.113883.4.6"), Some("1234567893"), None));
+        assert_eq!(v.unwrap()["system"], NPI_SYSTEM);
+        assert!(!is_valid_npi("123456789"));
+        assert!(!is_valid_npi("12345678a3"));
     }
 
     #[test]

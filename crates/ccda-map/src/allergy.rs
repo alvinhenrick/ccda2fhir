@@ -22,9 +22,6 @@ const REACTION_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.9";
 const CLINICAL_STATUS_SYSTEM: &str =
     "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical";
 const ABATEMENT_URL: &str = "http://hl7.org/fhir/StructureDefinition/allergyintolerance-abatement";
-const EXPOSURE_RISK_URL: &str =
-    "http://hl7.org/fhir/StructureDefinition/allergyintolerance-substanceExposureRisk";
-const EXPOSURE_RISK_SYSTEM: &str = "http://hl7.org/fhir/allerg-intol-substance-exp-risk";
 const SNOMED_URI: &str = "http://snomed.info/sct";
 
 /// Map every Allergy Concern Act in the document to `AllergyIntolerance` resources.
@@ -171,7 +168,6 @@ fn map_code(
     observation: &Statement,
     value: Option<&ccda_model::Code>,
     resource: &mut Map<String, Value>,
-    extensions: &mut Vec<Value>,
     ctx: &mut Context,
 ) {
     let substance = substance(observation);
@@ -205,19 +201,23 @@ fn map_code(
     // Negated: "no known allergy".
     let substance_concept = substance.and_then(|c| concept_of(c, ctx));
     if let Some(substance_concept) = substance_concept {
-        // A coded substance: the IG's fallback when no negated concept exists is the
-        // substanceExposureRisk extension, which replaces `code`.
+        // The IG's fallback for a coded substance is the substanceExposureRisk extension with no
+        // `code`. US Core needs a `code`, the extension forbids one, and the validator rejects
+        // the pair. A `code` that holds only the words "no known allergy to <substance>" is safe
+        // for a reader (a coded substance would read as an allergy to it) and conformant.
+        let name = substance_concept["text"]
+            .as_str()
+            .or_else(|| substance_concept["coding"][0]["display"].as_str())
+            .map(str::to_owned);
         ctx.report.info(
-            "allergy.negated.substance-exposure-risk",
-            "a negated allergy was mapped with the substanceExposureRisk extension; it has no code, so it is not US Core conformant",
+            "allergy.negated.substance-text",
+            "a negated allergy to a coded substance was written as code.text, because a code for the substance would read as an allergy to it",
         );
-        extensions.push(json!({
-            "url": EXPOSURE_RISK_URL,
-            "extension": [
-                { "url": "substance", "valueCodeableConcept": substance_concept },
-                { "url": "exposureRisk", "valueCodeableConcept": concept(EXPOSURE_RISK_SYSTEM, "no-known-reaction-risk") }
-            ]
-        }));
+        let text = match name {
+            Some(n) => format!("no known allergy to {n}"),
+            None => "no known allergies".to_owned(),
+        };
+        resource.insert("code".into(), json!({ "text": text }));
         return;
     }
     match value.and_then(snomed_code).and_then(no_known_allergy) {
@@ -340,7 +340,7 @@ fn map_observation(concern: &Statement, observation: &Statement, ctx: &mut Conte
         }
     }
 
-    map_code(observation, value, &mut resource, &mut extensions, ctx);
+    map_code(observation, value, &mut resource, ctx);
 
     if let Some(time) = observation.effective_time.as_ref() {
         if let Some(raw) = start_of(observation).and_then(|p| p.value) {
@@ -598,24 +598,19 @@ mod tests {
     }
 
     #[test]
-    fn negated_with_a_coded_substance_uses_the_exposure_risk_extension() {
+    fn negated_with_a_coded_substance_is_written_as_text() {
         let (out, report) = run(&document(
             ACTIVE,
             &observation(r#"negationInd="true""#, "", "416098002", penicillin(), ""),
         ));
-        assert!(out[0].get("code").is_none());
-        let ext = &out[0]["extension"][0];
-        assert_eq!(ext["url"], EXPOSURE_RISK_URL);
-        assert_eq!(ext["extension"][0]["url"], "substance");
-        assert_eq!(
-            ext["extension"][0]["valueCodeableConcept"]["coding"][0]["code"],
-            "7980"
-        );
-        assert_eq!(
-            ext["extension"][1]["valueCodeableConcept"]["coding"][0],
-            json!({ "system": EXPOSURE_RISK_SYSTEM, "code": "no-known-reaction-risk" })
-        );
-        assert_eq!(codes(&report), ["allergy.negated.substance-exposure-risk"]);
+        // A code for the substance would read as an allergy to it; the words cannot.
+        assert!(out[0]["code"].get("coding").is_none());
+        assert!(out[0]["code"]["text"]
+            .as_str()
+            .unwrap()
+            .starts_with("no known allergy"));
+        assert!(out[0].get("extension").is_none());
+        assert_eq!(codes(&report), ["allergy.negated.substance-text"]);
     }
 
     #[test]

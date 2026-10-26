@@ -34,6 +34,12 @@ pub trait Terminology {
     fn loinc_class(&self, _code: &str) -> Option<LoincClass> {
         None
     }
+
+    /// The official display for a code, when this implementation knows it (see
+    /// [`official_display`] for the built-in rows). The default uses only those.
+    fn official_display(&self, system: &str, code: &str) -> Option<String> {
+        official_display(system, code).map(str::to_owned)
+    }
 }
 
 /// The `CLASSTYPE` of a LOINC code: which broad kind of observation it names.
@@ -56,6 +62,8 @@ pub enum LoincClass {
 #[derive(Debug, Clone, Default)]
 pub struct LoincTable {
     classes: std::collections::HashMap<String, LoincClass>,
+    /// `LONG_COMMON_NAME` per code, when the file has that column.
+    names: std::collections::HashMap<String, String>,
 }
 
 impl LoincTable {
@@ -68,7 +76,9 @@ impl LoincTable {
         let header = split_csv(lines.next()?.trim_start_matches('\u{feff}'));
         let num = header.iter().position(|h| h == "LOINC_NUM")?;
         let class = header.iter().position(|h| h == "CLASSTYPE")?;
+        let long_name = header.iter().position(|h| h == "LONG_COMMON_NAME");
         let mut classes = std::collections::HashMap::new();
+        let mut names = std::collections::HashMap::new();
         for line in lines {
             let row = split_csv(line);
             let (Some(code), Some(kind)) = (row.get(num), row.get(class)) else {
@@ -82,8 +92,14 @@ impl LoincTable {
                 _ => continue,
             };
             classes.insert(code.clone(), kind);
+            if let Some(name) = long_name
+                .and_then(|i| row.get(i))
+                .filter(|n| !n.trim().is_empty())
+            {
+                names.insert(code.clone(), name.clone());
+            }
         }
-        Some(Self { classes })
+        Some(Self { classes, names })
     }
 
     /// Number of codes in the table.
@@ -132,6 +148,17 @@ impl Terminology for LoincTable {
 
     fn loinc_class(&self, code: &str) -> Option<LoincClass> {
         self.classes.get(code).copied()
+    }
+
+    /// LOINC displays come from the table's long common names (the display the validator
+    /// accepts); other systems use the built-in rows.
+    fn official_display(&self, system: &str, code: &str) -> Option<String> {
+        if system == "http://loinc.org" {
+            if let Some(name) = self.names.get(code) {
+                return Some(name.clone());
+            }
+        }
+        official_display(system, code).map(str::to_owned)
     }
 }
 
@@ -262,16 +289,134 @@ impl Terminology for BuiltinTerminology {
 /// the document's own wording as the concept's text (see `docs/decisions/0027-display-names.md`).
 /// A code that is not listed keeps the document's display: nothing is guessed.
 ///
-/// Every row is a LOINC long common name checked against the HL7 validator.
+/// Every row is checked against the HL7 validator (LOINC long common names, NUCC and NCI route
+/// terms as the validator spells them).
 #[must_use]
 pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
-    if system != "http://loinc.org" {
-        return None;
+    match system {
+        "http://loinc.org" => loinc_display(code),
+        "http://nucc.org/provider-taxonomy" => nucc_display(code),
+        "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl" => nci_display(code),
+        "http://hl7.org/fhir/sid/cvx" => match code {
+            "09" => Some("Td (adult), 2 Lf tetanus toxoid, preservative free, adsorbed"),
+            "111" => Some("Influenza, live, trivalent, intranasal, PF"),
+            "141" => Some("Influenza, split virus, trivalent, preservative"),
+            _ => None,
+        },
+        "http://snomed.info/sct" => match code {
+            "410942007" => Some("Drug or medicament"),
+            "71181003" => Some("Product containing vaccine"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation" => match code {
+            "1013" => Some("Christian (non-Catholic, non-specific)"),
+            _ => None,
+        },
+        _ => None,
     }
+}
+
+/// NUCC taxonomy: documents tend to write "classification; specialization".
+fn nucc_display(code: &str) -> Option<&'static str> {
     Some(match code {
+        "163W00000X" => "Registered Nurse",
+        "2085R0202X" => "Diagnostic Radiology Physician",
+        "207KA0200X" => "Allergy Physician",
+        "207QA0505X" => "Adult Medicine Physician",
+        "207RC0000X" => "Cardiovascular Disease Physician",
+        "207RN0300X" => "Nephrology Physician",
+        "208D00000X" => "General Practice Physician",
+        "246Q00000X" => "Pathology Specialist/Technologist",
+        "281P00000X" => "Chronic Disease Hospital",
+        _ => return None,
+    })
+}
+
+/// NCI Thesaurus route-of-administration codes (FDA route terms).
+fn nci_display(code: &str) -> Option<&'static str> {
+    Some(match code {
+        "C38216" => "RESPIRATORY (INHALATION)",
+        "C28161" => "INTRAMUSCULAR",
+        "C38276" => "INTRAVENOUS",
+        "C38288" => "ORAL",
+        _ => return None,
+    })
+}
+
+fn loinc_display(code: &str) -> Option<&'static str> {
+    Some(match code {
+        "10154-3" => "Chief complaint Narrative - Reported",
+        "10159-2" => "History of Industrial exposure Narrative",
+        "10184-0" => "Hospital discharge physical findings Narrative",
+        "10216-0" => "Surgical operation note fluids Narrative",
+        "10223-6" => "Surgical operation note surgical procedure Narrative",
+        "18841-7" => "Hospital consultations Document",
+        "26515-7" => "Platelets [#/volume] in Blood",
+        "30313-1" => "Hemoglobin [Mass/volume] in Arterial blood",
+        "33765-9" => {
+            "Leukocytes [#/volume] in Blood Product unit.platelet pheresis by Automated count"
+        }
+        "42347-5" => "Admission diagnosis (narrative)",
+        "42348-3" => "Advance Healthcare Directives",
+        "46008-9" => "Bathing during assessment period [CMS Assessment]",
+        "46241-6" => "Hospital admission diagnosis Narrative - Reported",
+        "48768-6" => "Payment sources Document",
+        "59769-0" => "Postprocedure diagnosis Narrative",
+        "61149-1" => "Objective Narrative",
+        "62959-2" => "PhenX - colorectal procedures and outcomes protocol 190401",
+        "71850-2" => {
+            "Deprecated Oxygen saturation [Pure mass fraction] in Capillary blood by Oximetry"
+        }
+        "8648-8" => "Hospital course note",
+        "10164-2" => "History of Present illness Narrative",
+        "10218-6" => "Surgical operation note postoperative diagnosis Narrative",
+        "10219-4" => "Surgical operation note preoperative diagnosis Narrative",
+        "11348-0" => "History of Past illness note",
+        "11535-2" => "Hospital discharge diagnosis note",
+        "2710-2" => "Deprecated Oxygen saturation in Capillary blood by Oximetry",
+        "29545-1" => "Physical findings note",
+        "29554-3" => "Procedure Narrative",
+        "3094-0" => "Urea nitrogen [Mass/volume] in Serum or Plasma",
+        "42346-7" => "Medications on admission (narrative)",
+        "42349-1" => "Reason for referral (narrative)",
+        "44616-1" => "Deprecated Pulse oximetry panel",
+        "4544-3" => "Hematocrit [Volume Fraction] of Blood by Automated count",
+        "45735-8" => "Weight loss [Minimum Data Set]",
+        "46239-0" => "Chief complaint+Reason for visit Narrative",
+        "52521-2" => "Deprecated Overall Plan of Care/Advance Care Directives",
+        "57021-8" => "CBC W Auto Differential panel - Blood",
+        "57782-5" => "CBC W Ordered Manual Differential panel - Blood",
+        "59768-2" => "Procedure indications [Interpretation] Narrative",
+        "59770-8" => "Procedure estimated blood loss Narrative",
+        "59771-6" => "Procedure implants Narrative",
+        "59773-2" => "Procedure specimens taken Narrative",
+        "59774-0" => "Procedure anesthesia Narrative",
+        "59775-7" => "Procedure disposition Narrative",
+        "59776-5" => "Procedure findings Narrative",
+        "61144-2" => "Diet and nutrition Narrative",
+        "62387-6" => "Interventions Narrative",
+        "6690-2" => "Leukocytes [#/volume] in Blood by Automated count",
+        "718-7" => "Hemoglobin [Mass/volume] in Blood",
+        "75311-1" => "Discharge medications note",
+        "777-3" => "Platelets [#/volume] in Blood by Automated count",
+        "789-8" => "Erythrocytes [#/volume] in Blood by Automated count",
+        "804-5" => "Leukocytes [#/volume] in Blood by Manual count",
         "10157-6" => "History of family member diseases note",
         "10160-0" => "History of Medication use Narrative",
         "11369-6" => "History of Immunization note",
+        "2708-6" => "Oxygen saturation in Arterial blood",
+        "29463-7" => "Body weight",
+        "3141-9" => "Body weight Measured",
+        "39156-5" => "Body mass index (BMI) [Ratio]",
+        "59408-5" => "Oxygen saturation in Arterial blood by Pulse oximetry",
+        "72166-2" => "Tobacco smoking status",
+        "8302-2" => "Body height",
+        "8310-5" => "Body temperature",
+        "8462-4" => "Diastolic blood pressure",
+        "8480-6" => "Systolic blood pressure",
+        "85354-9" => "Blood pressure panel with all children optional",
+        "8867-4" => "Heart rate",
+        "9279-1" => "Respiratory rate",
         "11450-4" => "Problem list - Reported",
         "18776-5" => "Plan of Care Note",
         "29762-2" => "Social history note",
