@@ -241,7 +241,7 @@ pub fn map_patient(
     Value::Object(resource)
 }
 
-fn human_name(n: &PersonName) -> Option<Value> {
+pub(crate) fn human_name(n: &PersonName) -> Option<Value> {
     if n.family.is_none() && n.given.is_empty() {
         return None;
     }

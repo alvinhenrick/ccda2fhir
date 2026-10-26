@@ -16,7 +16,7 @@ silently.
 - Supply request, authorization (4.123).
 - CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
 - Procedure instruction (`followUp`); `reasonReference` to an Observation (only Conditions are linked).
-- Coverage: the subscriber as a person (`subscriber`), plan name.
+- Coverage: plan name, authorizations, the member's period.
 - Patient and related-person members and `functionCode` of a care team; Specimen condition; Location status and organization.
 - Narrative `text/reference` as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
 - Immunization dose range and reaction; Problem supporting observations (SPRT); software authors as Devices.
@@ -329,7 +329,8 @@ See `docs/decisions/0017-coverage.md`.
 | Policy ids | `class` (group) | done | same | |
 | Payer performer | `payor` (Organization) | done | `missing_payer_and_role_are_reported` | |
 | Subscriber id, group | `subscriberId`, `class` | done (ADR 0017) | golden `coverage` | |
-| Subscriber as person, plan name | `subscriber` | todo | | |
+| Subscriber as a person | `subscriber` (Patient when the covered party is SELF, otherwise a RelatedPerson) | done (ADR 0051) | `self_subscriber_is_the_patient`, golden `coverage` | |
+| Plan name | `class.name` | todo | | |
 | Authorization (4.123) | ServiceRequest / ClaimResponse | todo (reported as unmapped) | | |
 
 ## Locations and Specimens

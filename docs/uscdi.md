@@ -32,4 +32,4 @@ Source: ONC USCDI v1 (July 2020 errata) and USCDI v3.1 (2025). "done" means a ma
 | Vital signs | all vital signs and percentiles | done | |
 | Encounter information | type, diagnosis, time, location, disposition | done | |
 | Goals | patient goals | done | |
-| Health insurance | coverage status and type, relationship, member, subscriber id, group, payer | done | subscriber as a person is a known gap (`docs/coverage.md`) |
+| Health insurance | coverage status and type, relationship, member, subscriber id, group, payer | done | plan name and authorizations are known gaps (`docs/coverage.md`) |
