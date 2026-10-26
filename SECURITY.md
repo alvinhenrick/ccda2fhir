@@ -11,12 +11,17 @@ than a public issue. Do not include real patient data in a report.
 - Keeps document content out of error and report messages.
 - Holds no state and does no I/O.
 
-## What it deliberately does not do yet
-Authentication, authorization, TLS, rate limiting and audit export belong to the service layer, which does not
-exist yet. The plan is pluggable seams (`Authenticator`, `Authorizer`, `AuditSink`) with permissive defaults, an
-OIDC/JWT validator, and TLS through rustls. Until then:
+## What the service does today
+- Optional JWT bearer authentication on `POST /convert` (RS256/ES256, JWKS by URL or inline, issuer, audience,
+  expiry and optional scope). See ADR 0067 and the README. It is off unless you configure a key set.
+- Caps body size, concurrency and request time; never logs request bodies or tokens.
 
-- Do not expose any wrapper around this library to untrusted networks.
+## What it deliberately does not do yet
+Authorization beyond one required scope, TLS termination, rate limiting per client and audit export belong to your
+gateway or a later layer. Until then:
+
+- Run the service behind TLS (a reverse proxy or gateway) and turn authentication on.
+- Do not expose it to untrusted networks without authentication.
 - Do not use it with real patient data in an unauthenticated deployment.
 
 This project has not had an independent security review.

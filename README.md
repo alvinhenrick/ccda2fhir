@@ -30,7 +30,25 @@ Errors are `OperationOutcome` resources. `GET /healthz` and `GET /readyz` are fo
 
 Settings (environment variables): `BIND_ADDR` (default `0.0.0.0:8080` in the image), `MAX_BODY_BYTES`
 (10 MiB), `MAX_CONCURRENCY` (64), `REQUEST_TIMEOUT_SECS` (30), `LOINC_TABLE` (optional path to your own LOINC `Loinc.csv`, used to set result categories; also `convert --loinc-table`), `RUST_LOG` (`info`). Request bodies are never
-logged. The service has no authentication yet: run it inside your network or behind a gateway that adds it.
+logged.
+
+#### Authentication (optional)
+
+Off by default. Set a key source and `/convert` then needs `Authorization: Bearer <JWT>` from your identity
+provider (Auth0, Okta, Keycloak, Entra, Cognito, anything that publishes a JWKS). `/healthz` and `/readyz` stay open.
+
+| Variable | Meaning |
+| --- | --- |
+| `AUTH_JWKS_URL` | The provider's JWKS (`https://`; plain `http://` only for localhost). Turns authentication on. |
+| `AUTH_JWKS` | The JWKS JSON inline, instead of a URL (air-gapped or fixed keys). |
+| `AUTH_ISSUER`, `AUTH_AUDIENCE` | Required with either source: the `iss` and `aud` a token must carry. |
+| `AUTH_REQUIRED_SCOPE` | Optional scope the token must grant (`scope` string or `scp`). Missing scope is a 403. |
+| `AUTH_ALGORITHMS` | `RS256,ES256` (default). Nothing else is supported; `none` and `HS*` cannot be enabled. |
+| `AUTH_LEEWAY_SECS`, `AUTH_JWKS_MIN_REFRESH_SECS`, `AUTH_JWKS_TTL_SECS` | Clock skew (60), shortest gap between key fetches (300), key lifetime (3600). |
+
+A bad or missing token is a 401 with a `WWW-Authenticate` challenge; the token is never logged or echoed. Starting
+with `AUTH_ISSUER` or `AUTH_AUDIENCE` but no key set is an error, so a typo cannot silently leave the service open.
+See [ADR 0067](docs/decisions/0067-jwt-authentication.md).
 
 ### Check your own documents with the HL7 validator
 
@@ -91,9 +109,9 @@ New to Rust? [`LESSONS/`](LESSONS) walks through the code step by step.
 
 ## Security
 
-The library parses untrusted XML safely by default. Authentication, TLS and auditing belong to the service layer
-and are designed as pluggable seams; see [`SECURITY.md`](SECURITY.md). Do not use with real patient data in an
-unauthenticated deployment.
+The library parses untrusted XML safely by default. The service can verify JWT bearer tokens (above); TLS and
+auditing belong to your gateway or the next layer; see [`SECURITY.md`](SECURITY.md). Do not use with real patient
+data in an unauthenticated deployment.
 
 ## License
 
