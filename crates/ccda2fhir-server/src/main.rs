@@ -1,5 +1,6 @@
 //! `ccda2fhir`: convert C-CDA documents to FHIR from the command line, or run the HTTP service.
 
+mod auth;
 mod server;
 
 use std::io::{Read, Write};
@@ -25,6 +26,62 @@ enum ProfileChoice {
     UsCore,
     /// Declare no profiles.
     None,
+}
+
+/// Bearer-token authentication for `/convert`. Off unless a key set is given.
+#[derive(clap::Args)]
+struct AuthArgs {
+    /// URL of the identity provider's JWKS (https). Turns authentication on.
+    #[arg(long, env = "AUTH_JWKS_URL")]
+    auth_jwks_url: Option<String>,
+    /// The JWKS itself, as JSON. Turns authentication on; use instead of a URL.
+    #[arg(long, env = "AUTH_JWKS", hide_env_values = true)]
+    auth_jwks: Option<String>,
+    /// Required `iss` claim.
+    #[arg(long, env = "AUTH_ISSUER")]
+    auth_issuer: Option<String>,
+    /// Required `aud` claim.
+    #[arg(long, env = "AUTH_AUDIENCE")]
+    auth_audience: Option<String>,
+    /// A scope the token must carry (`scope` or `scp`).
+    #[arg(long, env = "AUTH_REQUIRED_SCOPE")]
+    auth_required_scope: Option<String>,
+    /// Allowed signature algorithms, comma separated: RS256, ES256.
+    #[arg(long, env = "AUTH_ALGORITHMS", default_value = "RS256,ES256")]
+    auth_algorithms: String,
+    /// Clock skew tolerated on exp and nbf, in seconds.
+    #[arg(long, env = "AUTH_LEEWAY_SECS", default_value_t = 60)]
+    auth_leeway_secs: u64,
+    /// Shortest gap between two JWKS fetches, in seconds.
+    #[arg(long, env = "AUTH_JWKS_MIN_REFRESH_SECS", default_value_t = 300)]
+    auth_jwks_min_refresh_secs: u64,
+    /// Keys older than this are refetched, in seconds.
+    #[arg(long, env = "AUTH_JWKS_TTL_SECS", default_value_t = 3600)]
+    auth_jwks_ttl_secs: u64,
+}
+
+impl AuthArgs {
+    /// `None` when no key set is configured (authentication off).
+    fn build(self) -> Result<Option<std::sync::Arc<auth::Authenticator>>, String> {
+        if self.auth_jwks_url.is_none() && self.auth_jwks.is_none() {
+            if self.auth_issuer.is_some() || self.auth_audience.is_some() {
+                return Err("AUTH_ISSUER or AUTH_AUDIENCE is set without AUTH_JWKS_URL or AUTH_JWKS; refusing to start unauthenticated".into());
+            }
+            return Ok(None);
+        }
+        let settings = auth::Settings {
+            jwks_url: self.auth_jwks_url,
+            jwks: self.auth_jwks,
+            issuer: self.auth_issuer.unwrap_or_default(),
+            audience: self.auth_audience.unwrap_or_default(),
+            required_scope: self.auth_required_scope.filter(|s| !s.trim().is_empty()),
+            algorithms: auth::Settings::parse_algorithms(&self.auth_algorithms)?,
+            leeway: Duration::from_secs(self.auth_leeway_secs),
+            min_refresh: Duration::from_secs(self.auth_jwks_min_refresh_secs),
+            ttl: Duration::from_secs(self.auth_jwks_ttl_secs),
+        };
+        auth::Authenticator::new(settings).map(|a| Some(std::sync::Arc::new(a)))
+    }
 }
 
 #[derive(Subcommand)]
@@ -59,6 +116,8 @@ enum Command {
         /// A LOINC `Loinc.csv` (from your own LOINC download) to set result categories.
         #[arg(long, env = "LOINC_TABLE")]
         loinc_table: Option<PathBuf>,
+        #[command(flatten)]
+        auth: AuthArgs,
     },
     /// Exit 0 if a running service answers /healthz (for container health checks).
     Healthcheck {
@@ -85,17 +144,23 @@ fn main() -> ExitCode {
             max_concurrency,
             request_timeout_secs,
             loinc_table,
-        } => match load_loinc(loinc_table.as_deref()) {
-            Ok(loinc) => run_serve(
+            auth,
+        } => match (load_loinc(loinc_table.as_deref()), auth.build()) {
+            (Ok(loinc), Ok(auth)) => run_serve(
                 bind,
                 server::Config {
                     max_body_bytes,
                     max_concurrency,
                     request_timeout: Duration::from_secs(request_timeout_secs),
                     loinc,
+                    auth,
                 },
             ),
-            Err(code) => code,
+            (Err(code), _) => code,
+            (_, Err(message)) => {
+                eprintln!("authentication settings: {message}");
+                ExitCode::FAILURE
+            }
         },
         Command::Healthcheck { addr } => run_healthcheck(addr),
     }
@@ -221,6 +286,12 @@ fn run_serve(bind: SocketAddr, config: server::Config) -> ExitCode {
     };
     let result = runtime.block_on(async move {
         let listener = tokio::net::TcpListener::bind(bind).await?;
+        if let Some(auth) = &config.auth {
+            auth.warm().await;
+            tracing::info!("authentication is on for /convert");
+        } else {
+            tracing::warn!("authentication is off; /convert is open to anyone who can reach it");
+        }
         tracing::info!(%bind, "listening");
         axum::serve(listener, server::router(&config))
             .with_graceful_shutdown(shutdown_signal())

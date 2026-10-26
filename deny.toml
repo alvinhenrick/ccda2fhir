@@ -12,6 +12,9 @@ allow = [
     "Apache-2.0",
     "Unicode-3.0",
     "Unlicense", "BSD-3-Clause",
+    # TLS stack for fetching the JWKS (ring, rustls-webpki, untrusted) and the root store data.
+    "ISC",
+    "CDLA-Permissive-2.0",
 ]
 
 [bans]

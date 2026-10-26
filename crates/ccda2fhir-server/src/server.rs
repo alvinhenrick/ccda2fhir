@@ -32,6 +32,8 @@ pub struct Config {
     pub request_timeout: Duration,
     /// LOINC classes for result categories (see `ccda2fhir --loinc-table`).
     pub loinc: Option<Arc<ccda_terminology::LoincTable>>,
+    /// When set, `/convert` needs a valid bearer token. Health endpoints stay open.
+    pub auth: Option<Arc<crate::auth::Authenticator>>,
 }
 
 impl Default for Config {
@@ -41,6 +43,7 @@ impl Default for Config {
             max_concurrency: 64,
             request_timeout: Duration::from_secs(30),
             loinc: None,
+            auth: None,
         }
     }
 }
@@ -57,8 +60,15 @@ const FHIR_JSON: &str = "application/fhir+json";
 
 /// Build the router.
 pub fn router(config: &Config) -> Router {
+    let mut convert = post(convert_handler);
+    if let Some(auth) = &config.auth {
+        convert = convert.route_layer(axum::middleware::from_fn_with_state(
+            Arc::clone(auth),
+            crate::auth::require,
+        ));
+    }
     Router::new()
-        .route("/convert", post(convert_handler))
+        .route("/convert", convert)
         .route("/healthz", get(|| async { "ok" }))
         .route("/readyz", get(|| async { "ok" }))
         .with_state(config.loinc.clone())
@@ -71,7 +81,7 @@ pub fn router(config: &Config) -> Router {
         .layer(TraceLayer::new_for_http())
 }
 
-fn outcome(status: StatusCode, code: &str, diagnostics: &str) -> Response {
+pub(crate) fn outcome(status: StatusCode, code: &str, diagnostics: &str) -> Response {
     let body = json!({
         "resourceType": "OperationOutcome",
         "issue": [{ "severity": "error", "code": code, "diagnostics": diagnostics }],
