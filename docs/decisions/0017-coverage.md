@@ -17,4 +17,4 @@ Status: accepted. No IG page covers insurance; this follows C-CDA Payers section
 
 ## Update (docs refresh)
 
-The subscriber as a person was done in ADR 0051. Still open: plan name, authorizations and the participant time as period.
+The subscriber as a person was done in ADR 0051, plan name and the member period in ADR 0062. Authorizations have no IG mapping (ADR 0056).

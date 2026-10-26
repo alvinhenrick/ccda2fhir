@@ -243,6 +243,8 @@ pub struct Participant {
     pub telecoms: Vec<Telecom>,
     /// `participant/time`: its `@value`, else the start of its interval (raw HL7 timestamp).
     pub time: Option<String>,
+    /// The end of `participant/time` (`high`), raw HL7 timestamp.
+    pub time_high: Option<String>,
 }
 
 /// A `specimen` of a result: `specimenRole` and its `specimenPlayingEntity`.
@@ -526,6 +528,9 @@ fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
         time: child(node, "time").and_then(|n| {
             attr(&n, "value").or_else(|| child(&n, "low").and_then(|l| attr(&l, "value")))
         }),
+        time_high: child(node, "time")
+            .and_then(|n| child(&n, "high"))
+            .and_then(|h| attr(&h, "value")),
     }
 }
 

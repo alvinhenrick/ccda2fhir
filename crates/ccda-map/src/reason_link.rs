@@ -1,8 +1,8 @@
-//! Link a resource to the Condition that is its reason.
+//! Link a resource to the Condition or Observation that is its reason.
 //!
 //! An Indication (4.19) nested in a medication, procedure, encounter, immunization or request
 //! describes why it was done. When the Indication carries the identifier of a Problem Observation
-//! that became a Condition, we also set `reasonReference` on the resource made from the parent
+//! that became a Condition, or of a result or other Observation, we also set `reasonReference` on the resource made from the parent
 //! entry. `reasonCode` stays, so nothing the document said is lost. Matching is by identifier; an
 //! Indication whose id names nothing in the document adds nothing and is not an error. See
 //! `docs/decisions/0050-reason-reference.md`.
@@ -33,12 +33,14 @@ pub fn link_reasons(doc: &ClinicalDocument, ctx: &mut Context, resources: &mut [
     let mut targets: BTreeMap<String, Vec<usize>> = BTreeMap::new();
     for (i, r) in resources.iter().enumerate() {
         let type_ = r["resourceType"].as_str().unwrap_or_default();
-        if type_ == "Condition" {
+        if matches!(type_, "Condition" | "Observation") {
             if let Some(id) = r["id"].as_str() {
                 for k in keys(&r["identifier"]) {
+                    // The first resource with an identifier wins; a Condition is mapped before
+                    // the Observations, so it is preferred.
                     conditions
                         .entry(k)
-                        .or_insert_with(|| ctx.reference("Condition", id));
+                        .or_insert_with(|| ctx.reference(type_, id));
                 }
             }
         } else if LINKABLE.contains(&type_) {

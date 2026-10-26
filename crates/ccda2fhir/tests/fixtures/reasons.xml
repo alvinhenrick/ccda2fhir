@@ -54,6 +54,39 @@
         <value xsi:type="CD" code="74400008" codeSystem="2.16.840.1.113883.6.96"/>
       </observation></entryRelationship>
     </procedure></entry>
+    <entry><procedure classCode="PROC" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.14"/>
+      <id root="1.3.6.1.4.1.22812.13.1" extension="PROC-2"/>
+      <code code="80146002" codeSystem="2.16.840.1.113883.6.96"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20240420"/>
+      <entryRelationship typeCode="RSON"><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.19"/>
+        <id root="1.3.6.1.4.1.22812.13.4" extension="RES-1"/>
+        <code code="404684003" codeSystem="2.16.840.1.113883.6.96"/>
+      </observation></entryRelationship>
+    </procedure></entry>
+  </section></component>
+  <component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.3.1"/>
+    <code code="30954-2" codeSystem="2.16.840.1.113883.6.1"/>
+    <title>Results</title>
+    <text/>
+    <entry><organizer classCode="BATTERY" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.1"/>
+      <id root="1.3.6.1.4.1.22812.13.5" extension="ORG-1"/>
+      <code code="24323-8" codeSystem="2.16.840.1.113883.6.1"/>
+      <statusCode code="completed"/>
+      <effectiveTime value="20240410"/>
+      <component><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.2"/>
+        <id root="1.3.6.1.4.1.22812.13.4" extension="RES-1"/>
+        <code code="2345-7" codeSystem="2.16.840.1.113883.6.1"/>
+        <statusCode code="completed"/>
+        <effectiveTime value="20240410"/>
+        <value xsi:type="PQ" value="180" unit="mg/dL"/>
+      </observation></component>
+    </organizer></entry>
   </section></component>
   </structuredBody></component>
 </ClinicalDocument>

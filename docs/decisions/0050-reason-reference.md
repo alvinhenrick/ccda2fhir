@@ -17,3 +17,5 @@ Condition adds nothing and is not reported, because most Indications are only a 
 
 ## Consequences
 - Only Conditions are linked. Reasons that are Observations stay as `reasonCode`.
+
+Observations are linked too since ADR 0062.

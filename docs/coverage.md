@@ -15,8 +15,6 @@ silently.
 
 - Supply request, authorization (4.123): the IG has no mapping for either (ADR 0056).
 - Goal progress as an R4 achievement code (only the document's own wording is kept).
-- `reasonReference` to an Observation (only Conditions are linked).
-- Coverage: plan name, authorizations, the member's period.
 - Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
 
@@ -195,7 +193,7 @@ See `docs/decisions/0009-encounters.md`.
 | `effectiveTime` | `period` | done | `point_time_is_a_period_with_both_ends` | |
 | `sdtc:dischargeDispositionCode` | `hospitalization.dischargeDisposition` | done | `discharge_disposition_is_read_from_the_sdtc_element` | |
 | `performer` | `participant.individual` | done (function code todo) | golden | |
-| Indication | `reasonCode`, and `reasonReference` to the Condition with the same id | done (ADR 0050) | golden `reasons` | |
+| Indication | `reasonCode`, and `reasonReference` to the Condition or Observation with the same id | done (ADR 0050, 0062) | golden `reasons` | |
 | Encounter Diagnosis | Condition (encounter-diagnosis) + `diagnosis.condition` | done | `encounter_diagnoses_become_conditions_linked_both_ways` | |
 | Location participant | `location` | done (ADR 0018) | golden | |
 | Header `encompassingEncounter`, same encounter seen twice | one Encounter | done (ADR 0026) | golden | |
@@ -330,7 +328,8 @@ See `docs/decisions/0017-coverage.md`.
 | Payer performer | `payor` (Organization) | done | `missing_payer_and_role_are_reported` | |
 | Subscriber id, group | `subscriberId`, `class` | done (ADR 0017) | golden `coverage` | |
 | Subscriber as a person | `subscriber` (Patient when the covered party is SELF, otherwise a RelatedPerson) | done (ADR 0051) | `self_subscriber_is_the_patient`, golden `coverage` | |
-| Plan name | `class.name` | todo | | |
+| Plan (REFR act, mood DEF: id and text) | `class` (type plan, `value`, `name`) | done (ADR 0062) | `plan_name_and_member_period`, golden `coverage` | |
+| Covered party `time` | `period` when the policy has no interval | done (ADR 0062) | same | |
 | Authorization (4.123) | none in the IG | reported, on purpose (ADR 0056) | `authorization_is_reported_not_mapped` | no R4 resource fits without guessing |
 
 ## Locations and Specimens
