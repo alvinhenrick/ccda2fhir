@@ -28,6 +28,11 @@ The document can also arrive as JSON, for callers that cannot send raw XML:
 base64 `data` (`Content-Type: application/json` or `application/fhir+json`).
 Errors are `OperationOutcome` resources. `GET /healthz` and `GET /readyz` are for orchestrators.
 
+Open `http://localhost:8080/` for a built-in page: drop or paste a C-CDA file, pick the profiles, and see the resources, the
+conversion report and the bundle JSON side by side. It is plain HTML, CSS and JS served by the service itself (no build step, no
+external requests, a strict Content-Security-Policy), and the document goes only to `POST /convert`. If authentication is on,
+paste a bearer token into the page; it is kept in memory only. Turn the page off with `DISABLE_UI=1` (or `serve --no-ui`).
+
 Settings (environment variables): `BIND_ADDR` (default `0.0.0.0:8080` in the image), `MAX_BODY_BYTES`
 (10 MiB), `MAX_CONCURRENCY` (64), `REQUEST_TIMEOUT_SECS` (30), `LOINC_TABLE` (optional path to your own LOINC `Loinc.csv`, used to set result categories; also `convert --loinc-table`), `RUST_LOG` (`info`). Request bodies are never
 logged.

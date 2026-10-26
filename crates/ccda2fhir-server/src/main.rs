@@ -100,7 +100,7 @@ enum Command {
         #[arg(long, env = "LOINC_TABLE")]
         loinc_table: Option<PathBuf>,
     },
-    /// Run the HTTP service (POST /convert, GET /healthz, GET /readyz).
+    /// Run the HTTP service (web page at /, POST /convert, GET /healthz, GET /readyz).
     Serve {
         #[arg(long, env = "BIND_ADDR", default_value = "127.0.0.1:8080")]
         bind: SocketAddr,
@@ -116,6 +116,9 @@ enum Command {
         /// A LOINC `Loinc.csv` (from your own LOINC download) to set result categories.
         #[arg(long, env = "LOINC_TABLE")]
         loinc_table: Option<PathBuf>,
+        /// Do not serve the built-in web page at `/`.
+        #[arg(long, env = "DISABLE_UI")]
+        no_ui: bool,
         #[command(flatten)]
         auth: AuthArgs,
     },
@@ -144,6 +147,7 @@ fn main() -> ExitCode {
             max_concurrency,
             request_timeout_secs,
             loinc_table,
+            no_ui,
             auth,
         } => match (load_loinc(loinc_table.as_deref()), auth.build()) {
             (Ok(loinc), Ok(auth)) => run_serve(
@@ -154,6 +158,7 @@ fn main() -> ExitCode {
                     request_timeout: Duration::from_secs(request_timeout_secs),
                     loinc,
                     auth,
+                    ui: !no_ui,
                 },
             ),
             (Err(code), _) => code,
