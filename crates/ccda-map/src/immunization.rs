@@ -426,7 +426,11 @@ mod tests {
                 .count(),
             1
         );
-        assert_eq!(codes(&report), ["organization.active.assumed"]);
+        // The route display is replaced by the official NCI one.
+        assert_eq!(
+            codes(&report),
+            ["coding.display.replaced", "organization.active.assumed"]
+        );
     }
 
     #[test]

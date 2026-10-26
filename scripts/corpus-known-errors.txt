@@ -1,8 +1,10 @@
 # Validator errors on the HL7 example documents that are not converter bugs. One regular
 # expression per line, matched against the normalised error text (see corpus_gate.py).
-# '200000000X' is a NUCC grouping code that the validator's NUCC 22.1 does not list.
-Unknown code '200000000X' in the CodeSystem 'http://nucc.org/provider-taxonomy'
 # HL7's example weights use 3141-9 (Body weight Measured). The validator applies the FHIR bodyweight
 # profile to such a vital sign, and that profile insists on 29463-7. We do not add a code the
 # document does not carry.
 BodyWeightCode: magic LOINC code 29463-7 required
+# CPT is licensed by the AMA, so its displays are never bundled (ADR 0027), and the validator's
+# CPT edition does not list some retired codes the examples use.
+Wrong Display Name .* for http://www.ama-assn.org/go/cpt#
+Unknown code '99241' in the CodeSystem 'http://www.ama-assn.org/go/cpt'

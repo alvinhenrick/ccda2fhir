@@ -183,7 +183,7 @@ pub fn map_composition(doc: &ClinicalDocument, ctx: &mut Context, resources: &[V
         );
     }
     if let Some(l) = doc.language.as_deref() {
-        r.insert("language".into(), json!(l));
+        r.insert("language".into(), json!(crate::patient::bcp47_language(l)));
     }
     if let Some(c) = doc
         .custodian

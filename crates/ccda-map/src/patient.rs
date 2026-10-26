@@ -617,7 +617,7 @@ fn map_gender(code: &str, report: &mut Report) -> &'static str {
 
 /// The two-letter BCP 47 language for an ISO 639-2 three-letter code, when there is one. BCP 47
 /// wants the shortest form, so `eng` is `en`; a language with no two-letter code keeps the three.
-fn bcp47_language(code: &str) -> String {
+pub(crate) fn bcp47_language(code: &str) -> String {
     let lower = code.trim().replace('_', "-").to_ascii_lowercase();
     let (primary, rest) = match lower.split_once('-') {
         Some((p, r)) => (p, Some(r)),

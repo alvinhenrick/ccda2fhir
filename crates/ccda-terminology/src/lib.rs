@@ -297,6 +297,21 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
         "http://loinc.org" => loinc_display(code),
         "http://nucc.org/provider-taxonomy" => nucc_display(code),
         "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl" => nci_display(code),
+        "http://hl7.org/fhir/sid/cvx" => match code {
+            "09" => Some("Td (adult), 2 Lf tetanus toxoid, preservative free, adsorbed"),
+            "111" => Some("Influenza, live, trivalent, intranasal, PF"),
+            "141" => Some("Influenza, split virus, trivalent, preservative"),
+            _ => None,
+        },
+        "http://snomed.info/sct" => match code {
+            "410942007" => Some("Drug or medicament"),
+            "71181003" => Some("Product containing vaccine"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation" => match code {
+            "1013" => Some("Christian (non-Catholic, non-specific)"),
+            _ => None,
+        },
         _ => None,
     }
 }
@@ -305,6 +320,13 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
 fn nucc_display(code: &str) -> Option<&'static str> {
     Some(match code {
         "163W00000X" => "Registered Nurse",
+        "207KA0200X" => "Allergy Physician",
+        "207QA0505X" => "Adult Medicine Physician",
+        "207RC0000X" => "Cardiovascular Disease Physician",
+        "207RN0300X" => "Nephrology Physician",
+        "208D00000X" => "General Practice Physician",
+        "246Q00000X" => "Pathology Specialist/Technologist",
+        "281P00000X" => "Chronic Disease Hospital",
         _ => return None,
     })
 }
@@ -313,6 +335,8 @@ fn nucc_display(code: &str) -> Option<&'static str> {
 fn nci_display(code: &str) -> Option<&'static str> {
     Some(match code {
         "C38216" => "RESPIRATORY (INHALATION)",
+        "C28161" => "INTRAMUSCULAR",
+        "C38276" => "INTRAVENOUS",
         "C38288" => "ORAL",
         _ => return None,
     })
@@ -320,6 +344,39 @@ fn nci_display(code: &str) -> Option<&'static str> {
 
 fn loinc_display(code: &str) -> Option<&'static str> {
     Some(match code {
+        "10164-2" => "History of Present illness Narrative",
+        "10218-6" => "Surgical operation note postoperative diagnosis Narrative",
+        "10219-4" => "Surgical operation note preoperative diagnosis Narrative",
+        "11348-0" => "History of Past illness note",
+        "11535-2" => "Hospital discharge diagnosis note",
+        "2710-2" => "Deprecated Oxygen saturation in Capillary blood by Oximetry",
+        "29545-1" => "Physical findings note",
+        "29554-3" => "Procedure Narrative",
+        "3094-0" => "Urea nitrogen [Mass/volume] in Serum or Plasma",
+        "42346-7" => "Medications on admission (narrative)",
+        "42349-1" => "Reason for referral (narrative)",
+        "44616-1" => "Deprecated Pulse oximetry panel",
+        "4544-3" => "Hematocrit [Volume Fraction] of Blood by Automated count",
+        "45735-8" => "Weight loss [Minimum Data Set]",
+        "46239-0" => "Chief complaint+Reason for visit Narrative",
+        "52521-2" => "Deprecated Overall Plan of Care/Advance Care Directives",
+        "57021-8" => "CBC W Auto Differential panel - Blood",
+        "57782-5" => "CBC W Ordered Manual Differential panel - Blood",
+        "59768-2" => "Procedure indications [Interpretation] Narrative",
+        "59770-8" => "Procedure estimated blood loss Narrative",
+        "59771-6" => "Procedure implants Narrative",
+        "59773-2" => "Procedure specimens taken Narrative",
+        "59774-0" => "Procedure anesthesia Narrative",
+        "59775-7" => "Procedure disposition Narrative",
+        "59776-5" => "Procedure findings Narrative",
+        "61144-2" => "Diet and nutrition Narrative",
+        "62387-6" => "Interventions Narrative",
+        "6690-2" => "Leukocytes [#/volume] in Blood by Automated count",
+        "718-7" => "Hemoglobin [Mass/volume] in Blood",
+        "75311-1" => "Discharge medications note",
+        "777-3" => "Platelets [#/volume] in Blood by Automated count",
+        "789-8" => "Erythrocytes [#/volume] in Blood by Automated count",
+        "804-5" => "Leukocytes [#/volume] in Blood by Manual count",
         "10157-6" => "History of family member diseases note",
         "10160-0" => "History of Medication use Narrative",
         "11369-6" => "History of Immunization note",

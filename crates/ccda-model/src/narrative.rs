@@ -115,7 +115,17 @@ fn render_element(node: &Node, out: &mut String, depth: usize) {
         "paragraph" => Some("p"),
         "content" => Some("span"),
         "item" => Some("li"),
-        "caption" => Some("caption"),
+        // A caption belongs to a table; elsewhere (a paragraph or list title) it is bold text.
+        "caption" => Some(
+            if node
+                .parent_element()
+                .is_some_and(|p| p.tag_name().name() == "table")
+            {
+                "caption"
+            } else {
+                "strong"
+            },
+        ),
         "table" => Some("table"),
         "thead" => Some("thead"),
         "tbody" => Some("tbody"),
@@ -188,6 +198,15 @@ mod tests {
         let doc = roxmltree::Document::parse(&xml).unwrap();
         let text = doc.root_element().first_element_child().unwrap();
         xhtml(&text)
+    }
+
+    #[test]
+    fn a_caption_is_a_table_caption_only_inside_a_table() {
+        let out = render("<paragraph><caption>Title</caption>Body</paragraph>").unwrap();
+        assert!(out.contains("<strong>Title</strong>") && !out.contains("<caption>"));
+        let out = render("<table><caption>Cap</caption><tbody><tr><td>x</td></tr></tbody></table>")
+            .unwrap();
+        assert!(out.contains("<caption>Cap</caption>"));
     }
 
     #[test]
