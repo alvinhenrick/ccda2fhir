@@ -325,6 +325,14 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
             "1013" => Some("Christian (non-Catholic, non-specific)"),
             _ => None,
         },
+        "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration" => match code {
+            "IM" => Some("Injection, intramuscular"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v2-0443" => match code {
+            "PP" => Some("Primary Care Provider"),
+            _ => None,
+        },
         _ => None,
     }
 }
