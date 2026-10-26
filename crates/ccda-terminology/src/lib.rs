@@ -47,6 +47,10 @@ const BUILTIN: &[(&str, &str)] = &[
         "http://terminology.hl7.org/CodeSystem/v3-ParticipationFunction",
     ),
     (
+        "2.16.840.1.113883.18.317",
+        "http://terminology.hl7.org/CodeSystem/v2-0493",
+    ),
+    (
         "2.16.840.1.113883.5.1076",
         "http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation",
     ),

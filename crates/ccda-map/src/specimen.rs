@@ -10,6 +10,8 @@ use crate::quantity::map_quantity;
 use crate::{map_codeable_concept, map_datetime, map_identifier, Context};
 
 const SPECIMEN_COLLECTION: &str = "17636008";
+/// Specimen Condition Observation, nested in the collection procedure.
+const SPECIMEN_CONDITION: &str = "2.16.840.1.113883.10.20.22.4.421";
 
 /// Create (or reuse) a `Specimen` for each specimen role; return their references.
 ///
@@ -101,6 +103,21 @@ fn register(s: &Specimen, collection: Option<&Statement>, ctx: &mut Context) -> 
         coll.insert("quantity".into(), q);
     }
     if let Some(proc) = collection {
+        let conditions: Vec<Value> = proc
+            .related
+            .iter()
+            .map(|r| &r.statement)
+            .filter(|c| c.has_template(SPECIMEN_CONDITION))
+            .filter_map(|c| match c.values.first() {
+                Some(ccda_model::Value::Coded(code)) => {
+                    map_codeable_concept(code, ctx.terminology, ctx.report)
+                }
+                _ => None,
+            })
+            .collect();
+        if !conditions.is_empty() {
+            r.insert("condition".into(), json!(conditions));
+        }
         if let Some(site) = proc
             .target_site_codes
             .first()
