@@ -95,8 +95,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/corpus"
           n=0
           while IFS= read -r -d '' f; do
-            # Only complete, well-formed ClinicalDocuments; the repo also holds template fragments.
-            if head -c 4000 "$f" | grep -q '<ClinicalDocument' && xmllint --noout "$f" 2>/dev/null; then
+            # Only well-formed ClinicalDocuments in the HL7 namespace; the repo also holds stubs and fragments.
+            if head -c 8000 "$f" | tr '\n' ' ' | grep -Eq '<ClinicalDocument[^>]*xmlns="urn:hl7-org:v3"' && xmllint --noout "$f" 2>/dev/null; then
               n=$((n+1)); cp "$f" "$RUNNER_TEMP/corpus/doc$n.xml"
             fi
           done < <(find "$RUNNER_TEMP/examples" -name '*.xml' -print0 | sort -z)
