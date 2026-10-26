@@ -15,7 +15,7 @@ silently.
 
 - Supply request, authorization (4.123).
 - CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
-- `reasonReference` from an indication to its problem; procedure instruction (`followUp`).
+- Procedure instruction (`followUp`); `reasonReference` to an Observation (only Conditions are linked).
 - Coverage: the subscriber as a person (`subscriber`), plan name.
 - Patient and related-person members and `functionCode` of a care team; Specimen condition; Location status and organization.
 - Narrative `text/reference` as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
@@ -195,7 +195,7 @@ See `docs/decisions/0009-encounters.md`.
 | `effectiveTime` | `period` | done | `point_time_is_a_period_with_both_ends` | |
 | `sdtc:dischargeDispositionCode` | `hospitalization.dischargeDisposition` | done | `discharge_disposition_is_read_from_the_sdtc_element` | |
 | `performer` | `participant.individual` | done (function code todo) | golden | |
-| Indication | `reasonCode` (`reasonReference` to a problem is todo) | partial | golden | |
+| Indication | `reasonCode`, and `reasonReference` to the Condition with the same id | done (ADR 0050) | golden `reasons` | |
 | Encounter Diagnosis | Condition (encounter-diagnosis) + `diagnosis.condition` | done | `encounter_diagnoses_become_conditions_linked_both_ways` | |
 | Location participant | `location` | done (ADR 0018) | golden | |
 | Header `encompassingEncounter`, same encounter seen twice | one Encounter | done (ADR 0026) | golden | |
