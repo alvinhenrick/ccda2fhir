@@ -68,7 +68,7 @@ pub use device::map_devices;
 pub use encounter::{map_encompassing_encounter, map_encounters};
 pub use encounter_link::link_encounters;
 pub use family_history::map_family_history;
-pub use generated_text::add_generated_text;
+pub use generated_text::{add_generated_text, mark_narrative_language};
 pub use goal::{link_goal_addresses, map_goals};
 pub use health_concern::map_health_concerns;
 pub use identifier::map_identifier;

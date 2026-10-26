@@ -87,6 +87,39 @@ fn render(v: &Value) -> Option<String> {
     }
 }
 
+/// When a resource has a `language`, every narrative `div` in it (its own and its sections')
+/// carries the same `lang` and `xml:lang`, which FHIR asks for.
+pub fn mark_narrative_language(resource: &mut Value) {
+    let Some(language) = resource["language"].as_str().map(str::to_owned) else {
+        return;
+    };
+    let escaped = language
+        .replace('&', "&amp;")
+        .replace('"', "&quot;")
+        .replace('<', "&lt;");
+    let from = "<div xmlns=\"http://www.w3.org/1999/xhtml\">";
+    let to = format!(
+        "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"{escaped}\" xml:lang=\"{escaped}\">"
+    );
+    fn walk(v: &mut Value, from: &str, to: &str) {
+        match v {
+            Value::Object(map) => {
+                if let Some(Value::String(div)) = map.get_mut("div") {
+                    if div.starts_with(from) {
+                        *div = format!("{to}{}", &div[from.len()..]);
+                    }
+                }
+                for child in map.values_mut() {
+                    walk(child, from, to);
+                }
+            }
+            Value::Array(items) => items.iter_mut().for_each(|i| walk(i, from, to)),
+            _ => {}
+        }
+    }
+    walk(resource, from, &to);
+}
+
 /// Add a generated `text` to `resource` unless it already has one.
 pub fn add_generated_text(resource: &mut Value) {
     let Some(kind) = resource["resourceType"].as_str().map(str::to_owned) else {

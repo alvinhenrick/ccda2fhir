@@ -382,7 +382,11 @@ pub(crate) fn address(a: &Address) -> Option<Value> {
 }
 
 pub(crate) fn telecom(t: &Telecom) -> Option<Value> {
-    let raw = t.value.as_deref()?;
+    // FHIR values may not start or end with whitespace.
+    let raw = t.value.as_deref()?.trim();
+    if raw.is_empty() {
+        return None;
+    }
     let (system, value) = if let Some(v) = raw.strip_prefix("tel:") {
         ("phone", v)
     } else if let Some(v) = raw.strip_prefix("fax:") {
@@ -396,7 +400,7 @@ pub(crate) fn telecom(t: &Telecom) -> Option<Value> {
     };
     let mut out = Map::new();
     out.insert("system".into(), json!(system));
-    out.insert("value".into(), json!(value));
+    out.insert("value".into(), json!(value.trim()));
     match t.use_code.as_deref() {
         Some("H" | "HP") => {
             out.insert("use".into(), json!("home"));

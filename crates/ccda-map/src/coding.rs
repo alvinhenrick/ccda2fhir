@@ -35,7 +35,13 @@ fn coding(
     }
     coding.insert("code".into(), json!(value));
     let mut replaced = None;
-    if let Some(display) = &code.display_name {
+    if let Some(display) = code
+        .display_name
+        .as_ref()
+        .map(|d| d.trim().to_owned())
+        .filter(|d| !d.is_empty())
+        .as_ref()
+    {
         let official = coding
             .get("system")
             .and_then(Value::as_str)
@@ -119,7 +125,10 @@ pub fn map_codeable_concept(
         .or(original_display.as_ref())
         .or(grouping_text.as_ref())
     {
-        concept.insert("text".into(), json!(text));
+        let text = text.trim();
+        if !text.is_empty() {
+            concept.insert("text".into(), json!(text));
+        }
     }
     Some(Value::Object(concept))
 }
