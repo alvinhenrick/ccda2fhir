@@ -34,6 +34,8 @@ pub struct Config {
     pub loinc: Option<Arc<ccda_terminology::LoincTable>>,
     /// When set, `/convert` needs a valid bearer token. Health endpoints stay open.
     pub auth: Option<Arc<crate::auth::Authenticator>>,
+    /// Serve the built-in web page at `/`.
+    pub ui: bool,
 }
 
 impl Default for Config {
@@ -44,6 +46,7 @@ impl Default for Config {
             request_timeout: Duration::from_secs(30),
             loinc: None,
             auth: None,
+            ui: true,
         }
     }
 }
@@ -58,6 +61,26 @@ struct ConvertQuery {
 
 const FHIR_JSON: &str = "application/fhir+json";
 
+/// A built-in page asset. The policy lets the page load only its own script and style and talk
+/// only to this server; it cannot be framed or send a referrer.
+fn asset(content_type: &'static str, body: &'static str) -> Response {
+    (
+        [
+            (header::CONTENT_TYPE, content_type),
+            (
+                header::CONTENT_SECURITY_POLICY,
+                "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; \
+                 img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+            ),
+            (header::X_CONTENT_TYPE_OPTIONS, "nosniff"),
+            (header::REFERRER_POLICY, "no-referrer"),
+            (header::CACHE_CONTROL, "no-cache"),
+        ],
+        body,
+    )
+        .into_response()
+}
+
 /// Build the router.
 pub fn router(config: &Config) -> Router {
     let mut convert = post(convert_handler);
@@ -67,9 +90,25 @@ pub fn router(config: &Config) -> Router {
             crate::auth::require,
         ));
     }
-    Router::new()
-        .route("/convert", convert)
-        .route("/healthz", get(|| async { "ok" }))
+    let mut app = Router::new().route("/convert", convert);
+    if config.ui {
+        app = app
+            .route(
+                "/",
+                get(|| async { asset("text/html; charset=utf-8", include_str!("ui/index.html")) }),
+            )
+            .route(
+                "/ui/app.js",
+                get(|| async {
+                    asset("text/javascript; charset=utf-8", include_str!("ui/app.js"))
+                }),
+            )
+            .route(
+                "/ui/app.css",
+                get(|| async { asset("text/css; charset=utf-8", include_str!("ui/app.css")) }),
+            );
+    }
+    app.route("/healthz", get(|| async { "ok" }))
         .route("/readyz", get(|| async { "ok" }))
         .with_state(config.loinc.clone())
         .layer(RequestBodyLimitLayer::new(config.max_body_bytes))
@@ -444,5 +483,35 @@ mod tests {
             let response = router(&Config::default()).oneshot(req).await.unwrap();
             assert_eq!(response.status(), StatusCode::OK);
         }
+    }
+
+    #[tokio::test]
+    async fn the_web_page_is_served_with_a_strict_policy_and_can_be_turned_off() {
+        let get_req = |uri: &str| Request::builder().uri(uri).body(Body::empty()).unwrap();
+        for (uri, kind) in [
+            ("/", "text/html"),
+            ("/ui/app.js", "text/javascript"),
+            ("/ui/app.css", "text/css"),
+        ] {
+            let response = router(&Config::default())
+                .oneshot(get_req(uri))
+                .await
+                .unwrap();
+            assert_eq!(response.status(), StatusCode::OK, "{uri}");
+            let headers = response.headers();
+            assert!(headers[header::CONTENT_TYPE]
+                .to_str()
+                .unwrap()
+                .starts_with(kind));
+            let csp = headers[header::CONTENT_SECURITY_POLICY].to_str().unwrap();
+            assert!(csp.contains("default-src 'none'") && !csp.contains("unsafe-inline"));
+            assert_eq!(headers[header::X_CONTENT_TYPE_OPTIONS], "nosniff");
+        }
+        let off = Config {
+            ui: false,
+            ..Config::default()
+        };
+        let response = router(&off).oneshot(get_req("/")).await.unwrap();
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
 }

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ccda2fhir</title>
+<link rel="stylesheet" href="/ui/app.css">
+</head>
+<body>
+<header>
+  <h1>ccda2fhir</h1>
+  <p class="sub">C-CDA to FHIR R4. Your document goes only to this server and is not stored or logged.</p>
+</header>
+<main>
+  <section class="panel" aria-labelledby="in-h">
+    <h2 id="in-h">C-CDA document</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".xml,.cda,.ccda,application/xml,text/xml">
+      <span>Drop an XML file here, or click to choose one</span>
+    </label>
+    <textarea id="xml" spellcheck="false" placeholder="…or paste the XML here" aria-label="C-CDA XML"></textarea>
+    <div class="row">
+      <label>Profiles
+        <select id="profiles">
+          <option value="us-core">US Core 6.1.0</option>
+          <option value="none">None</option>
+        </select>
+      </label>
+      <label>Bearer token <span class="hint">(only if the server needs one)</span>
+        <input type="password" id="token" autocomplete="off" placeholder="not stored">
+      </label>
+    </div>
+    <div class="row">
+      <button id="go" type="button">Convert</button>
+      <button id="clear" type="button" class="secondary">Clear</button>
+      <span id="busy" class="hint" hidden>Converting…</span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="out-h" aria-live="polite">
+    <h2 id="out-h">Result</h2>
+    <p id="empty" class="hint">Convert a document to see the bundle and the report.</p>
+    <div id="error" class="error" hidden role="alert"></div>
+    <div id="result" hidden>
+      <div class="summary">
+        <span id="status" class="pill"></span>
+        <span id="counts" class="hint"></span>
+      </div>
+      <div id="chips" class="chips"></div>
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="resources" aria-selected="true">Resources</button>
+        <button role="tab" data-tab="report" aria-selected="false">Report</button>
+        <button role="tab" data-tab="json" aria-selected="false">Bundle JSON</button>
+      </div>
+      <div id="tab-resources" class="tabpanel">
+        <ul id="list" class="list"></ul>
+        <pre id="detail" class="code" hidden></pre>
+      </div>
+      <div id="tab-report" class="tabpanel" hidden>
+        <p id="no-issues" class="hint" hidden>Nothing was dropped, defaulted or approximated.</p>
+        <table id="issues"><thead><tr><th>Severity</th><th>Code</th><th>What happened</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div id="tab-json" class="tabpanel" hidden>
+        <div class="row">
+          <button id="copy" type="button" class="secondary">Copy</button>
+          <button id="download" type="button" class="secondary">Download</button>
+        </div>
+        <pre id="json" class="code"></pre>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="/ui/app.js"></script>
+</body>
+</html>
