@@ -3,11 +3,13 @@
 //! Rules come from the IG page "CF-results". One organizer becomes one `DiagnosticReport` that
 //! lists, in `result`, one `Observation` per Result Observation.
 //!
-//! The IG chooses the category from the LOINC class of the code, which needs a LOINC database we
-//! do not have yet. Until then every result in a Results section is treated as laboratory and the
-//! assumption is reported (`results.category.assumed-laboratory`).
+//! The IG chooses the category from the LOINC class of the code. LOINC is licensed separately, so
+//! the class comes from a table the caller supplies (`LoincTable`). Without one, or for a code the
+//! table does not know, a result is treated as laboratory and the assumption is reported
+//! (`results.category.assumed-laboratory`).
 
 use ccda_model::{ClinicalDocument, Statement, StatementKind};
+use ccda_terminology::LoincClass;
 use serde_json::{json, Map, Value};
 
 use crate::observation::{apply_performer, base, category, insert_effective, insert_span, status};
@@ -37,10 +39,9 @@ pub fn map_results(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
 
 fn observation(s: &Statement, org: Option<&Statement>, ctx: &mut Context) -> Map<String, Value> {
     let mut r = base(s, "result", ctx);
-    r.insert(
-        "category".into(),
-        category_of(ctx, "laboratory", "Laboratory"),
-    );
+    if let Some(c) = observation_category(s, ctx) {
+        r.insert("category".into(), c);
+    }
     // A specimen on the organizer applies to every observation in it; one on the observation
     // itself is added to those.
     let collection = org.and_then(crate::specimen::collection_procedure);
@@ -65,12 +66,59 @@ fn observation(s: &Statement, org: Option<&Statement>, ctx: &mut Context) -> Map
     r
 }
 
-fn category_of(ctx: &mut Context, code: &str, display: &str) -> Value {
+const LOINC_OID: &str = "2.16.840.1.113883.6.1";
+
+/// The LOINC `CLASSTYPE` of a statement's code, if the terminology has a table and knows it.
+fn class_of(s: &Statement, ctx: &Context) -> Option<LoincClass> {
+    let code = s.code.as_ref()?;
+    if code.code_system.as_deref() != Some(LOINC_OID) {
+        return None;
+    }
+    ctx.terminology.loinc_class(code.code.as_deref()?)
+}
+
+fn assumed_laboratory(ctx: &mut Context) {
     ctx.report.info(
         "results.category.assumed-laboratory",
         "a result was given the laboratory category without checking the LOINC class",
     );
-    category(code, display)
+}
+
+fn category_unavailable(ctx: &mut Context) {
+    ctx.report.info(
+        "results.category.unavailable",
+        "a result is not in the LOINC laboratory class and R4 has no matching category; no category was set",
+    );
+}
+
+/// The Observation category: from the LOINC class when a table is loaded, otherwise laboratory
+/// (reported). A clinical or claims class has no R4 category code, so none is set.
+fn observation_category(s: &Statement, ctx: &mut Context) -> Option<Value> {
+    match class_of(s, ctx) {
+        Some(LoincClass::Laboratory) => Some(category("laboratory", "Laboratory")),
+        Some(LoincClass::Survey) => Some(category("survey", "Survey")),
+        Some(LoincClass::Clinical | LoincClass::Claims) => {
+            category_unavailable(ctx);
+            None
+        }
+        None => {
+            assumed_laboratory(ctx);
+            Some(category("laboratory", "Laboratory"))
+        }
+    }
+}
+
+/// The DiagnosticReport category: laboratory (`LAB`), assumed unless the class says otherwise.
+fn report_category(org: &Statement, ctx: &mut Context) -> Option<Value> {
+    match class_of(org, ctx) {
+        Some(LoincClass::Laboratory) => {}
+        Some(_) => {
+            category_unavailable(ctx);
+            return None;
+        }
+        None => assumed_laboratory(ctx),
+    }
+    Some(json!([{ "coding": [{ "system": V2_0074, "code": "LAB", "display": "Laboratory" }] }]))
 }
 
 fn report(org: &Statement, ctx: &mut Context, out: &mut Vec<Value>) {
@@ -94,14 +142,9 @@ fn report(org: &Statement, ctx: &mut Context, out: &mut Vec<Value>) {
         r.insert("identifier".into(), json!(identifiers));
     }
     r.insert("status".into(), json!(status(org, ctx)));
-    ctx.report.info(
-        "results.category.assumed-laboratory",
-        "a result was given the laboratory category without checking the LOINC class",
-    );
-    r.insert(
-        "category".into(),
-        json!([{ "coding": [{ "system": V2_0074, "code": "LAB", "display": "Laboratory" }] }]),
-    );
+    if let Some(c) = report_category(org, ctx) {
+        r.insert("category".into(), c);
+    }
     let code = org.code.as_ref().and_then(|c| {
         map_codeable_concept(c, ctx.terminology, ctx.report).or_else(|| {
             c.null_flavor
@@ -315,5 +358,60 @@ mod tests {
             ),
         ));
         assert!(serde_json::to_string(&out).unwrap().contains("5.40"));
+    }
+
+    #[test]
+    fn a_loinc_table_sets_the_category_from_the_class() {
+        let table = ccda_terminology::LoincTable::from_csv(
+            "LOINC_NUM,CLASSTYPE\n2345-7,1\n8480-6,2\n44261-6,4\n",
+        )
+        .unwrap();
+        let xml = doc(
+            "",
+            &format!(
+                "{}{}{}{}",
+                member(
+                    "2345-7",
+                    "completed",
+                    r#"<value xsi:type="PQ" value="1" unit="mg/dL"/>"#,
+                    "20240101"
+                ),
+                member(
+                    "8480-6",
+                    "completed",
+                    r#"<value xsi:type="PQ" value="1" unit="mm[Hg]"/>"#,
+                    "20240101"
+                ),
+                member(
+                    "44261-6",
+                    "completed",
+                    r#"<value xsi:type="INT" value="3"/>"#,
+                    "20240101"
+                ),
+                member(
+                    "9999-9",
+                    "completed",
+                    r#"<value xsi:type="INT" value="3"/>"#,
+                    "20240101"
+                ),
+            ),
+        );
+        let d = ccda_model::parse(xml.as_bytes()).unwrap();
+        let mut report = Report::default();
+        let mut ctx = Context::new(&table, &mut report, "doc");
+        let out = map_results(&d, &mut ctx);
+        let cat = |code: &str| {
+            kind(&out, "Observation")
+                .into_iter()
+                .find(|o| o["code"]["coding"][0]["code"] == code)
+                .map(|o| o["category"][0]["coding"][0]["code"].clone())
+        };
+        assert_eq!(cat("2345-7"), Some(json!("laboratory")));
+        assert_eq!(cat("8480-6"), Some(Value::Null));
+        assert_eq!(cat("44261-6"), Some(json!("survey")));
+        assert_eq!(cat("9999-9"), Some(json!("laboratory")));
+        let codes: Vec<_> = report.issues.iter().map(|i| i.code).collect();
+        assert!(codes.contains(&"results.category.unavailable"));
+        assert!(codes.contains(&"results.category.assumed-laboratory"));
     }
 }

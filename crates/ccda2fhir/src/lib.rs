@@ -30,6 +30,8 @@ pub struct Options {
     pub limits: Limits,
     /// Profiles to declare in `meta.profile`. US Core 6.1.0 by default.
     pub profiles: Profiles,
+    /// LOINC classes for result categories. Without it results default to laboratory.
+    pub loinc: Option<std::sync::Arc<ccda_terminology::LoincTable>>,
 }
 
 /// The result of a successful conversion.
@@ -73,8 +75,12 @@ pub fn convert(xml: &[u8], options: &Options) -> Result<Conversion, ConvertError
         .unwrap_or_default();
     let mut bundle = Bundle::with_namespace_seed(&seed);
     let profiles = options.profiles;
-    let mut ctx = Context::new(&BuiltinTerminology, &mut report, &seed);
-    let mut patient = map_patient(&document, &BuiltinTerminology, ctx.report);
+    let terminology: &dyn ccda_terminology::Terminology = match options.loinc.as_deref() {
+        Some(table) => table,
+        None => &BuiltinTerminology,
+    };
+    let mut ctx = Context::new(terminology, &mut report, &seed);
+    let mut patient = map_patient(&document, terminology, ctx.report);
     link_managing_organization(&document, &mut ctx, &mut patient);
     add_generated_text(&mut patient);
     profiles.apply(&mut patient);

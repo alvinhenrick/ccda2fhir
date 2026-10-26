@@ -39,6 +39,9 @@ enum Command {
         out_dir: Option<PathBuf>,
         #[arg(long, value_enum, default_value = "us-core")]
         profiles: ProfileChoice,
+        /// A LOINC `Loinc.csv` (from your own LOINC download) to set result categories.
+        #[arg(long, env = "LOINC_TABLE")]
+        loinc_table: Option<PathBuf>,
     },
     /// Run the HTTP service (POST /convert, GET /healthz, GET /readyz).
     Serve {
@@ -53,6 +56,9 @@ enum Command {
         /// Seconds allowed per request.
         #[arg(long, env = "REQUEST_TIMEOUT_SECS", default_value_t = 30)]
         request_timeout_secs: u64,
+        /// A LOINC `Loinc.csv` (from your own LOINC download) to set result categories.
+        #[arg(long, env = "LOINC_TABLE")]
+        loinc_table: Option<PathBuf>,
     },
     /// Exit 0 if a running service answers /healthz (for container health checks).
     Healthcheck {
@@ -68,26 +74,69 @@ fn main() -> ExitCode {
             files,
             out_dir,
             profiles,
-        } => run_convert(&files, out_dir.as_deref(), profiles),
+            loinc_table,
+        } => match load_loinc(loinc_table.as_deref()) {
+            Ok(loinc) => run_convert(&files, out_dir.as_deref(), profiles, loinc),
+            Err(code) => code,
+        },
         Command::Serve {
             bind,
             max_body_bytes,
             max_concurrency,
             request_timeout_secs,
-        } => run_serve(
-            bind,
-            server::Config {
-                max_body_bytes,
-                max_concurrency,
-                request_timeout: Duration::from_secs(request_timeout_secs),
-            },
-        ),
+            loinc_table,
+        } => match load_loinc(loinc_table.as_deref()) {
+            Ok(loinc) => run_serve(
+                bind,
+                server::Config {
+                    max_body_bytes,
+                    max_concurrency,
+                    request_timeout: Duration::from_secs(request_timeout_secs),
+                    loinc,
+                },
+            ),
+            Err(code) => code,
+        },
         Command::Healthcheck { addr } => run_healthcheck(addr),
     }
 }
 
-fn run_convert(files: &[PathBuf], out_dir: Option<&Path>, profiles: ProfileChoice) -> ExitCode {
+/// Read the optional LOINC table. A table that cannot be read or has no class column is an error,
+/// not a silent fallback: the caller asked for it.
+fn load_loinc(
+    path: Option<&Path>,
+) -> Result<Option<std::sync::Arc<ccda_terminology::LoincTable>>, ExitCode> {
+    let Some(path) = path else {
+        return Ok(None);
+    };
+    let text = std::fs::read_to_string(path).map_err(|e| {
+        eprintln!(
+            "{}: cannot read the LOINC table: {}",
+            path.display(),
+            e.kind()
+        );
+        ExitCode::FAILURE
+    })?;
+    match ccda_terminology::LoincTable::from_csv(&text) {
+        Some(table) if !table.is_empty() => Ok(Some(std::sync::Arc::new(table))),
+        _ => {
+            eprintln!(
+                "{}: not a LOINC table (needs LOINC_NUM and CLASSTYPE columns)",
+                path.display()
+            );
+            Err(ExitCode::FAILURE)
+        }
+    }
+}
+
+fn run_convert(
+    files: &[PathBuf],
+    out_dir: Option<&Path>,
+    profiles: ProfileChoice,
+    loinc: Option<std::sync::Arc<ccda_terminology::LoincTable>>,
+) -> ExitCode {
     let options = Options {
+        loinc,
         profiles: match profiles {
             ProfileChoice::UsCore => Profiles::UsCore610,
             ProfileChoice::None => Profiles::None,

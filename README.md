@@ -22,7 +22,7 @@ curl -X POST -H 'Content-Type: application/xml' \
 Errors are `OperationOutcome` resources. `GET /healthz` and `GET /readyz` are for orchestrators.
 
 Settings (environment variables): `BIND_ADDR` (default `0.0.0.0:8080` in the image), `MAX_BODY_BYTES`
-(10 MiB), `MAX_CONCURRENCY` (64), `REQUEST_TIMEOUT_SECS` (30), `RUST_LOG` (`info`). Request bodies are never
+(10 MiB), `MAX_CONCURRENCY` (64), `REQUEST_TIMEOUT_SECS` (30), `LOINC_TABLE` (optional path to your own LOINC `Loinc.csv`, used to set result categories; also `convert --loinc-table`), `RUST_LOG` (`info`). Request bodies are never
 logged. The service has no authentication yet: run it inside your network or behind a gateway that adds it.
 
 ### Check your own documents with the HL7 validator

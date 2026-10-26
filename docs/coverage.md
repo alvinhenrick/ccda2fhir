@@ -157,7 +157,7 @@ See `docs/decisions/0007-results.md`.
 | Observation `value` by type | `value[x]` / `dataAbsentReason` | done | `value_types_map_to_value_elements` | |
 | `interpretationCode`, `methodCode`, `targetSiteCode` | `interpretation`, `method`, `bodySite` | done | golden | |
 | `referenceRange` | `referenceRange` (normal only) | done | `only_normal_reference_ranges_are_kept` | |
-| Category from LOINC class | `category` | assumed laboratory and reported (`results.category.assumed-laboratory`) | golden | |
+| Category from LOINC class | `category` | done with a caller-supplied LOINC table (ADR 0061); laboratory assumed and reported without one | `a_loinc_table_sets_the_category_from_the_class`, golden | |
 | `author` | `performer` + Provenance | done | golden | |
 | Specimen, specimen collection procedure | Specimen | done (ADR 0018) | golden `location_and_specimen` | |
 
