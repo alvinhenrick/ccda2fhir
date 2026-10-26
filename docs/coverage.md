@@ -17,7 +17,7 @@ silently.
 - CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
 - Procedure instruction (`followUp`); `reasonReference` to an Observation (only Conditions are linked).
 - Coverage: plan name, authorizations, the member's period.
-- Patient and related-person members and `functionCode` of a care team; Specimen condition; Location status and organization.
+- Patient and related-person members of a care team; Specimen condition; Location status and organization.
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
 - Immunization dose range and reaction; Problem supporting observations (SPRT); software authors as Devices.
 - Advance directive verifier, witness and custodian participants.
@@ -312,7 +312,7 @@ See `docs/decisions/0016-care-team.md`.
 | Performer code | `participant.role` | done | same | |
 | Member effectiveTime | `participant.period` | done | same | |
 | Member role (the performer's role code) | `role` | done (ADR 0016) | `care_team` tests | |
-| `functionCode` | `role` | todo | | |
+| `functionCode` (performer or act) | `role` (one; the specialty is the fallback) | done (ADR 0053) | `function_code_is_the_role_and_the_specialty_the_fallback`, golden `care-team` | |
 | Patient and related-person members | RelatedPerson | todo | | |
 | PractitionerRole, Location | PractitionerRole, Location | done | golden `care_team` | |
 

@@ -97,11 +97,18 @@ fn map_team(s: &Statement, ctx: &mut Context) -> Value {
                 continue;
             };
             let mut p = Map::new();
-            if let Some(role) = performer
-                .role_code
-                .as_ref()
-                .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
-            {
+            // US Core allows one role per participant. What the member does on the team
+            // (functionCode, on the performer or the act) wins over the performer's own code (a
+            // specialty), which is the fallback.
+            let role = [
+                performer.function_code.as_ref(),
+                member.function_code.as_ref(),
+                performer.role_code.as_ref(),
+            ]
+            .into_iter()
+            .flatten()
+            .find_map(|code| map_codeable_concept(code, ctx.terminology, ctx.report));
+            if let Some(role) = role {
                 p.insert("role".into(), json!([role]));
             }
             p.insert("member".into(), json!({ "reference": reference }));
@@ -205,5 +212,25 @@ mod tests {
             .issues
             .iter()
             .any(|i| i.code == "careteam.members.missing"));
+    }
+
+    #[test]
+    fn function_code_is_the_role_and_the_specialty_the_fallback() {
+        let member = MEMBER.replace(
+            "<performer>",
+            r#"<functionCode code="106292003" codeSystem="2.16.840.1.113883.6.96"/><performer><functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88"/>"#,
+        );
+        let (out, _) = run(&member, "active");
+        let roles = out[0]["participant"][0]["role"].as_array().unwrap();
+        assert_eq!(roles.len(), 1);
+        assert_eq!(roles[0]["coding"][0]["code"], "PCP");
+        let (out, _) = run(&MEMBER.replace(
+            "<performer>",
+            r#"<functionCode code="106292003" codeSystem="2.16.840.1.113883.6.96"/><performer>"#,
+        ), "active");
+        assert_eq!(
+            out[0]["participant"][0]["role"][0]["coding"][0]["code"],
+            "106292003"
+        );
     }
 }
