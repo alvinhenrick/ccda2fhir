@@ -136,6 +136,17 @@ fn render_element(node: &Node, out: &mut String, depth: usize) {
         "col" | "colgroup" => None,
         _ => None,
     };
+    // A list may hold only items, so its caption becomes a bold item.
+    if name == "caption"
+        && node
+            .parent_element()
+            .is_some_and(|p| p.tag_name().name() == "list")
+    {
+        out.push_str("<li><strong>");
+        render_children(node, out, depth);
+        out.push_str("</strong></li>");
+        return;
+    }
     if let Some(tag) = simple {
         out.push('<');
         out.push_str(tag);
@@ -202,6 +213,11 @@ mod tests {
 
     #[test]
     fn a_caption_is_a_table_caption_only_inside_a_table() {
+        let out = render("<list><caption>Head</caption><item>a</item></list>").unwrap();
+        assert!(
+            out.contains("<ul><li><strong>Head</strong></li><li>a</li></ul>"),
+            "{out}"
+        );
         let out = render("<paragraph><caption>Title</caption>Body</paragraph>").unwrap();
         assert!(out.contains("<strong>Title</strong>") && !out.contains("<caption>"));
         let out = render("<table><caption>Cap</caption><tbody><tr><td>x</td></tr></tbody></table>")

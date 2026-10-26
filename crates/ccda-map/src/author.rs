@@ -141,6 +141,16 @@ pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Optio
             name.insert("given".into(), json!(author.given));
         }
         resource.insert("name".into(), json!([name]));
+    } else {
+        // US Core wants a name or a data-absent-reason on it; the document gave none.
+        ctx.report.info(
+            "practitioner.name.absent",
+            "a practitioner has no name in the document; name was marked absent",
+        );
+        resource.insert(
+            "name".into(),
+            json!([{ "extension": [crate::nullflavor::data_absent_reason_extension("UNK", ctx.report)] }]),
+        );
     }
     let telecoms: Vec<Value> = author
         .telecoms

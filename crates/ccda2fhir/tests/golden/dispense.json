@@ -203,6 +203,21 @@
               "value": "PHARM-1"
             }
           ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+            ]
+          },
+          "name": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          ],
           "resourceType": "Practitioner",
           "text": {
             "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Practitioner</p></div>",
@@ -456,6 +471,10 @@
     "type": "collection"
   },
   "report": [
+    {
+      "code": "practitioner.name.absent",
+      "severity": "info"
+    },
     {
       "code": "organization.active.assumed",
       "severity": "info"

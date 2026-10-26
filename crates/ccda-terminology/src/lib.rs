@@ -320,6 +320,7 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
 fn nucc_display(code: &str) -> Option<&'static str> {
     Some(match code {
         "163W00000X" => "Registered Nurse",
+        "2085R0202X" => "Diagnostic Radiology Physician",
         "207KA0200X" => "Allergy Physician",
         "207QA0505X" => "Adult Medicine Physician",
         "207RC0000X" => "Cardiovascular Disease Physician",
@@ -344,6 +345,29 @@ fn nci_display(code: &str) -> Option<&'static str> {
 
 fn loinc_display(code: &str) -> Option<&'static str> {
     Some(match code {
+        "10154-3" => "Chief complaint Narrative - Reported",
+        "10159-2" => "History of Industrial exposure Narrative",
+        "10184-0" => "Hospital discharge physical findings Narrative",
+        "10216-0" => "Surgical operation note fluids Narrative",
+        "10223-6" => "Surgical operation note surgical procedure Narrative",
+        "18841-7" => "Hospital consultations Document",
+        "26515-7" => "Platelets [#/volume] in Blood",
+        "30313-1" => "Hemoglobin [Mass/volume] in Arterial blood",
+        "33765-9" => {
+            "Leukocytes [#/volume] in Blood Product unit.platelet pheresis by Automated count"
+        }
+        "42347-5" => "Admission diagnosis (narrative)",
+        "42348-3" => "Advance Healthcare Directives",
+        "46008-9" => "Bathing during assessment period [CMS Assessment]",
+        "46241-6" => "Hospital admission diagnosis Narrative - Reported",
+        "48768-6" => "Payment sources Document",
+        "59769-0" => "Postprocedure diagnosis Narrative",
+        "61149-1" => "Objective Narrative",
+        "62959-2" => "PhenX - colorectal procedures and outcomes protocol 190401",
+        "71850-2" => {
+            "Deprecated Oxygen saturation [Pure mass fraction] in Capillary blood by Oximetry"
+        }
+        "8648-8" => "Hospital course note",
         "10164-2" => "History of Present illness Narrative",
         "10218-6" => "Surgical operation note postoperative diagnosis Narrative",
         "10219-4" => "Surgical operation note preoperative diagnosis Narrative",

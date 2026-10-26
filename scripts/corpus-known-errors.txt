@@ -8,3 +8,10 @@ BodyWeightCode: magic LOINC code 29463-7 required
 # CPT edition does not list some retired codes the examples use.
 Wrong Display Name .* for http://www.ama-assn.org/go/cpt#
 Unknown code '99241' in the CodeSystem 'http://www.ama-assn.org/go/cpt'
+# The example documents themselves use these wrongly: 54522-8 is LOINC but sent as SNOMED,
+# 57113-1 and C-CDAV2-DDN are not LOINC codes, and 3141-9 / 59408-5 are alternatives to the
+# vital-sign codes the base FHIR profiles insist on.
+Unknown code '54522-8' in the CodeSystem 'http://snomed.info/sct'
+Unknown code '57113-1' in the CodeSystem 'http://loinc.org'
+Unknown code 'C-CDAV2-DDN' in the CodeSystem 'http://loinc.org'
+OxygenSatCode: magic LOINC code 2708-6 required
