@@ -121,6 +121,15 @@
                 {
                   "coding": [
                     {
+                      "code": "PCP",
+                      "display": "primary care physician",
+                      "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationFunction"
+                    }
+                  ]
+                },
+                {
+                  "coding": [
+                    {
                       "code": "163W00000X",
                       "system": "http://nucc.org/provider-taxonomy"
                     }

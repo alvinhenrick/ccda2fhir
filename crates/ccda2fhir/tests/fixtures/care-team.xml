@@ -27,7 +27,7 @@
       <component><act classCode="PCPR" moodCode="EVN">
         <templateId root="2.16.840.1.113883.10.20.22.4.500.1"/>
         <effectiveTime><low value="20240201"/></effectiveTime>
-        <performer><assignedEntity>
+        <performer><functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88" displayName="primary care physician"/><assignedEntity>
           <id root="2.16.840.1.113883.4.6" extension="1234567893"/>
           <code code="163W00000X" codeSystem="2.16.840.1.113883.6.101"/>
           <assignedPerson><name><given>Ann</given><family>Doe</family></name></assignedPerson>

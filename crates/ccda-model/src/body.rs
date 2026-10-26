@@ -101,6 +101,8 @@ pub struct Author {
     /// The party is a `relatedEntity` or `associatedEntity`: a person related to the patient,
     /// not a care provider.
     pub is_related_person: bool,
+    /// `performer/functionCode`: the role the performer plays in the statement.
+    pub function_code: Option<Code>,
 }
 
 /// A `relatedDocument` of the header: this document replaces, appends to or transforms another.
@@ -313,6 +315,8 @@ pub struct Statement {
     pub route_code: Option<Code>,
     /// `priorityCode` (ActPriority: `R` routine, `UR` urgent, ...).
     pub priority_code: Option<Code>,
+    /// `functionCode` of the statement itself (a care team member's role).
+    pub function_code: Option<Code>,
     pub approach_site_code: Option<Code>,
     /// `sdtc:dischargeDispositionCode` of an encounter.
     pub discharge_disposition: Option<Code>,
@@ -443,6 +447,7 @@ fn parse_agent(assigned: Option<Node>, time: Option<String>, narrative: &Narrati
         class_code: None,
         signature_code: None,
         is_related_person: false,
+        function_code: None,
     }
 }
 
@@ -693,12 +698,15 @@ fn parse_statement_as(
                 let time = child(&n, "time").and_then(|t| {
                     attr(&t, "value").or_else(|| child(&t, "low").and_then(|l| attr(&l, "value")))
                 });
-                parse_agent(child(&n, "assignedEntity"), time, narrative)
+                let mut a = parse_agent(child(&n, "assignedEntity"), time, narrative);
+                a.function_code = child(&n, "functionCode").map(|f| parse_code(&f, narrative));
+                a
             })
             .collect(),
         repeat_number: child(node, "repeatNumber").and_then(|n| attr(&n, "value")),
         route_code: child(node, "routeCode").map(|n| parse_code(&n, narrative)),
         priority_code: child(node, "priorityCode").map(|n| parse_code(&n, narrative)),
+        function_code: child(node, "functionCode").map(|n| parse_code(&n, narrative)),
         approach_site_code: child(node, "approachSiteCode").map(|n| parse_code(&n, narrative)),
         // The extension namespace (`sdtc:`) is not HL7 v3, so match on the local name only.
         discharge_disposition: node

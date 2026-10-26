@@ -97,12 +97,25 @@ fn map_team(s: &Statement, ctx: &mut Context) -> Value {
                 continue;
             };
             let mut p = Map::new();
-            if let Some(role) = performer
-                .role_code
-                .as_ref()
-                .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
+            // Roles: what the member does on the team (functionCode on the performer or the act),
+            // then the performer's own role or specialty. Repeats are dropped.
+            let mut roles: Vec<Value> = Vec::new();
+            for code in [
+                performer.function_code.as_ref(),
+                member.function_code.as_ref(),
+                performer.role_code.as_ref(),
+            ]
+            .into_iter()
+            .flatten()
             {
-                p.insert("role".into(), json!([role]));
+                if let Some(role) = map_codeable_concept(code, ctx.terminology, ctx.report) {
+                    if !roles.contains(&role) {
+                        roles.push(role);
+                    }
+                }
+            }
+            if !roles.is_empty() {
+                p.insert("role".into(), json!(roles));
             }
             p.insert("member".into(), json!({ "reference": reference }));
             if let Some(org) = performer
@@ -205,5 +218,19 @@ mod tests {
             .issues
             .iter()
             .any(|i| i.code == "careteam.members.missing"));
+    }
+
+    #[test]
+    fn function_code_becomes_a_role_before_the_specialty() {
+        let member = MEMBER.replace(
+            "<performer>",
+            r#"<functionCode code="106292003" codeSystem="2.16.840.1.113883.6.96"/><performer><functionCode code="PCP" codeSystem="2.16.840.1.113883.5.88"/>"#,
+        );
+        let (out, _) = run(&member, "active");
+        let roles = out[0]["participant"][0]["role"].as_array().unwrap();
+        assert_eq!(roles.len(), 3);
+        assert_eq!(roles[0]["coding"][0]["code"], "PCP");
+        assert_eq!(roles[1]["coding"][0]["code"], "106292003");
+        assert_eq!(roles[2]["coding"][0]["code"], "163W00000X");
     }
 }

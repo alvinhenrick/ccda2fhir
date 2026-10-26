@@ -13,4 +13,4 @@ Status: accepted. No IG page covers care teams; this follows C-CDA Care Team Org
 
 ## Update (docs refresh)
 
-Still open: patients and related persons as members, and `functionCode`. The member role comes from the performer's role code.
+`functionCode` was done in ADR 0053. Still open: patients and related persons as members.
