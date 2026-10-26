@@ -13,6 +13,7 @@ path = "src/main.rs"
 [dependencies]
 ccda2fhir = { path = "../ccda2fhir", version = "0.1.0" }
 ccda-map.workspace = true
+ccda-terminology.workspace = true
 axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "json", "query"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal"] }
 tower-http = { version = "0.6", features = ["timeout", "limit", "trace"] }

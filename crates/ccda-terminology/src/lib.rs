@@ -29,6 +29,110 @@ pub trait Terminology {
     /// True if the OID names an identifier system such as SSN or NPI (as opposed to a code
     /// system). The IG says the OID itself must never be sent as an identifier value for these.
     fn is_identifier_system(&self, oid: &str) -> bool;
+
+    /// The `CLASSTYPE` of a LOINC code, when this implementation knows it. The default does not.
+    fn loinc_class(&self, _code: &str) -> Option<LoincClass> {
+        None
+    }
+}
+
+/// The `CLASSTYPE` of a LOINC code: which broad kind of observation it names.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LoincClass {
+    /// 1: laboratory.
+    Laboratory,
+    /// 2: clinical (vital signs, EKG, and similar tests).
+    Clinical,
+    /// 3: claims attachments.
+    Claims,
+    /// 4: surveys and questionnaires.
+    Survey,
+}
+
+/// LOINC `CLASSTYPE` for each code, loaded from a LOINC release (`Loinc.csv`).
+///
+/// LOINC is licensed separately, so the library does not bundle it. When a table is supplied the
+/// converter sets result categories from it; without one it keeps its documented default.
+#[derive(Debug, Clone, Default)]
+pub struct LoincTable {
+    classes: std::collections::HashMap<String, LoincClass>,
+}
+
+impl LoincTable {
+    /// Read the `LOINC_NUM` and `CLASSTYPE` columns of a `Loinc.csv` file's text.
+    ///
+    /// Returns `None` if the header has neither column. Rows that do not parse are skipped.
+    #[must_use]
+    pub fn from_csv(text: &str) -> Option<Self> {
+        let mut lines = text.lines();
+        let header = split_csv(lines.next()?.trim_start_matches('\u{feff}'));
+        let num = header.iter().position(|h| h == "LOINC_NUM")?;
+        let class = header.iter().position(|h| h == "CLASSTYPE")?;
+        let mut classes = std::collections::HashMap::new();
+        for line in lines {
+            let row = split_csv(line);
+            let (Some(code), Some(kind)) = (row.get(num), row.get(class)) else {
+                continue;
+            };
+            let kind = match kind.as_str() {
+                "1" => LoincClass::Laboratory,
+                "2" => LoincClass::Clinical,
+                "3" => LoincClass::Claims,
+                "4" => LoincClass::Survey,
+                _ => continue,
+            };
+            classes.insert(code.clone(), kind);
+        }
+        Some(Self { classes })
+    }
+
+    /// Number of codes in the table.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.classes.len()
+    }
+
+    /// True if the table has no codes.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.classes.is_empty()
+    }
+}
+
+/// Split one CSV line into fields, honouring double quotes and doubled quotes inside them.
+/// A quoted field that spans lines is not supported (`Loinc.csv` keeps each row on one line).
+fn split_csv(line: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut field = String::new();
+    let mut quoted = false;
+    let mut chars = line.chars().peekable();
+    while let Some(c) = chars.next() {
+        match (c, quoted) {
+            ('"', true) if chars.peek() == Some(&'"') => {
+                field.push('"');
+                chars.next();
+            }
+            ('"', _) => quoted = !quoted,
+            (',', false) => out.push(std::mem::take(&mut field)),
+            (c, _) => field.push(c),
+        }
+    }
+    out.push(field);
+    out
+}
+
+impl Terminology for LoincTable {
+    fn oid_to_uri(&self, oid: &str) -> Option<&str> {
+        BuiltinTerminology.oid_to_uri(oid)
+    }
+
+    fn is_identifier_system(&self, oid: &str) -> bool {
+        BuiltinTerminology.is_identifier_system(oid)
+    }
+
+    fn loinc_class(&self, code: &str) -> Option<LoincClass> {
+        self.classes.get(code).copied()
+    }
 }
 
 /// OID to URI pairs bundled with the library.
@@ -245,5 +349,18 @@ mod tests {
                 "duplicate OID {a}"
             );
         }
+    }
+
+    #[test]
+    fn loinc_table_reads_the_class_columns() {
+        let csv = "\"LOINC_NUM\",\"COMPONENT\",\"CLASSTYPE\"\n\"2345-7\",\"Glucose, serum\",\"1\"\n\"8480-6\",\"Systolic\",\"2\"\n\"44261-6\",\"PHQ-9\",\"4\"\n\"bad\",\"x\",\"9\"\n";
+        let t = LoincTable::from_csv(csv).unwrap();
+        assert_eq!(t.len(), 3);
+        assert_eq!(t.loinc_class("2345-7"), Some(LoincClass::Laboratory));
+        assert_eq!(t.loinc_class("8480-6"), Some(LoincClass::Clinical));
+        assert_eq!(t.loinc_class("44261-6"), Some(LoincClass::Survey));
+        assert_eq!(t.loinc_class("bad"), None);
+        assert_eq!(BuiltinTerminology.loinc_class("2345-7"), None);
+        assert!(LoincTable::from_csv("A,B\n1,2\n").is_none());
     }
 }

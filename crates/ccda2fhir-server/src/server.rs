@@ -3,11 +3,12 @@
 //! Document content is never logged. Error responses carry the library's content-free messages
 //! and nothing else from the request.
 
+use std::sync::Arc;
 use std::time::Duration;
 
 use axum::{
     body::Bytes,
-    extract::Query,
+    extract::{Query, State},
     http::{header, HeaderMap, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
     routing::{get, post},
@@ -29,6 +30,8 @@ pub struct Config {
     pub max_concurrency: usize,
     /// Time allowed for one request.
     pub request_timeout: Duration,
+    /// LOINC classes for result categories (see `ccda2fhir --loinc-table`).
+    pub loinc: Option<Arc<ccda_terminology::LoincTable>>,
 }
 
 impl Default for Config {
@@ -37,6 +40,7 @@ impl Default for Config {
             max_body_bytes: 10 * 1024 * 1024,
             max_concurrency: 64,
             request_timeout: Duration::from_secs(30),
+            loinc: None,
         }
     }
 }
@@ -57,6 +61,7 @@ pub fn router(config: &Config) -> Router {
         .route("/convert", post(convert_handler))
         .route("/healthz", get(|| async { "ok" }))
         .route("/readyz", get(|| async { "ok" }))
+        .with_state(config.loinc.clone())
         .layer(RequestBodyLimitLayer::new(config.max_body_bytes))
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
@@ -89,6 +94,7 @@ fn is_xml(headers: &HeaderMap) -> bool {
 }
 
 async fn convert_handler(
+    State(loinc): State<Option<Arc<ccda_terminology::LoincTable>>>,
     Query(query): Query<ConvertQuery>,
     headers: HeaderMap,
     body: Bytes,
@@ -106,6 +112,7 @@ async fn convert_handler(
         } else {
             Profiles::UsCore610
         },
+        loinc,
         ..Options::default()
     };
     let with_report = query.report.unwrap_or(false);

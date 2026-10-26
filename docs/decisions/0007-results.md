@@ -17,3 +17,5 @@ Status: accepted. Source: IG page "CF-results", ConceptMaps `CF-ResultStatus` an
 ## Update (docs refresh)
 
 Done since: specimens and the organizer's specimen collection procedure (ADR 0018) and comments (ADR 0034). The category is still assumed to be laboratory and reported (`results.category.assumed-laboratory`); that remains the known gap.
+
+The category now comes from the LOINC class when a LOINC table is supplied (ADR 0061).
