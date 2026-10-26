@@ -96,10 +96,11 @@
                 "coding": [
                   {
                     "code": "75310-3",
-                    "display": "Health concerns",
+                    "display": "Health concerns Document",
                     "system": "http://loinc.org"
                   }
-                ]
+                ],
+                "text": "Health concerns"
               },
               "entry": [
                 {
@@ -405,6 +406,10 @@
     },
     {
       "code": "composition.title.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "coding.display.replaced",
       "severity": "info"
     },
     {
