@@ -5,7 +5,7 @@ thin layers on top.
 
 **Status: 0.1.0** (see [`CHANGELOG.md`](CHANGELOG.md)). Most USCDI v1 and v3 data classes are converted and checked with the HL7
 validator in CI; the remaining gaps are listed in [`docs/uscdi.md`](docs/uscdi.md) and
-[`docs/coverage.md`](docs/coverage.md). See [`DESIGN.md`](DESIGN.md) for the plan.
+[`docs/coverage.md`](docs/coverage.md); [`docs/benchmarks.md`](docs/benchmarks.md) compares speed and coverage with Medplum. See [`DESIGN.md`](DESIGN.md) for the plan.
 
 ## Run it
 
