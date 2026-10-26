@@ -51,6 +51,15 @@
       <statusCode code="completed"/>
       <effectiveTime><low value="20240101"/><high value="20261231"/></effectiveTime>
       <value xsi:type="CD" code="304253006" codeSystem="2.16.840.1.113883.6.96"/>
+      <participant typeCode="VRF"><time value="20240102"/><participantRole>
+        <playingEntity><name><given>Val</given><family>Verifier</family></name></playingEntity>
+      </participantRole></participant>
+      <participant typeCode="CST"><participantRole classCode="AGNT">
+        <code code="HPOWATT" codeSystem="2.16.840.1.113883.5.111" displayName="healthcare power of attorney"/>
+        <addr><streetAddressLine>2 Example Way</streetAddressLine><city>Springfield</city><state>MA</state><postalCode>01101</postalCode></addr>
+        <playingEntity><code code="SPS" codeSystem="2.16.840.1.113883.5.111" displayName="spouse"/>
+          <name><given>Pat</given><family>Agent</family></name></playingEntity>
+      </participantRole></participant>
     </observation></entry>
   </section></component></structuredBody></component>
 </ClinicalDocument>

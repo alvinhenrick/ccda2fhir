@@ -141,13 +141,61 @@ fn map_directive(s: &Statement, ctx: &mut Context) -> Value {
             provision.insert("code".into(), json!([c]));
         }
     }
+    // Participants: a verifier says the directive was checked; a custodian is the healthcare agent.
+    let mut verifications: Vec<Value> = Vec::new();
+    let mut actors: Vec<Value> = Vec::new();
+    let mut other = false;
+    for p in &s.participants {
+        match p.type_code.as_deref() {
+            Some("VRF") => {
+                let mut v = Map::new();
+                v.insert("verified".into(), json!(true));
+                if let Some(d) = p.time.as_deref().and_then(|t| map_datetime(t, ctx.report)) {
+                    v.insert("verificationDate".into(), json!(d));
+                }
+                verifications.push(Value::Object(v));
+            }
+            Some("CST") => {
+                let relationship = p
+                    .playing_entity_code
+                    .as_ref()
+                    .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report));
+                match crate::coverage::related_person(p, relationship, ctx) {
+                    Some(reference) => {
+                        let role = p
+                            .role_code
+                            .as_ref()
+                            .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
+                            .unwrap_or_else(|| {
+                                json!({ "extension": [data_absent_reason_extension("NI", ctx.report)] })
+                            });
+                        actors
+                            .push(json!({ "role": role, "reference": { "reference": reference } }));
+                    }
+                    None => other = true,
+                }
+            }
+            _ => other = true,
+        }
+    }
+    if !verifications.is_empty() {
+        r.insert("verification".into(), json!(verifications));
+        // Consent.verification has no place for the clinician who verified.
+        ctx.report.info(
+            "consent.verifier.identity-dropped",
+            "a verifier of an advance directive is recorded as verified, without who verified it",
+        );
+    }
+    if !actors.is_empty() {
+        provision.insert("actor".into(), json!(actors));
+    }
     if !provision.is_empty() {
         r.insert("provision".into(), Value::Object(provision));
     }
-    if !s.participants.is_empty() {
+    if other {
         ctx.report.info(
             "consent.participants.unsupported",
-            "verifier, witness and custodian participants of an advance directive were not mapped",
+            "a participant of an advance directive that is not a verifier or a named custodian was not mapped",
         );
     }
     Value::Object(r)
@@ -167,7 +215,10 @@ mod tests {
 <statusCode code="completed"/>
 <effectiveTime><low value="20240101"/><high value="20261231"/></effectiveTime>
 <value xsi:type="CD" code="304253006" codeSystem="2.16.840.1.113883.6.96"/>
-<participant typeCode="VRF"><participantRole/></participant>
+<participant typeCode="VRF"><time value="20240102"/><participantRole><playingEntity><name><family>Verifier</family></name></playingEntity></participantRole></participant>
+<participant typeCode="CST"><participantRole classCode="AGNT"><code code="HPOWATT" codeSystem="2.16.840.1.113883.5.111"/>
+  <playingEntity><code code="SPS" codeSystem="2.16.840.1.113883.5.111"/><name><given>Pat</given><family>Agent</family></name></playingEntity></participantRole></participant>
+<participant typeCode="WIT"><participantRole/></participant>
 </observation></entry></section></component></structuredBody></component></ClinicalDocument>"#;
 
     fn run(xml: &str) -> (Vec<Value>, Report) {
@@ -189,10 +240,17 @@ mod tests {
         assert_eq!(c["provision"]["code"][0]["coding"][0]["code"], "304253006");
         assert_eq!(c["provision"]["period"]["end"], "2026-12-31");
         assert_eq!(c["dateTime"], "2024-01-01");
-        assert!(report
-            .issues
-            .iter()
-            .any(|i| i.code == "consent.participants.unsupported"));
+        assert_eq!(c["verification"][0]["verified"], true);
+        assert_eq!(c["verification"][0]["verificationDate"], "2024-01-02");
+        let actor = &c["provision"]["actor"][0];
+        assert!(actor["reference"]["reference"].is_string());
+        assert_eq!(actor["role"]["coding"][0]["code"], "HPOWATT");
+        for code in [
+            "consent.verifier.identity-dropped",
+            "consent.participants.unsupported",
+        ] {
+            assert!(report.issues.iter().any(|i| i.code == code), "{code}");
+        }
     }
 
     #[test]

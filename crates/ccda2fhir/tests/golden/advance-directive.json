@@ -269,6 +269,22 @@
             ]
           },
           "provision": {
+            "actor": [
+              {
+                "reference": {
+                  "reference": "urn:uuid:254e7303-8e42-5998-9f19-b83bbb8bde58"
+                },
+                "role": {
+                  "coding": [
+                    {
+                      "code": "HPOWATT",
+                      "display": "healthcare power of attorney",
+                      "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                    }
+                  ]
+                }
+              }
+            ],
             "code": [
               {
                 "coding": [
@@ -297,7 +313,13 @@
           "text": {
             "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Consent</p><table><tr><td>category</td><td>304251008</td></tr><tr><td>status</td><td>active</td></tr></table></div>",
             "status": "generated"
-          }
+          },
+          "verification": [
+            {
+              "verificationDate": "2024-01-02",
+              "verified": true
+            }
+          ]
         }
       },
       {
@@ -337,6 +359,50 @@
           ],
           "text": {
             "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Organization</p><table><tr><td>name</td><td>River Valley Health Services</td></tr></table></div>",
+            "status": "generated"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:254e7303-8e42-5998-9f19-b83bbb8bde58",
+        "resource": {
+          "active": true,
+          "address": [
+            {
+              "city": "Springfield",
+              "line": [
+                "2 Example Way"
+              ],
+              "postalCode": "01101",
+              "state": "MA"
+            }
+          ],
+          "id": "relatedperson-1",
+          "name": [
+            {
+              "family": "Agent",
+              "given": [
+                "Pat"
+              ]
+            }
+          ],
+          "patient": {
+            "reference": "urn:uuid:578cf59c-2ee2-5a60-b39b-8327a7ab494c"
+          },
+          "relationship": [
+            {
+              "coding": [
+                {
+                  "code": "SPS",
+                  "display": "spouse",
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode"
+                }
+              ]
+            }
+          ],
+          "resourceType": "RelatedPerson",
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>RelatedPerson</p><table><tr><td>name</td><td>Pat Agent</td></tr></table></div>",
             "status": "generated"
           }
         }
@@ -450,6 +516,10 @@
   "report": [
     {
       "code": "organization.active.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "consent.verifier.identity-dropped",
       "severity": "info"
     },
     {
