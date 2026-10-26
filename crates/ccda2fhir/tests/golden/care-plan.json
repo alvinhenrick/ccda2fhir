@@ -66,8 +66,8 @@
                 "text": "Plan of care"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Walk daily. Recheck blood pressure in two weeks &amp; review diet.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Walk daily. Recheck blood pressure in two weeks &amp; review diet.</div>",
+                "status": "additional"
               },
               "title": "Plan of Treatment"
             },

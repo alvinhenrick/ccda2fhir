@@ -213,8 +213,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Referral to dental care.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Referral to dental care.</div>",
+                "status": "additional"
               },
               "title": "Plan of treatment"
             }

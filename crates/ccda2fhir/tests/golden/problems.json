@@ -77,8 +77,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Essential hypertensionActive Acute bronchitisResolved AsthmaUnknown end date</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><tbody><tr><td>Essential hypertension</td><td>Active</td></tr><tr><td>Acute bronchitis</td><td>Resolved</td></tr><tr><td>Asthma</td><td>Unknown end date</td></tr></tbody></table></div>",
+                "status": "additional"
               },
               "title": "Problems"
             }

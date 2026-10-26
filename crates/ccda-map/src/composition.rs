@@ -421,7 +421,11 @@ fn section(
     {
         o.insert("code".into(), c);
     }
-    if let Some(t) = text {
+    // The author's own narrative keeps its structure and is "additional" to the entries; with no
+    // structure to keep, the flattened text is wrapped in a generated paragraph.
+    if let Some(div) = s.text_xhtml.as_deref().filter(|_| text.is_some()) {
+        o.insert("text".into(), json!({ "status": "additional", "div": div }));
+    } else if let Some(t) = text {
         o.insert(
             "text".into(),
             json!({ "status": "generated", "div": narrative_div(t) }),
