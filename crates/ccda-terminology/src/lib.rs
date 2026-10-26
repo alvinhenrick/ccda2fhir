@@ -34,6 +34,12 @@ pub trait Terminology {
     fn loinc_class(&self, _code: &str) -> Option<LoincClass> {
         None
     }
+
+    /// The official display for a code, when this implementation knows it (see
+    /// [`official_display`] for the built-in rows). The default uses only those.
+    fn official_display(&self, system: &str, code: &str) -> Option<String> {
+        official_display(system, code).map(str::to_owned)
+    }
 }
 
 /// The `CLASSTYPE` of a LOINC code: which broad kind of observation it names.
@@ -56,6 +62,8 @@ pub enum LoincClass {
 #[derive(Debug, Clone, Default)]
 pub struct LoincTable {
     classes: std::collections::HashMap<String, LoincClass>,
+    /// `LONG_COMMON_NAME` per code, when the file has that column.
+    names: std::collections::HashMap<String, String>,
 }
 
 impl LoincTable {
@@ -68,7 +76,9 @@ impl LoincTable {
         let header = split_csv(lines.next()?.trim_start_matches('\u{feff}'));
         let num = header.iter().position(|h| h == "LOINC_NUM")?;
         let class = header.iter().position(|h| h == "CLASSTYPE")?;
+        let long_name = header.iter().position(|h| h == "LONG_COMMON_NAME");
         let mut classes = std::collections::HashMap::new();
+        let mut names = std::collections::HashMap::new();
         for line in lines {
             let row = split_csv(line);
             let (Some(code), Some(kind)) = (row.get(num), row.get(class)) else {
@@ -82,8 +92,14 @@ impl LoincTable {
                 _ => continue,
             };
             classes.insert(code.clone(), kind);
+            if let Some(name) = long_name
+                .and_then(|i| row.get(i))
+                .filter(|n| !n.trim().is_empty())
+            {
+                names.insert(code.clone(), name.clone());
+            }
         }
-        Some(Self { classes })
+        Some(Self { classes, names })
     }
 
     /// Number of codes in the table.
@@ -132,6 +148,17 @@ impl Terminology for LoincTable {
 
     fn loinc_class(&self, code: &str) -> Option<LoincClass> {
         self.classes.get(code).copied()
+    }
+
+    /// LOINC displays come from the table's long common names (the display the validator
+    /// accepts); other systems use the built-in rows.
+    fn official_display(&self, system: &str, code: &str) -> Option<String> {
+        if system == "http://loinc.org" {
+            if let Some(name) = self.names.get(code) {
+                return Some(name.clone());
+            }
+        }
+        official_display(system, code).map(str::to_owned)
     }
 }
 
@@ -262,12 +289,36 @@ impl Terminology for BuiltinTerminology {
 /// the document's own wording as the concept's text (see `docs/decisions/0027-display-names.md`).
 /// A code that is not listed keeps the document's display: nothing is guessed.
 ///
-/// Every row is a LOINC long common name checked against the HL7 validator.
+/// Every row is checked against the HL7 validator (LOINC long common names, NUCC and NCI route
+/// terms as the validator spells them).
 #[must_use]
 pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
-    if system != "http://loinc.org" {
-        return None;
+    match system {
+        "http://loinc.org" => loinc_display(code),
+        "http://nucc.org/provider-taxonomy" => nucc_display(code),
+        "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl" => nci_display(code),
+        _ => None,
     }
+}
+
+/// NUCC taxonomy: documents tend to write "classification; specialization".
+fn nucc_display(code: &str) -> Option<&'static str> {
+    Some(match code {
+        "163W00000X" => "Registered Nurse",
+        _ => return None,
+    })
+}
+
+/// NCI Thesaurus route-of-administration codes (FDA route terms).
+fn nci_display(code: &str) -> Option<&'static str> {
+    Some(match code {
+        "C38216" => "RESPIRATORY (INHALATION)",
+        "C38288" => "ORAL",
+        _ => return None,
+    })
+}
+
+fn loinc_display(code: &str) -> Option<&'static str> {
     Some(match code {
         "10157-6" => "History of family member diseases note",
         "10160-0" => "History of Medication use Narrative",

@@ -2,3 +2,7 @@
 # expression per line, matched against the normalised error text (see corpus_gate.py).
 # '200000000X' is a NUCC grouping code that the validator's NUCC 22.1 does not list.
 Unknown code '200000000X' in the CodeSystem 'http://nucc.org/provider-taxonomy'
+# HL7's example weights use 3141-9 (Body weight Measured). The validator applies the FHIR bodyweight
+# profile to such a vital sign, and that profile insists on 29463-7. We do not add a code the
+# document does not carry.
+BodyWeightCode: magic LOINC code 29463-7 required
