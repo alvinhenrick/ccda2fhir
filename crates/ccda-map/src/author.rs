@@ -136,20 +136,26 @@ pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Optio
         let mut name = Map::new();
         if let Some(family) = &author.family {
             name.insert("family".into(), json!(family));
+        } else {
+            // US Core needs name.family (1..1).
+            name.insert(
+                "_family".into(),
+                json!({ "extension": [crate::nullflavor::data_absent_reason_extension("UNK", ctx.report)] }),
+            );
         }
         if !author.given.is_empty() {
             name.insert("given".into(), json!(author.given));
         }
         resource.insert("name".into(), json!([name]));
     } else {
-        // US Core wants a name or a data-absent-reason on it; the document gave none.
+        // US Core needs name.family (1..1); with none in the document it is marked absent.
         ctx.report.info(
             "practitioner.name.absent",
-            "a practitioner has no name in the document; name was marked absent",
+            "a practitioner has no name in the document; name.family was marked absent",
         );
         resource.insert(
             "name".into(),
-            json!([{ "extension": [crate::nullflavor::data_absent_reason_extension("UNK", ctx.report)] }]),
+            json!([{ "_family": { "extension": [crate::nullflavor::data_absent_reason_extension("UNK", ctx.report)] } }]),
         );
     }
     let telecoms: Vec<Value> = author

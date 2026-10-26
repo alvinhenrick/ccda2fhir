@@ -164,13 +164,14 @@ impl Profiles {
                     .into_iter()
                     .flatten()
                     .any(|i| i["system"].is_string() && i["value"].is_string());
-                // A family name, or the data-absent-reason that US Core accepts in its place.
-                let has_family = resource["name"].as_array().into_iter().flatten().any(|n| {
-                    n["family"].is_string()
-                        || n["extension"].as_array().into_iter().flatten().any(|e| {
+                // A family name, or the data-absent-reason on it.
+                let has_family =
+                    resource["name"].as_array().into_iter().flatten().any(|n| {
+                        n["family"].is_string()
+                        || n["_family"]["extension"].as_array().into_iter().flatten().any(|e| {
                             e["url"] == "http://hl7.org/fhir/StructureDefinition/data-absent-reason"
                         })
-                });
+                    });
                 if !(has_identifier && has_family) {
                     return None;
                 }
