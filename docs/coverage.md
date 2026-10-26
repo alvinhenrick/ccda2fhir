@@ -19,7 +19,7 @@ silently.
 - Coverage: plan name, authorizations, the member's period.
 - Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
-- Immunization dose range and reaction; Problem supporting observations (SPRT); software authors as Devices.
+- Problem supporting observations (SPRT); software authors as Devices.
 - Advance directive verifier, witness and custodian participants.
 - Imaging, laboratory and pathology report narratives stay text.
 
@@ -86,7 +86,7 @@ silently.
 | `repeatNumber` | `protocolApplied.doseNumberPositiveInt` | done | `invalid_dose_number_is_reported` | |
 | `routeCode`, `approachSiteCode` | `route`, `site` | done | `completed_immunization_follows_the_ig` | |
 | `doseQuantity` (PQ) | `doseQuantity` | done | same | |
-| `doseQuantity` (IVL) | not supported by target (IG) | reported | `dose_range_and_reaction_are_reported` | |
+| `doseQuantity` (IVL) | not supported by target (IG) | reported, on purpose | `dose_range_and_an_empty_reaction_are_reported` | Immunization has one `doseQuantity`; a range would be a guess |
 | `administrationUnitCode` | not supported by target (IG) | n/a | | |
 | Material `code` | `vaccineCode` | done | `missing_vaccine_is_marked_unknown_with_a_warning` | |
 | `lotNumberText` | `lotNumber` | done | `completed_immunization_follows_the_ig` | |
@@ -95,7 +95,7 @@ silently.
 | `author` | `recorded`, Provenance | done | `authors_set_recorded_and_create_provenance` | |
 | Not Given Reason (4.53) | `statusReason` | done | `reasons_split_by_template` | |
 | Indication (4.19) | `reasonCode` | done | same | |
-| Reaction (4.9) | `reaction` (Observation) | reported | `dose_range_and_reaction_are_reported` | |
+| Reaction (4.9) | `reaction.detail` (an Observation with `valueCodeableConcept`), `reaction.date` | done (ADR 0055) | `reaction_becomes_an_observation_referenced_from_the_immunization`, golden `immunizations` | |
 | mood INT (planned) | MedicationRequest | done (ADR 0049) | `planned_immunization_becomes_a_medication_request` | |
 | `primarySource` | not in C-CDA; omitted (R4/US Core 6.1.0 decide) | n/a | | |
 | Comment Activity (4.64) | `note` on the parent resource | done | golden `small_templates`, `comment_becomes_a_note_on_the_parent` | |
