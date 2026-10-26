@@ -16,6 +16,7 @@ use crate::{
 const PROCEDURE_ACTIVITY_PROCEDURE: &str = "2.16.840.1.113883.10.20.22.4.14";
 const PROCEDURE_ACTIVITY_ACT: &str = "2.16.840.1.113883.10.20.22.4.12";
 const PROCEDURE_ACTIVITY_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.13";
+const INSTRUCTION: &str = "2.16.840.1.113883.10.20.22.4.20";
 const INDICATION: &str = "2.16.840.1.113883.10.20.22.4.19";
 
 /// `Procedure.recorder` holds the latest author; there is no recorded date element.
@@ -192,6 +193,25 @@ fn map_activity(s: &Statement, ctx: &mut Context) -> Value {
     }
     if !reasons.is_empty() {
         r.insert("reasonCode".into(), json!(reasons));
+    }
+
+    // An Instruction nested in the procedure is what the patient is told to do afterwards.
+    let mut follow_up: Vec<Value> = Vec::new();
+    for related in nested(s).filter(|n| n.has_template(INSTRUCTION)) {
+        let mut c = related
+            .code
+            .as_ref()
+            .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
+            .unwrap_or_else(|| json!({}));
+        if let Some(text) = related.text.as_ref().filter(|t| !t.trim().is_empty()) {
+            c["text"] = json!(text);
+        }
+        if c.as_object().is_some_and(|o| !o.is_empty()) && !follow_up.contains(&c) {
+            follow_up.push(c);
+        }
+    }
+    if !follow_up.is_empty() {
+        r.insert("followUp".into(), json!(follow_up));
     }
 
     let authors: Vec<_> = s.authors.iter().collect();
@@ -379,5 +399,21 @@ mod tests {
         ));
         assert_eq!(out[0]["resourceType"], "Procedure");
         assert_eq!(out[0]["performedDateTime"], "2024");
+    }
+
+    #[test]
+    fn nested_instruction_becomes_follow_up() {
+        let body = r#"<entryRelationship typeCode="SUBJ"><act classCode="ACT" moodCode="INT">
+  <templateId root="2.16.840.1.113883.10.20.22.4.20"/>
+  <code code="409073007" codeSystem="2.16.840.1.113883.6.96"/>
+  <text>Return in 10 days to have the stitches removed.</text>
+</act></entryRelationship>"#;
+        let xml = doc("procedure", "2.16.840.1.113883.10.20.22.4.14", "", body);
+        let (out, _) = run(&xml);
+        assert_eq!(
+            out[0]["followUp"][0]["text"],
+            "Return in 10 days to have the stitches removed."
+        );
+        assert_eq!(out[0]["followUp"][0]["coding"][0]["code"], "409073007");
     }
 }

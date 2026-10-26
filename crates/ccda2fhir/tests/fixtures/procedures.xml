@@ -47,6 +47,11 @@
         <code code="404684003" codeSystem="2.16.840.1.113883.6.96"/>
         <value xsi:type="CD" code="74400008" codeSystem="2.16.840.1.113883.6.96"/>
       </observation></entryRelationship>
+      <entryRelationship typeCode="SUBJ"><act classCode="ACT" moodCode="INT">
+        <templateId root="2.16.840.1.113883.10.20.22.4.20"/>
+        <code code="409073007" codeSystem="2.16.840.1.113883.6.96"/>
+        <text>Return in 10 days to have the stitches removed.</text>
+      </act></entryRelationship>
     </procedure></entry>
     <!-- 2. Not done -->
     <entry typeCode="DRIV"><procedure classCode="PROC" moodCode="EVN" negationInd="true">
