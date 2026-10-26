@@ -22,6 +22,10 @@ fn time_key(raw: &str) -> String {
 
 /// The identity key of an author's identifiers or, failing that, name.
 fn person_key(author: &Author) -> Option<String> {
+    // Software is not a person, even when it has an id.
+    if author.device_name.is_some() && author.family.is_none() && author.given.is_empty() {
+        return None;
+    }
     author
         .ids
         .iter()
@@ -111,15 +115,7 @@ pub(crate) fn register_organization(org: &AuthorOrganization, ctx: &mut Context)
 }
 
 pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Option<String> {
-    let Some(key) = person_key(author) else {
-        if author.device_name.is_some() {
-            ctx.report.info(
-                "author.device.unsupported",
-                "an author is software, not a person; it was not mapped to a Practitioner",
-            );
-        }
-        return None;
-    };
+    let key = person_key(author)?;
     if let Some(existing) = ctx.practitioners.get(&key).cloned() {
         add_role(author, &existing, ctx);
         return Some(existing);
@@ -292,48 +288,54 @@ pub(crate) fn register_author_agent(author: &Author, ctx: &mut Context) -> Optio
     if person_key(author).is_some() {
         return register_practitioner(author, ctx);
     }
-    if let Some(name) = &author.device_name {
-        let key = format!(
-            "device:{}|{}",
-            author
-                .ids
-                .iter()
-                .find_map(|id| Some(format!(
-                    "{}|{}",
-                    id.root.as_deref()?,
-                    id.extension.as_deref()?
-                )))
-                .unwrap_or_default(),
-            name
-        );
-        if let Some(existing) = ctx.practitioners.get(&key) {
-            return Some(existing.clone());
-        }
-        let id = ctx.next_id("device");
-        let mut resource = Map::new();
-        resource.insert("resourceType".into(), json!("Device"));
-        resource.insert("id".into(), json!(id));
-        let identifiers: Vec<Value> = author
-            .ids
-            .iter()
-            .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
-            .collect();
-        if !identifiers.is_empty() {
-            resource.insert("identifier".into(), json!(identifiers));
-        }
-        resource.insert(
-            "deviceName".into(),
-            json!([{ "name": name, "type": "user-friendly-name" }]),
-        );
-        let reference = ctx.reference("Device", &id);
-        ctx.practitioners.insert(key, reference.clone());
-        ctx.push_extra(Value::Object(resource));
+    if let Some(reference) = register_device(author, ctx) {
         return Some(reference);
     }
     author
         .organization
         .as_ref()
         .and_then(|o| register_organization(o, ctx))
+}
+
+/// A `Device` for an author that is software (`assignedAuthoringDevice`). Shared by id and name.
+pub(crate) fn register_device(author: &Author, ctx: &mut Context) -> Option<String> {
+    let name = author.device_name.as_ref()?;
+    let key = format!(
+        "device:{}|{}",
+        author
+            .ids
+            .iter()
+            .find_map(|id| Some(format!(
+                "{}|{}",
+                id.root.as_deref()?,
+                id.extension.as_deref()?
+            )))
+            .unwrap_or_default(),
+        name
+    );
+    if let Some(existing) = ctx.practitioners.get(&key) {
+        return Some(existing.clone());
+    }
+    let id = ctx.next_id("device");
+    let mut resource = Map::new();
+    resource.insert("resourceType".into(), json!("Device"));
+    resource.insert("id".into(), json!(id));
+    let identifiers: Vec<Value> = author
+        .ids
+        .iter()
+        .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
+        .collect();
+    if !identifiers.is_empty() {
+        resource.insert("identifier".into(), json!(identifiers));
+    }
+    resource.insert(
+        "deviceName".into(),
+        json!([{ "name": name, "type": "user-friendly-name" }]),
+    );
+    let reference = ctx.reference("Device", &id);
+    ctx.practitioners.insert(key, reference.clone());
+    ctx.push_extra(Value::Object(resource));
+    Some(reference)
 }
 
 /// Where a resource type keeps the author information.
@@ -365,8 +367,10 @@ pub(crate) fn apply_authors(
         return;
     }
 
-    // (author, practitioner reference, organization reference)
+    // (author, agent reference, organization reference). Software authors are agents of the
+    // Provenance (a Device), but a Device cannot be a `recorder`.
     let mut agents: Vec<(&Author, String, Option<String>)> = Vec::new();
+    let mut software: Vec<(String, Option<String>)> = Vec::new();
     for author in authors {
         if let Some(practitioner) = register_practitioner(author, ctx) {
             let organization = author
@@ -374,6 +378,12 @@ pub(crate) fn apply_authors(
                 .as_ref()
                 .and_then(|org| register_organization(org, ctx));
             agents.push((author, practitioner, organization));
+        } else if let Some(device) = register_device(author, ctx) {
+            let organization = author
+                .organization
+                .as_ref()
+                .and_then(|org| register_organization(org, ctx));
+            software.push((device, organization));
         }
     }
 
@@ -398,7 +408,7 @@ pub(crate) fn apply_authors(
         resource.insert(fields.date.into(), json!(date));
     }
 
-    if agents.is_empty() {
+    if agents.is_empty() && software.is_empty() {
         return;
     }
     // Provenance.recorded is an `instant`: it needs a time and an offset.
@@ -419,7 +429,9 @@ pub(crate) fn apply_authors(
 
     let mut seen: Vec<(String, Option<String>)> = Vec::new();
     let mut agent_json = Vec::new();
-    for (_, practitioner, organization) in &agents {
+    let people = agents.iter().map(|(_, p, o)| (p, o));
+    let devices = software.iter().map(|(d, o)| (d, o));
+    for (practitioner, organization) in people.chain(devices) {
         let key = (practitioner.clone(), organization.clone());
         if seen.contains(&key) {
             continue;
@@ -600,7 +612,7 @@ mod tests {
     }
 
     #[test]
-    fn software_authors_are_noted_not_mapped() {
+    fn software_author_is_a_provenance_agent_but_never_the_recorder() {
         let device = Author {
             time: Some("20200101090000-0500".into()),
             device_name: Some("EHR".into()),
@@ -608,9 +620,34 @@ mod tests {
         };
         let (resource, extra, report) = run(&[device]);
         assert!(!resource.contains_key("recorder"));
-        assert!(extra.is_empty());
-        assert_eq!(report.issues[0].code, "author.device.unsupported");
-        assert!(report.issues.iter().all(|i| !i.message.contains("EHR")));
+        assert_eq!(of_type(&extra, "Device").len(), 1);
+        let provenance = &of_type(&extra, "Provenance")[0];
+        assert!(provenance["agent"][0]["who"]["reference"]
+            .as_str()
+            .unwrap()
+            .starts_with("urn:uuid:"));
+        assert!(report.issues.is_empty());
+    }
+
+    #[test]
+    fn a_person_and_software_share_one_provenance_and_the_person_is_the_recorder() {
+        let device = Author {
+            time: Some("20200101090000-0500".into()),
+            device_name: Some("EHR".into()),
+            ..Author::default()
+        };
+        let (resource, extra, _) = run(&[
+            device,
+            person("1111111111", "Doe", Some("20200101090000-0500")),
+        ]);
+        assert!(resource.contains_key("recorder"));
+        assert_eq!(
+            of_type(&extra, "Provenance")[0]["agent"]
+                .as_array()
+                .unwrap()
+                .len(),
+            2
+        );
     }
 
     #[test]
@@ -638,5 +675,19 @@ mod tests {
         };
         let (_, extra, _) = run(&[nameless_id("Doe"), nameless_id("Doe"), nameless_id("Roe")]);
         assert_eq!(of_type(&extra, "Practitioner").len(), 2);
+    }
+
+    #[test]
+    fn software_with_an_id_is_a_device_not_a_practitioner() {
+        let device = Author {
+            time: Some("20200101090000-0500".into()),
+            ids: vec![npi("2222222222")],
+            device_name: Some("EHR".into()),
+            ..Author::default()
+        };
+        let (resource, extra, _) = run(&[device]);
+        assert!(!resource.contains_key("recorder"));
+        assert!(of_type(&extra, "Practitioner").is_empty());
+        assert_eq!(of_type(&extra, "Device").len(), 1);
     }
 }
