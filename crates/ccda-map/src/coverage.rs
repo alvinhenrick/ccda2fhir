@@ -10,6 +10,7 @@ use crate::author::register_organization;
 use crate::{map_codeable_concept, map_datetime, map_identifier, Context};
 
 const POLICY_ACTIVITY: &str = "2.16.840.1.113883.10.20.22.4.61";
+const AUTHORIZATION_ACTIVITY: &str = "2.16.840.1.113883.10.20.1.19";
 const COVERED_PARTY: &str = "2.16.840.1.113883.10.20.22.4.89";
 const POLICY_HOLDER: &str = "2.16.840.1.113883.10.20.22.4.90";
 const RELATIONSHIP_SYSTEM: &str = "http://terminology.hl7.org/CodeSystem/subscriber-relationship";
@@ -215,6 +216,16 @@ fn map_policy(s: &Statement, ctx: &mut Context) -> Value {
         r.insert("class".into(), json!(groups));
     }
 
+    if s.related
+        .iter()
+        .any(|x| x.statement.has_template(AUTHORIZATION_ACTIVITY))
+    {
+        ctx.report.info(
+            "coverage.authorization.unsupported",
+            "an authorization on a policy was not mapped; the IG has no mapping for it",
+        );
+    }
+
     // Payer: the performer that is not a guarantor.
     let payor = s
         .performers
@@ -335,5 +346,18 @@ mod tests {
         let c = &xml_doc.0[0];
         assert!(c["subscriber"]["reference"].is_string());
         assert_ne!(c["subscriber"], c["beneficiary"]);
+    }
+
+    #[test]
+    fn authorization_is_reported_not_mapped() {
+        let auth = r#"<entryRelationship typeCode="REFR"><act classCode="ACT" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.1.19"/><id root="1.2.3" extension="AUTH-1"/>
+  <code code="AUTH" codeSystem="2.16.840.1.113883.5.4"/>
+</act></entryRelationship>"#;
+        let (_, report) = run(&format!("{FULL}{auth}"));
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.code == "coverage.authorization.unsupported"));
     }
 }

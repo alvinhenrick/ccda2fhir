@@ -135,6 +135,15 @@
             ],
             "text": "Essential hypertension"
           },
+          "evidence": [
+            {
+              "detail": [
+                {
+                  "reference": "urn:uuid:c40a76a4-569b-58a9-af61-79e238b9d2c1"
+                }
+              ]
+            }
+          ],
           "extension": [
             {
               "url": "http://hl7.org/fhir/StructureDefinition/condition-assertedDate",
@@ -287,6 +296,43 @@
           "text": {
             "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Condition</p><table><tr><td>code</td><td>Asthma</td></tr><tr><td>category</td><td>problem-list-item</td></tr><tr><td>clinicalStatus</td><td>resolved</td></tr></table></div>",
             "status": "generated"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:c40a76a4-569b-58a9-af61-79e238b9d2c1",
+        "resource": {
+          "code": {
+            "coding": [
+              {
+                "code": "2345-7",
+                "display": "Glucose [Mass/volume] in Serum or Plasma",
+                "system": "http://loinc.org"
+              }
+            ]
+          },
+          "effectiveDateTime": "2024-03-01",
+          "id": "evidence-1",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.3.2009316.3.4.9",
+              "value": "EV-1"
+            }
+          ],
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Glucose [Mass/volume] in Serum or Plasma</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-03-01</td></tr><tr><td>valueQuantity</td><td>152 mg/dL</td></tr></table></div>",
+            "status": "generated"
+          },
+          "valueQuantity": {
+            "code": "mg/dL",
+            "system": "http://unitsofmeasure.org",
+            "unit": "mg/dL",
+            "value": 152
           }
         }
       },

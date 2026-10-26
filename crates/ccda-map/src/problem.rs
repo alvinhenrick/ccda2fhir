@@ -375,11 +375,20 @@ pub(crate) fn map_observation(
         }
     }
 
-    if observation.related_by("SPRT").next().is_some() {
-        ctx.report.info(
-            "condition.evidence.unsupported",
-            "supporting observations (SPRT) are not mapped to Condition.evidence yet",
-        );
+    // Supporting observations become Observations that `evidence.detail` points at (IG).
+    let mut details: Vec<Value> = Vec::new();
+    for supporting in observation.related_by("SPRT") {
+        if supporting.kind != ccda_model::StatementKind::Observation {
+            continue;
+        }
+        let mut o = crate::observation::base(supporting, "evidence", ctx);
+        crate::observation::apply_performer(&mut o, supporting, None, ctx);
+        let id = o["id"].as_str().unwrap_or_default().to_owned();
+        details.push(json!({ "reference": ctx.reference("Observation", &id) }));
+        ctx.push_extra(Value::Object(o));
+    }
+    if !details.is_empty() {
+        resource.insert("evidence".into(), json!([{ "detail": details }]));
     }
 
     resource.insert("subject".into(), json!({ "reference": ctx.patient }));
@@ -795,14 +804,33 @@ mod tests {
     }
 
     #[test]
-    fn supporting_observations_are_reported_as_unsupported() {
-        let sprt = r#"<entryRelationship typeCode="SPRT"><observation classCode="OBS" moodCode="EVN"/></entryRelationship>"#;
-        let (_, report) = run(&document(
+    fn supporting_observation_becomes_evidence_detail() {
+        let sprt = r#"<entryRelationship typeCode="SPRT"><observation classCode="OBS" moodCode="EVN">
+  <id root="1.2.3" extension="EV-1"/>
+  <code code="44261-6" codeSystem="2.16.840.1.113883.6.1"/>
+  <statusCode code="completed"/>
+  <value xsi:type="INT" value="12"/>
+</observation></entryRelationship>"#;
+        let xml = document(
             "11450-4",
             r#"<statusCode code="active"/>"#,
             &observation("", "", hypertension(), sprt),
-        ));
-        assert_eq!(codes(&report), ["condition.evidence.unsupported"]);
+        );
+        let doc = ccda_model::parse(xml.as_bytes()).unwrap();
+        let mut report = Report::default();
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
+        let conditions = map_problems(&doc, &mut ctx);
+        let extra = ctx.take_extra();
+        let reference = conditions[0]["evidence"][0]["detail"][0]["reference"]
+            .as_str()
+            .unwrap();
+        assert!(reference.starts_with("urn:uuid:"));
+        let obs = extra
+            .iter()
+            .find(|r| r["resourceType"] == "Observation")
+            .unwrap();
+        assert_eq!(obs["code"]["coding"][0]["code"], "44261-6");
+        assert_eq!(obs["valueInteger"], 12);
     }
 
     #[test]

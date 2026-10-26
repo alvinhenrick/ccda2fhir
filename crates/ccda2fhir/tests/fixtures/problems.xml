@@ -70,6 +70,14 @@
                       <effectiveTime value="20120901"/>
                     </act>
                   </entryRelationship>
+                    <entryRelationship typeCode="SPRT"><observation classCode="OBS" moodCode="EVN">
+                        <templateId root="2.16.840.1.113883.10.20.22.4.2"/>
+                        <id root="1.3.6.1.4.1.22812.3.2009316.3.4.9" extension="EV-1"/>
+                        <code code="2345-7" codeSystem="2.16.840.1.113883.6.1" displayName="Glucose [Mass/volume] in Serum or Plasma"/>
+                        <statusCode code="completed"/>
+                        <effectiveTime value="20240301"/>
+                        <value xsi:type="PQ" value="152" unit="mg/dL"/>
+                    </observation></entryRelationship>
                 </observation>
               </entryRelationship>
             </act>

@@ -13,7 +13,7 @@ coverage: US Core "must support" completeness is tracked in `docs/uscdi.md`.
 **Known gaps (everything else in this file is done or deliberately reported).** Each is reported by the converter, never dropped
 silently.
 
-- Supply request, authorization (4.123).
+- Supply request, authorization (4.123): the IG has no mapping for either (ADR 0056).
 - CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
 - Procedure instruction (`followUp`); `reasonReference` to an Observation (only Conditions are linked).
 - Coverage: plan name, authorizations, the member's period.
@@ -39,7 +39,7 @@ silently.
 | Concern `statusCode` | `clinicalStatus` (CF-ConditionClinicalStatus) | done | `concern_status_is_used_when_there_is_no_problem_status` | |
 | Age Observation | `onsetAge` | done | `age_at_onset_is_used_only_without_an_onset_date` | |
 | Date of Diagnosis | `assertedDate` extension | done | `date_of_diagnosis_becomes_asserted_date` | |
-| Supporting observations (SPRT) | `evidence.detail` | reported | `supporting_observations_are_reported_as_unsupported` | |
+| Supporting observations (SPRT) | `evidence.detail` -> an Observation | done (ADR 0056) | `supporting_observation_becomes_evidence_detail`, golden `problems` | |
 | Author | `recorder`, `recordedDate`, Practitioner, Organization, Provenance (ADR 0004) | done | `author.rs` tests; fixtures | |
 | Comment Activity (4.64) | `note` on the parent resource | done | golden `small_templates`, `comment_becomes_a_note_on_the_parent` | |
 | Prognosis, Priority Preference | not supported by target (IG) | n/a | | |
@@ -331,7 +331,7 @@ See `docs/decisions/0017-coverage.md`.
 | Subscriber id, group | `subscriberId`, `class` | done (ADR 0017) | golden `coverage` | |
 | Subscriber as a person | `subscriber` (Patient when the covered party is SELF, otherwise a RelatedPerson) | done (ADR 0051) | `self_subscriber_is_the_patient`, golden `coverage` | |
 | Plan name | `class.name` | todo | | |
-| Authorization (4.123) | ServiceRequest / ClaimResponse | todo (reported as unmapped) | | |
+| Authorization (4.123) | none in the IG | reported, on purpose (ADR 0056) | `authorization_is_reported_not_mapped` | no R4 resource fits without guessing |
 
 ## Locations and Specimens
 
