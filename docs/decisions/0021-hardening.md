@@ -15,5 +15,5 @@ Status: accepted.
   per KiB. It found a quadratic duplicate check when a section lists thousands of resources (fixed with a set). Now about
   70 us/KiB (roughly 14 MB/s on the CI-class machine used), flat from 100 KiB to 7 MiB.
 - **Still to do:** a corpus of messy real-world (de-identified, redistributable) documents, memory bounds for the 50 MiB limit
-  (roughly 5-10x input), a benchmark against Medplum and Microsoft's converter, and mutation of the mapper input
+  (roughly 5-10x input), and mutation of the mapper input
   (structure-aware fuzzing).

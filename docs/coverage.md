@@ -487,7 +487,7 @@ Composition element), and translations on observation codes.
 ## Running real-world samples
 
 `cargo run --release -p ccda2fhir --example corpus -- <files>` converts a set of documents and counts what was not mapped (report
-code `entry.unmapped`, with the template OID). On the 29 sample documents in the Medplum repository (ONC 170.315(b)(1) samples and
+code `entry.unmapped`, with the template OID). On 29 sample documents (ONC 170.315(b)(1) samples and
 small unit samples) nothing fails to convert and no entry is unmapped. Gaps it found earlier are now covered: Health Concerns,
 status assessments, planned medications, instructions, procedure observations, hospital-course wrappers, advance directives and
 the C-CDA 3.0 observations.
@@ -502,8 +502,8 @@ Remaining validator *warnings* come from the source data (inactive or retired co
 
 - **Display names.** Settled in ADR 0027: the official display replaces a wrong one when the code is in our checked table, and the
   document's wording is kept as `text`; unknown codes keep the document's display. The table grows from validator findings.
-- **Prior art on codes** (read from source): Medplum and Microsoft both pass `displayName` through unchanged. Microsoft also maps
-  a value-set OID mistakenly used as a code system to SNOMED, a robustness hack worth considering as an opt-in repair.
+- **Repairing misused OIDs.** Some documents use a value-set OID where a code system belongs. Mapping that to the intended
+  system (for example SNOMED) would be a robustness repair, worth considering as an opt-in.
 - **OID table.** Entries are added as fixtures need them; the table still needs a full review against the HL7 OID registry.
 
 ## Patient completeness
