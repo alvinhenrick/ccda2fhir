@@ -15,7 +15,7 @@ silently.
 
 - Supply request, authorization (4.123): the IG has no mapping for either (ADR 0056).
 - Goal progress as an R4 achievement code (only the document's own wording is kept).
-- Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
+- Location organization (see ADR 0054: C-CDA has no source for it).
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
 
 - Advance directive witness participants (no template in C-CDA).
@@ -313,6 +313,7 @@ See `docs/decisions/0016-care-team.md`.
 | `functionCode` (performer or act) | `role` (one; the specialty is the fallback) | done (ADR 0053) | `function_code_is_the_role_and_the_specialty_the_fallback`, golden `care-team` | |
 | Patient and related-person members | RelatedPerson | todo | | |
 | PractitionerRole, Location | PractitionerRole, Location | done | golden `care_team` | |
+| `assignedPerson/sdtc:asPatientRelationship` (a relative on the team) | `RelatedPerson` (relationship = the sdtc code) | done (ADR 0063) | `relative_member_becomes_related_person`, golden `care-team` | The patient as a member has no C-CDA pattern; not mapped. |
 
 ## Insurance (Policy Activity) to Coverage
 

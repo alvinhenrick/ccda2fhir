@@ -3,7 +3,7 @@
 //! No IG page covers care teams; this follows C-CDA and the US Core CareTeam profile.
 //! See `docs/decisions/0016-care-team.md`.
 
-use ccda_model::{ClinicalDocument, Statement, StatementKind};
+use ccda_model::{Author, ClinicalDocument, Statement, StatementKind};
 use serde_json::{json, Map, Value};
 
 use crate::author::{register_organization, register_practitioner};
@@ -48,6 +48,56 @@ pub fn map_care_teams(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value> {
     out
 }
 
+/// A care team member who is a relative of the patient becomes a `RelatedPerson`, not a
+/// `Practitioner`. `None` when the member has no name (a `RelatedPerson` without one is of no use).
+fn register_relative(member: &Author, relationship: Value, ctx: &mut Context) -> Option<String> {
+    if member.family.is_none() && member.given.is_empty() {
+        return None;
+    }
+    let id = ctx.next_id("relatedperson");
+    let mut name = Map::new();
+    if let Some(family) = &member.family {
+        name.insert("family".into(), json!(family));
+    }
+    if !member.given.is_empty() {
+        name.insert("given".into(), json!(member.given));
+    }
+    let mut r = Map::new();
+    r.insert("resourceType".into(), json!("RelatedPerson"));
+    r.insert("id".into(), json!(id));
+    r.insert("active".into(), json!(true));
+    r.insert("patient".into(), json!({ "reference": ctx.patient }));
+    r.insert("relationship".into(), json!([relationship]));
+    r.insert("name".into(), json!([name]));
+    let identifiers: Vec<Value> = member
+        .ids
+        .iter()
+        .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
+        .collect();
+    if !identifiers.is_empty() {
+        r.insert("identifier".into(), json!(identifiers));
+    }
+    let telecoms: Vec<Value> = member
+        .telecoms
+        .iter()
+        .filter_map(crate::patient::telecom)
+        .collect();
+    if !telecoms.is_empty() {
+        r.insert("telecom".into(), json!(telecoms));
+    }
+    let addresses: Vec<Value> = member
+        .addresses
+        .iter()
+        .filter_map(crate::patient::address)
+        .collect();
+    if !addresses.is_empty() {
+        r.insert("address".into(), json!(addresses));
+    }
+    let reference = ctx.reference("RelatedPerson", &id);
+    ctx.push_extra(Value::Object(r));
+    Some(reference)
+}
+
 fn map_team(s: &Statement, ctx: &mut Context) -> Value {
     let mut r = Map::new();
     r.insert("resourceType".into(), json!("CareTeam"));
@@ -89,7 +139,16 @@ fn map_team(s: &Statement, ctx: &mut Context) -> Value {
     for related in &s.related {
         let member = &related.statement;
         for performer in &member.performers {
-            let Some(reference) = register_practitioner(performer, ctx) else {
+            let relative = performer
+                .patient_relationship
+                .as_ref()
+                .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
+                .and_then(|rel| register_relative(performer, rel, ctx));
+            let reference = match relative {
+                Some(r) => Some(r),
+                None => register_practitioner(performer, ctx),
+            };
+            let Some(reference) = reference else {
                 ctx.report.warn(
                     "careteam.member.unidentified",
                     "a care team member has no name or id and was skipped",
@@ -191,6 +250,40 @@ mod tests {
             .as_str()
             .unwrap()
             .starts_with("urn:uuid:"));
+    }
+
+    #[test]
+    fn relative_member_becomes_related_person() {
+        let member = MEMBER.replace(
+            "</assignedPerson>",
+            r#"<sdtc:asPatientRelationship xmlns:sdtc="urn:hl7-org:sdtc" classCode="PRS"><sdtc:code code="SIB" codeSystem="2.16.840.1.113883.5.111"/></sdtc:asPatientRelationship></assignedPerson>"#,
+        );
+        let mut report = Report::default();
+        let xml_doc = |m: &str| {
+            format!(
+                r#"<ClinicalDocument xmlns="urn:hl7-org:v3"><component><structuredBody><component><section>
+<code code="85847-2" codeSystem="2.16.840.1.113883.6.1"/>
+<entry><organizer classCode="CLUSTER" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.22.4.500"/>
+  <statusCode code="active"/>{m}
+</organizer></entry></section></component></structuredBody></component></ClinicalDocument>"#
+            )
+        };
+        let d = ccda_model::parse(xml_doc(&member).as_bytes()).unwrap();
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
+        let out = map_care_teams(&d, &mut ctx);
+        let extras = ctx.take_extra();
+        let reference = out[0]["participant"][0]["member"]["reference"]
+            .as_str()
+            .unwrap();
+        let related = extras
+            .iter()
+            .find(|r| r["resourceType"] == "RelatedPerson")
+            .expect("a RelatedPerson");
+        assert_eq!(related["relationship"][0]["coding"][0]["code"], "SIB");
+        assert_eq!(related["name"][0]["family"], "Doe");
+        assert!(reference.starts_with("urn:uuid:"));
+        assert!(!extras.iter().any(|r| r["resourceType"] == "Practitioner"));
     }
 
     #[test]
