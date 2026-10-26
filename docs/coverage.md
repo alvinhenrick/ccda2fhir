@@ -252,7 +252,7 @@ See `docs/decisions/0012-notes.md`.
 | `effectiveTime` | `context.period` | done | `author_and_time_set_author_date_and_period` | |
 | `author` | `author`, `date`, Provenance | done | same | |
 | Encounter link | `context.encounter` | done (ADR 0025) | golden | |
-| `reference/externalDocument/id` | `relatesTo.target.identifier` (`code` marked unknown) | done (ADR 0064) | `external_document_becomes_relates_to_target`, golden `notes` | The IG gives no relationship code. |
+| `reference/externalDocument/id` | `context.related` (identifier) | done (ADR 0064) | `external_document_id_goes_to_context_related`, golden `notes` | The IG says `relatesTo.target.identifier`, but R4 requires `relatesTo.code` and the source has none. |
 | The document itself | Composition | done (ADR 0020); a source DocumentReference has no IG mapping (ADR 0064) | golden `composition` | |
 
 ## Devices (Product Instance / UDI) to Device

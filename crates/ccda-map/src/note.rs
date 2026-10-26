@@ -178,33 +178,27 @@ fn map_note(s: &Statement, ctx: &mut Context) -> Value {
         ),
     }
 
-    // The IG maps the id of a referenced external document to `relatesTo.target.identifier`. It
-    // gives no relationship, and `relatesTo.code` is required, so the code is marked absent.
-    let relates: Vec<Value> = s
+    // The IG maps the id of a referenced external document to `relatesTo.target.identifier`. But
+    // R4 requires `relatesTo.code` (replaces, transforms, signs, appends) and the source gives no
+    // relationship, so the validator rejects it. `context.related` takes the same identifier
+    // with no relationship claimed.
+    let related: Vec<Value> = s
         .external_documents
         .iter()
         .filter_map(|ids| {
             ids.iter()
                 .find_map(|id| map_identifier(id, ctx.terminology, ctx.report))
         })
-        .map(|identifier| {
-            json!({
-                "_code": { "extension": [{
-                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                    "valueCode": "unknown"
-                }] },
-                "target": { "identifier": identifier }
-            })
-        })
+        .map(|identifier| json!({ "identifier": identifier }))
         .collect();
-    if !relates.is_empty() {
+    if !related.is_empty() {
         ctx.report.info(
-            "note.relatesto.code-unknown",
-            "a note points at an external document; the relationship is not in the source, so relatesTo.code was marked unknown",
+            "note.externaldocument.related",
+            "a note points at an external document; its id is in context.related because the source gives no relationship for relatesTo.code",
         );
-        r.insert("relatesTo".into(), json!(relates));
     }
 
+    let mut context = Map::new();
     if let Some(t) = &s.effective_time {
         let mut period = Map::new();
         for (key, raw) in [
@@ -226,8 +220,14 @@ fn map_note(s: &Statement, ctx: &mut Context) -> Value {
             }
         }
         if !period.is_empty() {
-            r.insert("context".into(), json!({ "period": period }));
+            context.insert("period".into(), json!(period));
         }
+    }
+    if !related.is_empty() {
+        context.insert("related".into(), json!(related));
+    }
+    if !context.is_empty() {
+        r.insert("context".into(), Value::Object(context));
     }
     Value::Object(r)
 }
@@ -308,18 +308,20 @@ mod tests {
     }
 
     #[test]
-    fn external_document_becomes_relates_to_target() {
+    fn external_document_id_goes_to_context_related() {
         let (out, report) = run(
             r##"<text><reference value="#n1"/></text>"##,
             r#"<reference typeCode="REFR"><externalDocument><id root="2.16.840.1.113883.19.5" extension="DOC-9"/></externalDocument></reference>"#,
         );
-        let rel = &out[0]["relatesTo"][0];
-        assert_eq!(rel["target"]["identifier"]["value"], "DOC-9");
-        assert!(rel["_code"]["extension"][0]["valueCode"] == "unknown");
+        assert!(out[0].get("relatesTo").is_none());
+        assert_eq!(
+            out[0]["context"]["related"][0]["identifier"]["value"],
+            "DOC-9"
+        );
         assert!(report
             .issues
             .iter()
-            .any(|i| i.code == "note.relatesto.code-unknown"));
+            .any(|i| i.code == "note.externaldocument.related"));
     }
 
     #[test]

@@ -190,7 +190,15 @@
             "period": {
               "end": "2024-09-08",
               "start": "2024-09-08"
-            }
+            },
+            "related": [
+              {
+                "identifier": {
+                  "system": "urn:oid:1.3.6.1.4.1.22812.10.2",
+                  "value": "DOC-9"
+                }
+              }
+            ]
           },
           "id": "documentreference-2",
           "identifier": [
@@ -204,24 +212,6 @@
               "http://hl7.org/fhir/us/core/StructureDefinition/us-core-documentreference"
             ]
           },
-          "relatesTo": [
-            {
-              "_code": {
-                "extension": [
-                  {
-                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                    "valueCode": "unknown"
-                  }
-                ]
-              },
-              "target": {
-                "identifier": {
-                  "system": "urn:oid:1.3.6.1.4.1.22812.10.2",
-                  "value": "DOC-9"
-                }
-              }
-            }
-          ],
           "resourceType": "DocumentReference",
           "status": "current",
           "subject": {
@@ -445,7 +435,7 @@
       "severity": "info"
     },
     {
-      "code": "note.relatesto.code-unknown",
+      "code": "note.externaldocument.related",
       "severity": "info"
     },
     {

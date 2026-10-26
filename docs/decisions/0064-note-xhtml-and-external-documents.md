@@ -16,13 +16,15 @@ document references were dropped.
   statement exposes it as `text_xhtml`.
 - A note whose narrative has markup gets `application/xhtml+xml`; plain-text narrative stays
   `text/plain`; a note that states another media type keeps it.
-- Each `externalDocument` id becomes a `relatesTo` entry with `target.identifier`. The source has
-  no relationship, and `relatesTo.code` is required, so it carries the data-absent-reason
-  extension (`unknown`) and the issue `note.relatesto.code-unknown` is reported.
+- The IG maps each `externalDocument` id to `relatesTo.target.identifier`. R4 requires
+  `relatesTo.code`, the source gives no relationship, and the HL7 validator rejects a missing
+  code (a data-absent-reason on it does not help). We deviate: the identifier goes to
+  `context.related` (an identifier-only reference), and `note.externaldocument.related` is
+  reported. No relationship is claimed.
 - A source `DocumentReference` for the converted document is not created: no IG page maps it.
 - Report narrative types (imaging, lab, pathology narrative sections) stay text: the IG has no
   separate mapping for them.
 
 ## Consequences
 
-Tables and lists in notes survive conversion. No relationship is invented for linked documents.
+Tables and lists in notes survive conversion. No relationship is invented for linked documents; if a later IG supplies a code, move the id to `relatesTo`.
