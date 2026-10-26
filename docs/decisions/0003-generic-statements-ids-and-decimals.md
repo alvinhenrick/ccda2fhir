@@ -35,4 +35,4 @@ observations to `evidence`, `meta.profile`, Bundle `fullUrl`s, and validator con
 
 ## Update (docs refresh)
 
-Done since this was written: authors and Provenance (ADR 0004), Comment Activity to `note` (ADR 0034), `meta.profile` (ADR 0021), Bundle `fullUrl`s, and validator confirmation in CI. Supporting observations (SPRT) to `evidence` are still reported, not mapped.
+Done since this was written: authors and Provenance (ADR 0004), Comment Activity to `note` (ADR 0034), `meta.profile` (ADR 0021), Bundle `fullUrl`s, and validator confirmation in CI. Supporting observations (SPRT) to `evidence` were done in ADR 0056.
