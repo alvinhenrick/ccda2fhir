@@ -16,7 +16,7 @@ silently.
 - Supply request, authorization (4.123): the IG has no mapping for either (ADR 0056).
 - Goal progress as an R4 achievement code (only the document's own wording is kept).
 - Location organization (see ADR 0054: C-CDA has no source for it).
-- Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
+- A source `DocumentReference` for the converted document (the IG has no mapping for it; ADR 0064).
 
 - Advance directive witness participants (no template in C-CDA).
 - Imaging, laboratory and pathology report narratives stay text.
@@ -248,12 +248,12 @@ See `docs/decisions/0012-notes.md`.
 | `code` translation (LOINC) | `type` (root 34109-9 if none) | done | `narrative_reference_becomes_plain_text_content` | |
 | fixed | `category` clinical-note, `status` current | done | same | |
 | `text` (embedded base64 + mediaType) | `content.attachment` | done | `embedded_base64_keeps_its_media_type` | |
-| `text/reference` (narrative) | `content.attachment` as text/plain | done (XHTML is todo) | `narrative_reference_becomes_plain_text_content` | |
+| `text/reference` (narrative) | `content.attachment`: `application/xhtml+xml` when the narrative has markup, else text/plain | done (ADR 0064) | `narrative_with_markup_becomes_html_content`, `narrative_reference_becomes_plain_text_content`, golden `notes` | |
 | `effectiveTime` | `context.period` | done | `author_and_time_set_author_date_and_period` | |
 | `author` | `author`, `date`, Provenance | done | same | |
 | Encounter link | `context.encounter` | done (ADR 0025) | golden | |
-| `reference/externalDocument` | `relatesTo` | todo | | |
-| The document itself | Composition | done (ADR 0020); a source DocumentReference is todo | golden `composition` | |
+| `reference/externalDocument/id` | `context.related` (identifier) | done (ADR 0064) | `external_document_id_goes_to_context_related`, golden `notes` | The IG says `relatesTo.target.identifier`, but R4 requires `relatesTo.code` and the source has none. |
+| The document itself | Composition | done (ADR 0020); a source DocumentReference has no IG mapping (ADR 0064) | golden `composition` | |
 
 ## Devices (Product Instance / UDI) to Device
 

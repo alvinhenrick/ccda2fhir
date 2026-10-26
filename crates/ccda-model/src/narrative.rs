@@ -23,6 +23,19 @@ pub(crate) fn xhtml(text: &Node) -> Option<String> {
     ))
 }
 
+/// One narrative element (a paragraph, list or table with an `ID`) as an XHTML `div`, or `None`
+/// if it holds no text.
+pub(crate) fn xhtml_element(node: &Node) -> Option<String> {
+    if !has_text(node) {
+        return None;
+    }
+    let mut body = String::new();
+    render_element(node, &mut body, 0);
+    Some(format!(
+        "<div xmlns=\"http://www.w3.org/1999/xhtml\">{body}</div>"
+    ))
+}
+
 fn has_text(node: &Node) -> bool {
     node.descendants()
         .any(|n| n.is_text() && n.text().is_some_and(|t| !t.trim().is_empty()))

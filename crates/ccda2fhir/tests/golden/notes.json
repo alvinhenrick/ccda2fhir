@@ -67,10 +67,13 @@
               "entry": [
                 {
                   "reference": "urn:uuid:5410fc6f-d6d8-5fe5-b0e9-e32e545a9929"
+                },
+                {
+                  "reference": "urn:uuid:3cbfcca9-6401-5548-a423-120ecd0b53f5"
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Seen for follow-up. Doing well on current plan.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Seen for follow-up. Doing well on current plan.</p><ul><li>Continue current plan</li><li>Return in <span>six</span> weeks</li></ul></div>",
                 "status": "additional"
               },
               "title": "Notes"
@@ -155,6 +158,74 @@
               {
                 "code": "11488-4",
                 "display": "Consult note",
+                "system": "http://loinc.org"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:3cbfcca9-6401-5548-a423-120ecd0b53f5",
+        "resource": {
+          "category": [
+            {
+              "coding": [
+                {
+                  "code": "clinical-note",
+                  "display": "Clinical Note",
+                  "system": "http://hl7.org/fhir/us/core/CodeSystem/us-core-documentreference-category"
+                }
+              ]
+            }
+          ],
+          "content": [
+            {
+              "attachment": {
+                "contentType": "application/xhtml+xml",
+                "data": "PGRpdiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94aHRtbCI+PHVsPjxsaT5Db250aW51ZSBjdXJyZW50IHBsYW48L2xpPjxsaT5SZXR1cm4gaW4gPHNwYW4+c2l4PC9zcGFuPiB3ZWVrczwvbGk+PC91bD48L2Rpdj4="
+              }
+            }
+          ],
+          "context": {
+            "period": {
+              "end": "2024-09-08",
+              "start": "2024-09-08"
+            },
+            "related": [
+              {
+                "identifier": {
+                  "system": "urn:oid:1.3.6.1.4.1.22812.10.2",
+                  "value": "DOC-9"
+                }
+              }
+            ]
+          },
+          "id": "documentreference-2",
+          "identifier": [
+            {
+              "system": "urn:oid:1.3.6.1.4.1.22812.10.1",
+              "value": "NOTE-2"
+            }
+          ],
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-documentreference"
+            ]
+          },
+          "resourceType": "DocumentReference",
+          "status": "current",
+          "subject": {
+            "reference": "urn:uuid:00803a25-43ff-59da-b206-118dc4f38194"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>DocumentReference</p><table><tr><td>type</td><td>Note</td></tr><tr><td>category</td><td>Clinical Note</td></tr><tr><td>status</td><td>current</td></tr></table></div>",
+            "status": "generated"
+          },
+          "type": {
+            "coding": [
+              {
+                "code": "34109-9",
+                "display": "Note",
                 "system": "http://loinc.org"
               }
             ]
@@ -343,6 +414,9 @@
             },
             {
               "reference": "urn:uuid:5410fc6f-d6d8-5fe5-b0e9-e32e545a9929"
+            },
+            {
+              "reference": "urn:uuid:3cbfcca9-6401-5548-a423-120ecd0b53f5"
             }
           ],
           "text": {
@@ -358,6 +432,10 @@
   "report": [
     {
       "code": "organization.active.assumed",
+      "severity": "info"
+    },
+    {
+      "code": "note.externaldocument.related",
       "severity": "info"
     },
     {

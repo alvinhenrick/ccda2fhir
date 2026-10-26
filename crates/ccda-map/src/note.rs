@@ -1,8 +1,9 @@
 //! Note Activity (`act`, template 4.202) to FHIR `DocumentReference`.
 //!
 //! Rules come from the IG page "CF-notes". The note body is embedded as base64 in
-//! `content.attachment.data`. Narrative the note refers to is flattened to plain text
-//! (`text/plain`); the IG also allows XHTML, which needs narrative markup we do not keep.
+//! `content.attachment.data`. Narrative the note refers to keeps its markup as XHTML
+//! (`application/xhtml+xml`, as the IG says); a note with only plain text, or one that asks for another media type, is
+//! `text/plain`. See ADR 0064.
 
 use ccda_model::{ClinicalDocument, Statement, StatementKind};
 use serde_json::{json, Map, Value};
@@ -89,6 +90,19 @@ fn attachment(s: &Statement, ctx: &mut Context) -> Option<Value> {
             "data": data,
         }));
     }
+    // A note that points at section narrative with markup keeps the markup (a table stays a
+    // table) unless the note itself asks for another media type.
+    if let Some(html) = s.text_xhtml.as_deref().filter(|_| {
+        matches!(
+            media.as_deref(),
+            None | Some("text/html" | "application/xhtml+xml")
+        )
+    }) {
+        return Some(json!({
+            "contentType": "application/xhtml+xml",
+            "data": base64(html.as_bytes()),
+        }));
+    }
     // Otherwise the body is text, written in place or taken from the section narrative.
     let text = s
         .text
@@ -164,6 +178,27 @@ fn map_note(s: &Statement, ctx: &mut Context) -> Value {
         ),
     }
 
+    // The IG maps the id of a referenced external document to `relatesTo.target.identifier`. But
+    // R4 requires `relatesTo.code` (replaces, transforms, signs, appends) and the source gives no
+    // relationship, so the validator rejects it. `context.related` takes the same identifier
+    // with no relationship claimed.
+    let related: Vec<Value> = s
+        .external_documents
+        .iter()
+        .filter_map(|ids| {
+            ids.iter()
+                .find_map(|id| map_identifier(id, ctx.terminology, ctx.report))
+        })
+        .map(|identifier| json!({ "identifier": identifier }))
+        .collect();
+    if !related.is_empty() {
+        ctx.report.info(
+            "note.externaldocument.related",
+            "a note points at an external document; its id is in context.related because the source gives no relationship for relatesTo.code",
+        );
+    }
+
+    let mut context = Map::new();
     if let Some(t) = &s.effective_time {
         let mut period = Map::new();
         for (key, raw) in [
@@ -185,8 +220,14 @@ fn map_note(s: &Statement, ctx: &mut Context) -> Value {
             }
         }
         if !period.is_empty() {
-            r.insert("context".into(), json!({ "period": period }));
+            context.insert("period".into(), json!(period));
         }
+    }
+    if !related.is_empty() {
+        context.insert("related".into(), json!(related));
+    }
+    if !context.is_empty() {
+        r.insert("context".into(), Value::Object(context));
     }
     Value::Object(r)
 }
@@ -244,6 +285,43 @@ mod tests {
         assert_eq!(out[0]["type"]["coding"][0]["code"], "11488-4");
         assert_eq!(out[0]["category"][0]["coding"][0]["code"], "clinical-note");
         assert_eq!(out[0]["status"], "current");
+    }
+
+    #[test]
+    fn narrative_with_markup_becomes_html_content() {
+        let doc = r##"<ClinicalDocument xmlns="urn:hl7-org:v3"><component><structuredBody><component><section>
+<code code="34109-9" codeSystem="2.16.840.1.113883.6.1"/>
+<text><list ID="t1"><item>First</item><item>Second <content styleCode="Bold">bold</content></item></list></text>
+<entry><act classCode="ACT" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.22.4.202"/>
+  <code code="34109-9" codeSystem="2.16.840.1.113883.6.1"/>
+  <text><reference value="#t1"/></text><statusCode code="completed"/>
+</act></entry></section></component></structuredBody></component></ClinicalDocument>"##;
+        let d = ccda_model::parse(doc.as_bytes()).unwrap();
+        let mut report = Report::default();
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
+        let out = map_notes(&d, &mut ctx);
+        let att = &out[0]["content"][0]["attachment"];
+        assert_eq!(att["contentType"], "application/xhtml+xml");
+        let data = att["data"].as_str().unwrap();
+        assert!(data.starts_with(&base64(b"<div xmln")));
+    }
+
+    #[test]
+    fn external_document_id_goes_to_context_related() {
+        let (out, report) = run(
+            r##"<text><reference value="#n1"/></text>"##,
+            r#"<reference typeCode="REFR"><externalDocument><id root="2.16.840.1.113883.19.5" extension="DOC-9"/></externalDocument></reference>"#,
+        );
+        assert!(out[0].get("relatesTo").is_none());
+        assert_eq!(
+            out[0]["context"]["related"][0]["identifier"]["value"],
+            "DOC-9"
+        );
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.code == "note.externaldocument.related"));
     }
 
     #[test]
