@@ -189,13 +189,25 @@ fn map_policy(s: &Statement, ctx: &mut Context) -> Value {
         }
     }
 
-    if let Some(t) = &s.effective_time {
-        let low = t
-            .low
-            .as_ref()
-            .and_then(|p| p.value.as_deref())
-            .or(t.value.as_deref());
-        let high = t.high.as_ref().and_then(|p| p.value.as_deref());
+    // The policy's own interval, else the covered party's `time`.
+    let (member_low, member_high) = covered
+        .map(|p| (p.time.as_deref(), p.time_high.as_deref()))
+        .unwrap_or_default();
+    let own = s.effective_time.as_ref().map(|t| {
+        (
+            t.low
+                .as_ref()
+                .and_then(|p| p.value.as_deref())
+                .or(t.value.as_deref()),
+            t.high.as_ref().and_then(|p| p.value.as_deref()),
+        )
+    });
+    let span = match own {
+        Some((None, None)) | None => (member_low, member_high),
+        Some(own) => own,
+    };
+    {
+        let (low, high) = span;
         let mut p = Map::new();
         if let Some(d) = low.and_then(|v| map_datetime(v, ctx.report)) {
             p.insert("start".into(), json!(d));
@@ -208,8 +220,8 @@ fn map_policy(s: &Statement, ctx: &mut Context) -> Value {
         }
     }
 
-    // The policy's own ids are the group number.
-    let groups: Vec<Value> = s
+    // The policy's own ids are the group number; the plan entry gives the plan.
+    let mut classes: Vec<Value> = s
         .ids
         .iter()
         .filter_map(|i| i.extension.as_deref())
@@ -220,8 +232,35 @@ fn map_policy(s: &Statement, ctx: &mut Context) -> Value {
             })
         })
         .collect();
-    if !groups.is_empty() {
-        r.insert("class".into(), json!(groups));
+    for plan in s
+        .related_by("REFR")
+        .filter(|p| p.mood_code.as_deref() == Some("DEF"))
+    {
+        let name = plan
+            .text
+            .as_deref()
+            .map(str::trim)
+            .filter(|n| !n.is_empty());
+        let value = plan
+            .ids
+            .iter()
+            .find_map(|i| i.extension.as_deref())
+            .or(name);
+        if let Some(value) = value {
+            let mut c = Map::new();
+            c.insert(
+                "type".into(),
+                json!({ "coding": [{ "system": COVERAGE_CLASS_SYSTEM, "code": "plan" }] }),
+            );
+            c.insert("value".into(), json!(value));
+            if let Some(n) = name {
+                c.insert("name".into(), json!(n));
+            }
+            classes.push(Value::Object(c));
+        }
+    }
+    if !classes.is_empty() {
+        r.insert("class".into(), json!(classes));
     }
 
     if s.related
@@ -367,5 +406,27 @@ mod tests {
             .issues
             .iter()
             .any(|i| i.code == "coverage.authorization.unsupported"));
+    }
+
+    #[test]
+    fn plan_name_and_member_period() {
+        let body = r#"
+  <participant typeCode="COV"><time><low value="20240201"/><high value="20241231"/></time>
+    <participantRole><templateId root="2.16.840.1.113883.10.20.22.4.89"/>
+      <id root="1.2.3.4" extension="MEMBER-9"/><code code="SELF" codeSystem="2.16.840.1.113883.5.111"/></participantRole></participant>
+  <entryRelationship typeCode="REFR"><act classCode="ACT" moodCode="DEF">
+    <id root="1.2.3" extension="PLAN-5"/><text>Example Gold PPO</text></act></entryRelationship>"#;
+        let (out, _) = run(body);
+        let c = &out[0];
+        assert_eq!(c["period"]["start"], "2024-02-01");
+        assert_eq!(c["period"]["end"], "2024-12-31");
+        let plan = c["class"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|x| x["type"]["coding"][0]["code"] == "plan")
+            .unwrap();
+        assert_eq!(plan["value"], "PLAN-5");
+        assert_eq!(plan["name"], "Example Gold PPO");
     }
 }
