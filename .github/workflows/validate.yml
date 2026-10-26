@@ -122,6 +122,16 @@ jobs:
               echo '```'
             done
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Annotate validator findings
+        if: always()
+        run: |
+          # HL7's public examples, so showing the findings is safe. Annotations are capped.
+          for f in target/corpus-validation/*.validation.txt; do
+            [ -e "$f" ] || continue
+            b=$(basename "$f" .validation.txt)
+            grep -E "^\s*Error @" "$f" | grep -v "dom-6" | sed -E 's/^\s+//; s/%/%25/g' | sort -u | head -3 \
+              | while IFS= read -r line; do echo "::error::$b: ${line:0:420}"; done
+          done 2>/dev/null | head -40
       - name: Upload validation output
         if: always()
         uses: actions/upload-artifact@v4
