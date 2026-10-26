@@ -129,7 +129,18 @@ pub(crate) fn register_practitioner(author: &Author, ctx: &mut Context) -> Optio
         .iter()
         .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
         .collect();
-    if !identifiers.is_empty() {
+    if identifiers.is_empty() {
+        // US Core needs an identifier with a system and a value (1..*); the document has none.
+        ctx.report.info(
+            "practitioner.identifier.absent",
+            "a practitioner has no identifier in the document; the identifier was marked absent",
+        );
+        let absent = json!({ "extension": [crate::nullflavor::data_absent_reason_extension("UNK", ctx.report)] });
+        resource.insert(
+            "identifier".into(),
+            json!([{ "_system": absent.clone(), "_value": absent }]),
+        );
+    } else {
         resource.insert("identifier".into(), json!(identifiers));
     }
     if author.family.is_some() || !author.given.is_empty() {
