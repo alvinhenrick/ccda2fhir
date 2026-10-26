@@ -126,8 +126,14 @@ pub enum Value {
 }
 
 /// `id` to text for every element in a section narrative that carries an `ID` attribute.
-/// `BTreeMap` keeps iteration deterministic.
+/// `BTreeMap` keeps iteration deterministic. The same element rendered as XHTML is stored under
+/// `xhtml:<id>`; an XML `ID` has no colon, so the two kinds of key cannot collide.
 pub(crate) type Narrative = BTreeMap<String, String>;
+
+/// Key of an element's XHTML rendering in a [`Narrative`].
+pub(crate) fn xhtml_key(id: &str) -> String {
+    format!("xhtml:{id}")
+}
 
 pub(crate) fn template_ids(node: &Node) -> Vec<TemplateId> {
     children(node, "templateId")

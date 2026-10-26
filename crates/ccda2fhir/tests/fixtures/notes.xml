@@ -18,7 +18,7 @@
     <templateId root="2.16.840.1.113883.10.20.22.2.65"/>
     <code code="34109-9" codeSystem="2.16.840.1.113883.6.1" displayName="Note"/>
     <title>Notes</title>
-    <text><paragraph ID="Note1">Seen for follow-up. Doing well on current plan.</paragraph></text>
+    <text><paragraph ID="Note1">Seen for follow-up. Doing well on current plan.</paragraph><list ID="Note2"><item>Continue current plan</item><item>Return in <content styleCode="Bold">six</content> weeks</item></list></text>
     <entry typeCode="DRIV"><act classCode="ACT" moodCode="EVN">
       <templateId root="2.16.840.1.113883.10.20.22.4.202"/>
       <id root="1.3.6.1.4.1.22812.10.1" extension="NOTE-1"/>
@@ -36,6 +36,15 @@
           <representedOrganization><id root="1.3.6.1.4.1.22812.9" extension="ORG-1"/><name>Example Clinic</name></representedOrganization>
         </assignedAuthor>
       </author>
+    </act></entry>
+    <entry typeCode="DRIV"><act classCode="ACT" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.202"/>
+      <id root="1.3.6.1.4.1.22812.10.1" extension="NOTE-2"/>
+      <code code="34109-9" codeSystem="2.16.840.1.113883.6.1" displayName="Note"/>
+      <text><reference value="#Note2"/></text>
+      <statusCode code="completed"/>
+      <effectiveTime value="20240908"/>
+      <reference typeCode="REFR"><externalDocument><id root="1.3.6.1.4.1.22812.10.2" extension="DOC-9"/></externalDocument></reference>
     </act></entry>
   </section></component></structuredBody></component>
 </ClinicalDocument>

@@ -298,6 +298,10 @@ pub struct Statement {
     pub code: Option<Code>,
     /// The `text` element: written text, or resolved from the section narrative.
     pub text: Option<String>,
+    /// `reference/externalDocument/id`: the documents this statement points at, one entry each.
+    pub external_documents: Vec<Vec<Identifier>>,
+    /// The narrative the `text` element points to, as FHIR XHTML (a `div`), when it has markup.
+    pub text_xhtml: Option<String>,
     /// The `text` element's own media type, representation and content.
     pub text_content: Option<TextContent>,
     pub status_code: Option<String>,
@@ -398,6 +402,11 @@ fn narrative_of(section: &Node) -> Narrative {
     if let Some(text) = child(section, "text") {
         for node in text.descendants().filter(Node::is_element) {
             if let (Some(id), Some(value)) = (attr(&node, "ID"), text_of(&node)) {
+                // Plain text needs no markup; only elements with structure inside keep it.
+                let structured = node.descendants().filter(Node::is_element).count() > 1;
+                if let Some(x) = crate::narrative::xhtml_element(&node).filter(|_| structured) {
+                    map.entry(crate::types::xhtml_key(&id)).or_insert(x);
+                }
                 map.entry(id).or_insert(value);
             }
         }
@@ -687,6 +696,19 @@ fn parse_statement_as(
         ids: identifiers(node),
         code: child(node, "code").map(|n| parse_code(&n, narrative)),
         text,
+        external_documents: children(node, "reference")
+            .filter_map(|r| child(&r, "externalDocument"))
+            .map(|d| identifiers(&d))
+            .filter(|ids| !ids.is_empty())
+            .collect(),
+        text_xhtml: child(node, "text")
+            .and_then(|n| child(&n, "reference"))
+            .and_then(|r| attr(&r, "value"))
+            .and_then(|r| {
+                narrative
+                    .get(&crate::types::xhtml_key(r.strip_prefix('#')?))
+                    .cloned()
+            }),
         text_content: child(node, "text").map(|n| TextContent {
             media_type: attr(&n, "mediaType"),
             representation: attr(&n, "representation"),
