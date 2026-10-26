@@ -65,3 +65,60 @@ jobs:
         with:
           name: validation
           path: target/validation/
+
+  corpus:
+    # Public HL7 C-CDA example documents (not our fixtures): a regression net against real-shaped
+    # input. Not a required check; a failure here means a document the converter turns into
+    # invalid FHIR, which we want to know about.
+    name: HL7 example corpus
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Cache validator and FHIR packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/validator
+            ~/.fhir/packages
+          key: fhir-validator-${{ hashFiles('scripts/validate.sh') }}
+          restore-keys: fhir-validator-
+      - name: Collect the full documents from HL7/C-CDA-Examples
+        run: |
+          git clone -q --depth 1 https://github.com/HL7/C-CDA-Examples.git "$RUNNER_TEMP/examples"
+          mkdir -p "$RUNNER_TEMP/corpus"
+          n=0
+          while IFS= read -r -d '' f; do
+            # Only complete, well-formed ClinicalDocuments; the repo also holds template fragments.
+            if head -c 4000 "$f" | grep -q '<ClinicalDocument' && xmllint --noout "$f" 2>/dev/null; then
+              n=$((n+1)); cp "$f" "$RUNNER_TEMP/corpus/doc$n.xml"
+            fi
+          done < <(find "$RUNNER_TEMP/examples" -name '*.xml' -print0 | sort -z)
+          echo "collected $n documents"
+      - name: Convert and validate
+        run: FIXTURE_DIR="$RUNNER_TEMP/corpus" VALIDATION_OUT="$PWD/target/corpus-validation" scripts/validate.sh
+      - name: Summarize results
+        if: always()
+        run: |
+          {
+            echo "## HL7 example corpus"
+            for f in target/corpus-validation/*.validation.txt; do
+              [ -e "$f" ] || continue
+              echo "### $(basename "$f" .validation.txt)"
+              echo '```'
+              grep -E "^(Success|\*FAILURE\*|Error @)|errors?, .* warnings?" "$f" | head -30 || true
+              echo '```'
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload validation output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: corpus-validation
+          path: target/corpus-validation/

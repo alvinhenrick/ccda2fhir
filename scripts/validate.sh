@@ -5,6 +5,7 @@
 # avoids a Java start and an IG load per fixture.
 #
 # Usage: scripts/validate.sh [fixture-name ...]    (default: every fixture)
+# Set FIXTURE_DIR to validate the .xml files of another folder (names without spaces).
 # Needs: Java 17+, curl, python3, network access to github.com, packages.fhir.org and tx.fhir.org.
 set -euo pipefail
 
@@ -14,7 +15,8 @@ US_CORE_PACKAGE="${US_CORE_PACKAGE:-hl7.fhir.us.core#6.1.0}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CACHE="$ROOT/.cache/validator"
 JAR="$CACHE/validator_cli-$VALIDATOR_VERSION.jar"
-OUT="$ROOT/target/validation"
+OUT="${VALIDATION_OUT:-$ROOT/target/validation}"
+FIXTURES="${FIXTURE_DIR:-$ROOT/crates/ccda2fhir/tests/fixtures}"
 
 mkdir -p "$CACHE" "$OUT"
 if [ ! -f "$JAR" ]; then
@@ -25,14 +27,14 @@ fi
 
 names=("$@")
 if [ ${#names[@]} -eq 0 ]; then
-  for f in "$ROOT"/crates/ccda2fhir/tests/fixtures/*.xml; do names+=("$(basename "$f" .xml)"); done
+  for f in "$FIXTURES"/*.xml; do names+=("$(basename "$f" .xml)"); done
 fi
 
 # Build the converter once, then convert every fixture with the binary.
 cargo build -q -p ccda2fhir --example convert_file
 CONVERT="$ROOT/target/debug/examples/convert_file"
 for name in "${names[@]}"; do
-  "$CONVERT" "$ROOT/crates/ccda2fhir/tests/fixtures/$name.xml" "$OUT/$name.bundle.json"
+  "$CONVERT" "$FIXTURES/$name.xml" "$OUT/$name.bundle.json"
 done
 
 # Start the validator once as a web service so FHIR R4 and US Core load a single time, then post
