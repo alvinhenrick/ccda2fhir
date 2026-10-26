@@ -25,4 +25,4 @@ US Core Location profile.
 
 ## Update (docs refresh)
 
-Still open: `Encounter.location.status`/`period`, `serviceProvider` from the location's organization, Location `managingOrganization`, and Specimen condition.
+Specimen condition was done in ADR 0054. `Encounter.location.status`/`period`, `serviceProvider` and Location `managingOrganization` have no source in the document (ADR 0054).

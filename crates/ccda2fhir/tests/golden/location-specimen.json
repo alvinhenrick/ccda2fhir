@@ -300,6 +300,17 @@
             },
             "collectedDateTime": "2024-06-01T09:15:00-05:00"
           },
+          "condition": [
+            {
+              "coding": [
+                {
+                  "code": "FROZ",
+                  "display": "Frozen",
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0493"
+                }
+              ]
+            }
+          ],
           "id": "specimen-1",
           "identifier": [
             {

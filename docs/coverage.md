@@ -17,7 +17,7 @@ silently.
 - CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
 - Procedure instruction (`followUp`); `reasonReference` to an Observation (only Conditions are linked).
 - Coverage: plan name, authorizations, the member's period.
-- Patient and related-person members of a care team; Specimen condition; Location status and organization.
+- Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
 - Immunization dose range and reaction; Problem supporting observations (SPRT); software authors as Devices.
 - Advance directive verifier, witness and custodian participants.
@@ -346,8 +346,8 @@ See `docs/decisions/0018-location-and-specimen.md`.
 | Specimen `desc`, `quantity` | `note`, `collection.quantity` | done | `description_becomes_a_note` | |
 | Specimen Collection Procedure | `collection.bodySite`, `collectedDateTime` | done | golden | |
 | Specimen on organizer / observation | `DiagnosticReport.specimen`, `Observation.specimen` | done | golden | |
-| Specimen Condition Observation | `condition` | todo | | |
-| Location status, organization | `status`, `managingOrganization` | todo | | |
+| Specimen Condition Observation (4.421) | `condition` | done (ADR 0054) | golden `location-specimen` | |
+| Location status, organization | `status`, `managingOrganization` | no source in C-CDA (ADR 0054) | | the Service Delivery Location role has no status or organization |
 
 ## Planned activities to ServiceRequest
 
