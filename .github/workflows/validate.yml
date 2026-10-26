@@ -108,46 +108,17 @@ jobs:
             fi
           done
       - name: Convert and validate
-        run: FIXTURE_DIR="$RUNNER_TEMP/corpus" VALIDATION_OUT="$PWD/target/corpus-validation" scripts/validate.sh
-      - name: Summarize results
-        if: always()
+        # The gate below decides pass or fail, so validator errors alone do not stop this step.
+        run: FIXTURE_DIR="$RUNNER_TEMP/corpus" VALIDATION_OUT="$PWD/target/corpus-validation" scripts/validate.sh || true
+      - name: Gate on errors that are not known
         run: |
-          {
-            echo "## HL7 example corpus"
-            for f in target/corpus-validation/*.validation.txt; do
-              [ -e "$f" ] || continue
-              echo "### $(basename "$f" .validation.txt)"
-              echo '```'
-              grep -E "^(Success|\*FAILURE\*|Error @)|errors?, .* warnings?" "$f" | head -30 || true
-              echo '```'
-            done
-          } >> "$GITHUB_STEP_SUMMARY"
-      - name: Annotate validator findings
-        if: always()
-        run: |
-          # HL7's public examples, so showing the findings is safe. One annotation lists every
-          # distinct error once, with the number of documents it occurs in.
-          python3 - <<'PY' > "$RUNNER_TEMP/distinct.md"
-          import glob, re, collections
-          seen = collections.defaultdict(set)
-          for f in sorted(glob.glob("target/corpus-validation/*.validation.txt")):
-              doc = f.split("/")[-1].split(".")[0]
-              for line in open(f, errors="replace"):
-                  m = re.match(r"\s*Error @ (.*)", line)
-                  if not m or "dom-6" in line:
-                      continue
-                  t = re.sub(r"\[\d+\]", "[]", m.group(1))
-                  t = re.sub(r"urn:uuid:[0-9a-f-]+", "urn:uuid:X", t)
-                  t = re.sub(r"\(line \d+, col\d+\)", "", t)
-                  t = re.sub(r"/\*([A-Za-z]+)/[a-z0-9-]+\*/", r"/*\1*/", t)
-                  seen[t].add(doc)
-          print("## Distinct validator errors in the HL7 example corpus")
-          for t, docs in sorted(seen.items(), key=lambda kv: -len(kv[1])):
-              print(f"- ({len(docs)} docs: {', '.join(sorted(docs))}) `{t[:380]}`")
-          PY
+          set +e
+          python3 scripts/corpus_gate.py target/corpus-validation scripts/corpus-known-errors.txt "$RUNNER_TEMP/distinct.md"
+          status=$?
           cat "$RUNNER_TEMP/distinct.md" >> "$GITHUB_STEP_SUMMARY"
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g' "$RUNNER_TEMP/distinct.md")
-          echo "::error title=Distinct corpus errors::${msg:0:30000}"
+          if [ $status -ne 0 ]; then echo "::error title=Corpus errors::${msg:0:30000}"; else echo "::notice title=Corpus::${msg:0:3000}"; fi
+          exit $status
       - name: Upload validation output
         if: always()
         uses: actions/upload-artifact@v4

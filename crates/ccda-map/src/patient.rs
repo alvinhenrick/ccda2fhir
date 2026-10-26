@@ -136,7 +136,7 @@ pub fn map_patient(
             let mut c = Map::new();
             c.insert(
                 "language".into(),
-                json!({ "coding": [{ "system": "urn:ietf:bcp:47", "code": code }] }),
+                json!({ "coding": [{ "system": "urn:ietf:bcp:47", "code": bcp47_language(code) }] }),
             );
             if let Some(p) = l.preferred {
                 c.insert("preferred".into(), json!(p));
@@ -468,7 +468,14 @@ fn category_extension(
         .or_else(|| detailed.iter().find_map(|(_, d)| d.clone()))
         .or_else(|| detailed.first().map(|(c, _)| c.clone()))?;
     let coding = |code: &str, display: Option<&str>| {
-        let mut c = json!({ "system": CDC_RACE_SYSTEM, "code": code });
+        // Unknown and asked-but-no-answer are in the OMB value set as v3 null flavors, not as
+        // CDC race codes.
+        let system = if matches!(code, "UNK" | "ASKU") {
+            "http://terminology.hl7.org/CodeSystem/v3-NullFlavor"
+        } else {
+            CDC_RACE_SYSTEM
+        };
+        let mut c = json!({ "system": system, "code": code });
         if let Some(d) = display {
             c["display"] = json!(d);
         }
@@ -606,6 +613,240 @@ fn map_gender(code: &str, report: &mut Report) -> &'static str {
             "unknown"
         }
     }
+}
+
+/// The two-letter BCP 47 language for an ISO 639-2 three-letter code, when there is one. BCP 47
+/// wants the shortest form, so `eng` is `en`; a language with no two-letter code keeps the three.
+fn bcp47_language(code: &str) -> String {
+    let lower = code.trim().replace('_', "-").to_ascii_lowercase();
+    let (primary, rest) = match lower.split_once('-') {
+        Some((p, r)) => (p, Some(r)),
+        None => (lower.as_str(), None),
+    };
+    let short = match primary {
+        "aar" => "aa",
+        "abk" => "ab",
+        "afr" => "af",
+        "aka" => "ak",
+        "alb" => "sq",
+        "amh" => "am",
+        "ara" => "ar",
+        "arg" => "an",
+        "arm" => "hy",
+        "asm" => "as",
+        "ava" => "av",
+        "ave" => "ae",
+        "aym" => "ay",
+        "aze" => "az",
+        "bak" => "ba",
+        "bam" => "bm",
+        "baq" => "eu",
+        "bel" => "be",
+        "ben" => "bn",
+        "bis" => "bi",
+        "bod" => "bo",
+        "bos" => "bs",
+        "bre" => "br",
+        "bul" => "bg",
+        "bur" => "my",
+        "cat" => "ca",
+        "ces" => "cs",
+        "cha" => "ch",
+        "che" => "ce",
+        "chi" => "zh",
+        "chu" => "cu",
+        "chv" => "cv",
+        "cor" => "kw",
+        "cos" => "co",
+        "cre" => "cr",
+        "cym" => "cy",
+        "cze" => "cs",
+        "dan" => "da",
+        "deu" => "de",
+        "div" => "dv",
+        "dut" => "nl",
+        "dzo" => "dz",
+        "ell" => "el",
+        "eng" => "en",
+        "epo" => "eo",
+        "est" => "et",
+        "eus" => "eu",
+        "ewe" => "ee",
+        "fao" => "fo",
+        "fas" => "fa",
+        "fij" => "fj",
+        "fin" => "fi",
+        "fra" => "fr",
+        "fre" => "fr",
+        "fry" => "fy",
+        "ful" => "ff",
+        "geo" => "ka",
+        "ger" => "de",
+        "gla" => "gd",
+        "gle" => "ga",
+        "glg" => "gl",
+        "glv" => "gv",
+        "gre" => "el",
+        "grn" => "gn",
+        "guj" => "gu",
+        "hat" => "ht",
+        "hau" => "ha",
+        "heb" => "he",
+        "her" => "hz",
+        "hin" => "hi",
+        "hmo" => "ho",
+        "hrv" => "hr",
+        "hun" => "hu",
+        "hye" => "hy",
+        "ibo" => "ig",
+        "ice" => "is",
+        "ido" => "io",
+        "iii" => "ii",
+        "iku" => "iu",
+        "ile" => "ie",
+        "ina" => "ia",
+        "ind" => "id",
+        "ipk" => "ik",
+        "isl" => "is",
+        "ita" => "it",
+        "jav" => "jv",
+        "jpn" => "ja",
+        "kal" => "kl",
+        "kan" => "kn",
+        "kas" => "ks",
+        "kat" => "ka",
+        "kau" => "kr",
+        "kaz" => "kk",
+        "khm" => "km",
+        "kik" => "ki",
+        "kin" => "rw",
+        "kir" => "ky",
+        "kom" => "kv",
+        "kon" => "kg",
+        "kor" => "ko",
+        "kua" => "kj",
+        "kur" => "ku",
+        "lao" => "lo",
+        "lat" => "la",
+        "lav" => "lv",
+        "lim" => "li",
+        "lin" => "ln",
+        "lit" => "lt",
+        "ltz" => "lb",
+        "lub" => "lu",
+        "lug" => "lg",
+        "mac" => "mk",
+        "mah" => "mh",
+        "mal" => "ml",
+        "mao" => "mi",
+        "mar" => "mr",
+        "may" => "ms",
+        "mkd" => "mk",
+        "mlg" => "mg",
+        "mlt" => "mt",
+        "mon" => "mn",
+        "mri" => "mi",
+        "msa" => "ms",
+        "mya" => "my",
+        "nau" => "na",
+        "nav" => "nv",
+        "nbl" => "nr",
+        "nde" => "nd",
+        "ndo" => "ng",
+        "nep" => "ne",
+        "nld" => "nl",
+        "nno" => "nn",
+        "nob" => "nb",
+        "nor" => "no",
+        "nya" => "ny",
+        "oci" => "oc",
+        "oji" => "oj",
+        "ori" => "or",
+        "orm" => "om",
+        "oss" => "os",
+        "pan" => "pa",
+        "per" => "fa",
+        "pli" => "pi",
+        "pol" => "pl",
+        "por" => "pt",
+        "pus" => "ps",
+        "que" => "qu",
+        "roh" => "rm",
+        "ron" => "ro",
+        "rum" => "ro",
+        "run" => "rn",
+        "rus" => "ru",
+        "sag" => "sg",
+        "san" => "sa",
+        "sin" => "si",
+        "slk" => "sk",
+        "slo" => "sk",
+        "slv" => "sl",
+        "sme" => "se",
+        "smo" => "sm",
+        "sna" => "sn",
+        "snd" => "sd",
+        "som" => "so",
+        "sot" => "st",
+        "spa" => "es",
+        "sqi" => "sq",
+        "srd" => "sc",
+        "srp" => "sr",
+        "ssw" => "ss",
+        "sun" => "su",
+        "swa" => "sw",
+        "swe" => "sv",
+        "tah" => "ty",
+        "tam" => "ta",
+        "tat" => "tt",
+        "tel" => "te",
+        "tgk" => "tg",
+        "tgl" => "tl",
+        "tha" => "th",
+        "tib" => "bo",
+        "tir" => "ti",
+        "ton" => "to",
+        "tsn" => "tn",
+        "tso" => "ts",
+        "tuk" => "tk",
+        "tur" => "tr",
+        "twi" => "tw",
+        "uig" => "ug",
+        "ukr" => "uk",
+        "urd" => "ur",
+        "uzb" => "uz",
+        "ven" => "ve",
+        "vie" => "vi",
+        "vol" => "vo",
+        "wel" => "cy",
+        "wln" => "wa",
+        "wol" => "wo",
+        "xho" => "xh",
+        "yid" => "yi",
+        "yor" => "yo",
+        "zha" => "za",
+        "zho" => "zh",
+        "zul" => "zu",
+        other => other,
+    };
+    match rest {
+        Some(r) => format!("{short}-{}", region_case(r)),
+        None => short.to_owned(),
+    }
+}
+
+/// `us` to `US` for a two-letter region subtag; other subtags are left as they are.
+fn region_case(rest: &str) -> String {
+    rest.split('-')
+        .map(|s| {
+            if s.len() == 2 {
+                s.to_ascii_uppercase()
+            } else {
+                s.to_owned()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("-")
 }
 
 #[cfg(test)]
@@ -854,6 +1095,16 @@ mod tests {
         assert!(tribal["extension"][0]["valueCodeableConcept"]["coding"][0]["code"] == "1");
         let sex = ext.iter().find(|e| e["url"] == SEX_URL).unwrap();
         assert_eq!(sex["valueCode"], "248152002");
+    }
+
+    #[test]
+    fn three_letter_languages_become_bcp47() {
+        assert_eq!(bcp47_language("eng"), "en");
+        assert_eq!(bcp47_language("ita"), "it");
+        assert_eq!(bcp47_language("fre"), "fr");
+        assert_eq!(bcp47_language("en"), "en");
+        assert_eq!(bcp47_language("eng-us"), "en-US");
+        assert_eq!(bcp47_language("haw"), "haw");
     }
 
     #[test]

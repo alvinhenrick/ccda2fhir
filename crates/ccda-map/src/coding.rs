@@ -36,7 +36,18 @@ fn coding(
             .get("system")
             .and_then(Value::as_str)
             .and_then(|system| ccda_terminology::official_display(system, value));
+        let is_nucc = coding.get("system").and_then(Value::as_str) == Some(NUCC_SYSTEM);
         match official {
+            // NUCC taxonomy displays in documents are usually the "classification; specialization"
+            // wording, which is not the code's display, and no table of them is built in. The code
+            // says it all; the wording is kept as text.
+            None if is_nucc => {
+                report.info(
+                    "coding.display.unverified",
+                    "a NUCC taxonomy display was not kept on the coding (it could not be checked); the original is kept as text",
+                );
+                replaced = Some(display.clone());
+            }
             Some(o) if o != display => {
                 report.info(
                     "coding.display.replaced",
@@ -52,6 +63,8 @@ fn coding(
     }
     Some((Value::Object(coding), replaced))
 }
+
+const NUCC_SYSTEM: &str = "http://nucc.org/provider-taxonomy";
 
 /// Map a coded value (and its translations) to a FHIR `CodeableConcept`.
 ///

@@ -465,9 +465,15 @@ mod tests {
     use ccda_model::{AuthorOrganization, Identifier};
     use ccda_terminology::BuiltinTerminology;
 
+    /// An id; only the real-looking ones (10 digits) are NPIs, so short test ids do not trip the
+    /// NPI check.
     fn npi(n: &str) -> Identifier {
         Identifier {
-            root: Some("2.16.840.1.113883.4.6".into()),
+            root: Some(if n.len() == 10 {
+                "2.16.840.1.113883.4.6".into()
+            } else {
+                "1.3.6.1.4.1.99999".into()
+            }),
             extension: Some(n.into()),
             null_flavor: None,
             ..Identifier::default()
@@ -508,8 +514,8 @@ mod tests {
     #[test]
     fn recorder_is_latest_and_recorded_date_is_earliest() {
         let authors = [
-            person("1111111111", "First", Some("20200101090000-0500")),
-            person("2222222222", "Second", Some("20210301090000-0500")),
+            person("1111111112", "First", Some("20200101090000-0500")),
+            person("2222222228", "Second", Some("20210301090000-0500")),
         ];
         let (resource, extra, report) = run(&authors);
         let practitioners = of_type(&extra, "Practitioner");
@@ -552,8 +558,8 @@ mod tests {
     #[test]
     fn the_same_person_becomes_one_practitioner() {
         let authors = [
-            person("1111111111", "Doe", Some("20200101090000-0500")),
-            person("1111111111", "Doe", Some("20200201090000-0500")),
+            person("1111111112", "Doe", Some("20200101090000-0500")),
+            person("1111111112", "Doe", Some("20200201090000-0500")),
         ];
         let (_, extra, _) = run(&authors);
         assert_eq!(of_type(&extra, "Practitioner").len(), 1);
@@ -568,8 +574,8 @@ mod tests {
 
     #[test]
     fn organization_is_shared_and_linked_with_on_behalf_of() {
-        let mut a = person("1111111111", "A", Some("20200101090000-0500"));
-        let mut b = person("2222222222", "B", Some("20200102090000-0500"));
+        let mut a = person("1111111112", "A", Some("20200101090000-0500"));
+        let mut b = person("2222222228", "B", Some("20200102090000-0500"));
         for author in [&mut a, &mut b] {
             author.organization = Some(AuthorOrganization {
                 ids: vec![Identifier {
@@ -596,7 +602,7 @@ mod tests {
 
     #[test]
     fn date_only_times_set_recorded_date_but_cannot_make_provenance() {
-        let (resource, extra, report) = run(&[person("1111111111", "Doe", Some("20200101"))]);
+        let (resource, extra, report) = run(&[person("1111111112", "Doe", Some("20200101"))]);
         assert_eq!(resource["recordedDate"], "2020-01-01");
         assert!(of_type(&extra, "Provenance").is_empty());
         assert_eq!(report.issues[0].code, "provenance.recorded.unavailable");
@@ -604,7 +610,7 @@ mod tests {
 
     #[test]
     fn author_without_time_still_gets_a_recorder() {
-        let (resource, extra, report) = run(&[person("1111111111", "Doe", None)]);
+        let (resource, extra, report) = run(&[person("1111111112", "Doe", None)]);
         assert!(resource.contains_key("recorder"));
         assert!(!resource.contains_key("recordedDate"));
         assert!(of_type(&extra, "Provenance").is_empty());
@@ -638,7 +644,7 @@ mod tests {
         };
         let (resource, extra, _) = run(&[
             device,
-            person("1111111111", "Doe", Some("20200101090000-0500")),
+            person("1111111112", "Doe", Some("20200101090000-0500")),
         ]);
         assert!(resource.contains_key("recorder"));
         assert_eq!(
@@ -652,7 +658,7 @@ mod tests {
 
     #[test]
     fn organization_without_a_name_is_skipped_with_a_note() {
-        let mut author = person("1111111111", "A", Some("20200101090000-0500"));
+        let mut author = person("1111111112", "A", Some("20200101090000-0500"));
         author.organization = Some(AuthorOrganization {
             ids: vec![npi("9")],
             name: None,
@@ -681,7 +687,7 @@ mod tests {
     fn software_with_an_id_is_a_device_not_a_practitioner() {
         let device = Author {
             time: Some("20200101090000-0500".into()),
-            ids: vec![npi("2222222222")],
+            ids: vec![npi("2222222228")],
             device_name: Some("EHR".into()),
             ..Author::default()
         };

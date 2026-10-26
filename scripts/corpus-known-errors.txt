@@ -1,0 +1,4 @@
+# Validator errors on the HL7 example documents that are not converter bugs. One regular
+# expression per line, matched against the normalised error text (see corpus_gate.py).
+# '200000000X' is a NUCC grouping code that the validator's NUCC 22.1 does not list.
+Unknown code '200000000X' in the CodeSystem 'http://nucc.org/provider-taxonomy'
