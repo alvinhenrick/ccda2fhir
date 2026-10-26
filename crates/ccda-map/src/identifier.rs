@@ -114,7 +114,7 @@ fn is_valid_npi(value: &str) -> bool {
             }
         })
         .sum();
-    sum % 10 == 0
+    sum.is_multiple_of(10)
 }
 
 fn map_without_extension(
