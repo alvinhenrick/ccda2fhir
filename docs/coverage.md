@@ -312,7 +312,7 @@ See `docs/decisions/0016-care-team.md`.
 | Performer code | `participant.role` | done | same | |
 | Member effectiveTime | `participant.period` | done | same | |
 | Member role (the performer's role code) | `role` | done (ADR 0016) | `care_team` tests | |
-| `functionCode` (performer or act) | `role`, before the specialty | done (ADR 0053) | `function_code_becomes_a_role_before_the_specialty`, golden `care-team` | |
+| `functionCode` (performer or act) | `role` (one; the specialty is the fallback) | done (ADR 0053) | `function_code_is_the_role_and_the_specialty_the_fallback`, golden `care-team` | |
 | Patient and related-person members | RelatedPerson | todo | | |
 | PractitionerRole, Location | PractitionerRole, Location | done | golden `care_team` | |
 
