@@ -56,7 +56,7 @@ mod vitals;
 pub use advance_directive::map_advance_directives;
 pub use allergy::map_allergies;
 pub use assessment::map_assessments;
-pub use care_plan::{link_care_plan_activities, map_care_plans};
+pub use care_plan::{link_care_plan_activities, link_care_plan_addresses, map_care_plans};
 pub use care_team::map_care_teams;
 pub use coding::map_codeable_concept;
 pub use comment::attach_comments;

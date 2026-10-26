@@ -40,5 +40,25 @@
       <effectiveTime value="20240601"/>
       <value xsi:type="ST">Walk 30 minutes a day</value>
     </observation></entry>
+  </section></component>
+  <component><section>
+    <templateId root="2.16.840.1.113883.10.20.22.2.58"/>
+    <code code="75310-3" codeSystem="2.16.840.1.113883.6.1" displayName="Health concerns"/>
+    <title>Health Concerns</title>
+    <text/>
+    <entry><act classCode="ACT" moodCode="EVN">
+      <templateId root="2.16.840.1.113883.10.20.22.4.132"/>
+      <id root="1.3.6.1.4.1.22812.12.5" extension="HC-1"/>
+      <code code="75310-3" codeSystem="2.16.840.1.113883.6.1" displayName="Health Concern"/>
+      <statusCode code="active"/>
+      <entryRelationship typeCode="REFR"><observation classCode="OBS" moodCode="EVN">
+        <templateId root="2.16.840.1.113883.10.20.22.4.4"/>
+        <id root="1.3.6.1.4.1.22812.12.6" extension="PROB-9"/>
+        <code code="55607006" codeSystem="2.16.840.1.113883.6.96"/>
+        <statusCode code="completed"/>
+        <effectiveTime><low value="20240101"/></effectiveTime>
+        <value xsi:type="CD" code="44054006" codeSystem="2.16.840.1.113883.6.96"/>
+      </observation></entryRelationship>
+    </act></entry>
   </section></component></structuredBody></component>
 </ClinicalDocument>

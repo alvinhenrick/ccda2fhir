@@ -145,6 +145,38 @@ pub fn link_care_plan_activities(
     }
 }
 
+/// Point each care plan at the Conditions that are health concerns (`addresses`).
+///
+/// This is a judgment, not a link the document states: a plan of treatment in a document that
+/// lists health concerns is taken to address them, in the same way every goal is attached to the
+/// plan. It is reported once per plan.
+pub fn link_care_plan_addresses(ctx: &mut Context, resources: &mut [Value]) {
+    let concerns: Vec<Value> = resources
+        .iter()
+        .filter(|r| {
+            r["resourceType"] == "Condition"
+                && crate::health_concern::has_health_concern_category(r)
+        })
+        .filter_map(|r| r["id"].as_str())
+        .map(|id| json!({ "reference": ctx.reference("Condition", id) }))
+        .collect();
+    if concerns.is_empty() {
+        return;
+    }
+    for r in resources
+        .iter_mut()
+        .filter(|r| r["resourceType"] == "CarePlan")
+    {
+        if r.get("addresses").is_none() {
+            r["addresses"] = json!(concerns);
+            ctx.report.info(
+                "careplan.addresses.inferred",
+                "a care plan was linked to the health concerns of the document; the document does not state the link",
+            );
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -193,5 +225,26 @@ mod tests {
     fn empty_section_gives_no_plan() {
         let (out, _) = run("", &[]);
         assert!(out.is_empty());
+    }
+
+    #[test]
+    fn plan_addresses_the_health_concern_conditions_only() {
+        let mut ctx_report = Report::default();
+        let mut ctx = Context::new(&BuiltinTerminology, &mut ctx_report, "doc");
+        let mut resources = vec![
+            json!({ "resourceType": "CarePlan", "id": "careplan-1" }),
+            json!({ "resourceType": "Condition", "id": "condition-1",
+                "category": [{ "coding": [{ "code": "health-concern" }] }] }),
+            json!({ "resourceType": "Condition", "id": "condition-2",
+                "category": [{ "coding": [{ "code": "problem-list-item" }] }] }),
+        ];
+        link_care_plan_addresses(&mut ctx, &mut resources);
+        let addresses = resources[0]["addresses"].as_array().unwrap();
+        assert_eq!(addresses.len(), 1);
+        assert!(resources[0]["addresses"][0]["reference"].is_string());
+        assert!(ctx_report
+            .issues
+            .iter()
+            .any(|i| i.code == "careplan.addresses.inferred"));
     }
 }

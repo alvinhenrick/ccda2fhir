@@ -177,6 +177,7 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
         "47420-5" => "Functional Status Assessment Note",
         "47519-4" => "History of Procedures Document",
         "48765-2" => "Allergies and adverse reactions Document",
+        "75310-3" => "Health concerns Document",
         "8716-3" => "Vital signs note",
         _ => return None,
     })

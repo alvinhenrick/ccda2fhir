@@ -22,7 +22,7 @@ fn health_concern_category() -> Value {
     json!({ "coding": [{ "system": US_CORE_CATEGORY_SYSTEM, "code": "health-concern" }] })
 }
 
-fn has_health_concern_category(condition: &Value) -> bool {
+pub(crate) fn has_health_concern_category(condition: &Value) -> bool {
     condition["category"]
         .as_array()
         .into_iter()

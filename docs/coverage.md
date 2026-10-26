@@ -14,7 +14,7 @@ coverage: US Core "must support" completeness is tracked in `docs/uscdi.md`.
 silently.
 
 - Supply request, authorization (4.123): the IG has no mapping for either (ADR 0056).
-- CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
+- Goal progress as an R4 achievement code (only the document's own wording is kept).
 - `reasonReference` to an Observation (only Conditions are linked).
 - Coverage: plan name, authorizations, the member's period.
 - Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
@@ -284,7 +284,7 @@ See `docs/decisions/0014-goals.md`.
 | Goal target | `target` | done (ADR 0014) | golden `goals` | |
 | Priority Preference (4.143) | `priority` | done (ADR 0048) | `progress_and_priority_are_mapped`, golden `goals` | |
 | Nested Problem Observation | `addresses` | done (ADR 0048) | golden `goals` | `goal.addresses.unresolved` when the problem is not in the document |
-| Links to Care Plan, Health Concerns | `addresses` | todo | | |
+| Plan of treatment and health concerns in one document | `CarePlan.addresses` (the health concern Conditions) | done, as a judgment (ADR 0060) | `plan_addresses_the_health_concern_conditions_only`, golden `care-plan` | reported `careplan.addresses.inferred`; the document does not state the link |
 
 ## Plan of Treatment to CarePlan
 
@@ -297,7 +297,7 @@ See `docs/decisions/0015-care-plan.md`.
 | Goals in the document | `goal` | done | `plan_points_at_goals` | |
 | Planned activities (4.39-4.41, 4.44) | ServiceRequest | done | see below | |
 | Planned activities as `CarePlan.activity` | `activity.reference` | done | golden `planned_activities` | |
-| Health Concerns | `addresses` | todo | | |
+| Health Concerns | `CarePlan.addresses` | done, as a judgment (ADR 0060) | same | |
 | Care team | `CareTeam` | done (ADR 0016) | golden `care_team` | |
 
 ## Care Team to CareTeam
