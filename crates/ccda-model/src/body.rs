@@ -241,6 +241,8 @@ pub struct Participant {
     pub addresses: Vec<Address>,
     /// `participantRole/telecom`
     pub telecoms: Vec<Telecom>,
+    /// `participant/time`: its `@value`, else the start of its interval (raw HL7 timestamp).
+    pub time: Option<String>,
 }
 
 /// A `specimen` of a result: `specimenRole` and its `specimenPlayingEntity`.
@@ -521,6 +523,9 @@ fn parse_participant(node: &Node, narrative: &Narrative) -> Participant {
             .flat_map(|r| children(r, "telecom"))
             .map(|n| crate::header::parse_telecom(&n))
             .collect(),
+        time: child(node, "time").and_then(|n| {
+            attr(&n, "value").or_else(|| child(&n, "low").and_then(|l| attr(&l, "value")))
+        }),
     }
 }
 

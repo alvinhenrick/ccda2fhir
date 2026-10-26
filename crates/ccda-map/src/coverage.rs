@@ -56,7 +56,12 @@ fn relationship(code: &str) -> &'static str {
 }
 
 /// The policy holder as a `RelatedPerson`, when the document gives a name.
-fn related_person(p: &Participant, ctx: &mut Context) -> Option<String> {
+/// `relationship` is the person's relationship to the patient, when the document gives it.
+pub(crate) fn related_person(
+    p: &Participant,
+    relationship: Option<Value>,
+    ctx: &mut Context,
+) -> Option<String> {
     let name = p
         .person_name
         .as_ref()
@@ -67,6 +72,9 @@ fn related_person(p: &Participant, ctx: &mut Context) -> Option<String> {
     r.insert("id".into(), json!(id));
     r.insert("active".into(), json!(true));
     r.insert("patient".into(), json!({ "reference": ctx.patient }));
+    if let Some(rel) = relationship {
+        r.insert("relationship".into(), json!([rel]));
+    }
     r.insert("name".into(), json!([name]));
     let identifiers: Vec<Value> = p
         .ids
@@ -152,7 +160,7 @@ fn map_policy(s: &Statement, ctx: &mut Context) -> Value {
         == Some("SELF");
     if is_self {
         r.insert("subscriber".into(), json!({ "reference": ctx.patient }));
-    } else if let Some(reference) = holder.and_then(|h| related_person(h, ctx)) {
+    } else if let Some(reference) = holder.and_then(|h| related_person(h, None, ctx)) {
         r.insert("subscriber".into(), json!({ "reference": reference }));
     }
 

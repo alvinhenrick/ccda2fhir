@@ -20,7 +20,7 @@ silently.
 - Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
 
-- Advance directive verifier, witness and custodian participants.
+- Advance directive witness participants (no template in C-CDA).
 - Imaging, laboratory and pathology report narratives stay text.
 
 ## Problems (Problem Concern Act / Problem Observation) to Condition
