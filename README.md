@@ -18,7 +18,14 @@ curl -X POST -H 'Content-Type: application/xml' \
 ```
 
 `POST /convert` takes the C-CDA XML as the body and returns a FHIR R4 Bundle (`application/fhir+json`). Add
-`?report=true` to get `{ "bundle": ..., "report": [...] }`, or `?profiles=none` to leave out `meta.profile`.
+`?report=true` to get `{ "status", "issues", "bundle", "report" }`, or `?profiles=none` to leave out `meta.profile`.
+
+`status` is `complete` when nothing was dropped, defaulted or approximated, and `partial` when the
+report holds at least one warning. The same value is in the `X-Ccda2fhir-Status` header.
+
+The document can also arrive as JSON, for callers that cannot send raw XML:
+`{ "document": "<base64 C-CDA>" }`, or a FHIR `DocumentReference` whose XML attachment has inline
+base64 `data` (`Content-Type: application/json` or `application/fhir+json`).
 Errors are `OperationOutcome` resources. `GET /healthz` and `GET /readyz` are for orchestrators.
 
 Settings (environment variables): `BIND_ADDR` (default `0.0.0.0:8080` in the image), `MAX_BODY_BYTES`
