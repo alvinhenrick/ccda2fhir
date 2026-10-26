@@ -101,6 +101,12 @@ jobs:
             fi
           done < <(find "$RUNNER_TEMP/examples" -name '*.xml' -print0 | sort -z)
           echo "collected $n documents"
+          cargo build -q -p ccda2fhir --example convert_file
+          for f in "$RUNNER_TEMP"/corpus/*.xml; do
+            if ! target/debug/examples/convert_file "$f" /dev/null 2>"$RUNNER_TEMP/err.txt"; then
+              echo "::error::$(basename "$f") from ${f}: $(grep -m1 'conversion failed' "$RUNNER_TEMP/err.txt")"
+            fi
+          done
       - name: Convert and validate
         run: FIXTURE_DIR="$RUNNER_TEMP/corpus" VALIDATION_OUT="$PWD/target/corpus-validation" scripts/validate.sh
       - name: Summarize results
