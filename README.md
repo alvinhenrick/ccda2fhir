@@ -91,7 +91,7 @@ Error and report messages never contain document content, so they are safe to lo
 | Crate | Role |
 |---|---|
 | `ccda-model` | Typed, version-neutral C-CDA model and a safe parser (size and node limits, no DTD) |
-| `ccda-terminology` | OID to FHIR system URI mapping behind a `Terminology` trait |
+| `ccda-terminology` | OID to FHIR system URI mapping and a checked table of official displays, behind a `Terminology` trait |
 | `ccda-map` | Maps the model to FHIR resources and records issues in a `Report` |
 | `fhir-out` | FHIR R4 output building blocks (Bundle) |
 | `ccda2fhir` | Public facade: `convert()` |

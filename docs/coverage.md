@@ -53,7 +53,7 @@ silently.
 | `value` | `type`, `category` (CF-AllergyIntoleranceType/Category) | done | `type_and_category_follow_the_ig_maps` | |
 | `participant/.../playingEntity/code` | `code` | done | `drug_allergy_...` | |
 | Negated, null substance | `code` via CF-NoKnownAllergies, else `code.text` | done | `negated_with_null_substance_uses_the_no_known_allergy_map` | |
-| Negated, coded substance | `substanceExposureRisk` extension (no `code`; not US Core conformant, per IG) | done | `negated_with_a_coded_substance_uses_the_exposure_risk_extension` | |
+| Negated, coded substance | `code.text` ("no known allergy to ..."); the IG's extension has no `code`, which US Core requires (ADR 0066) | done | `negated_with_a_coded_substance_is_written_as_text` | |
 | Allergy Status Observation | `clinicalStatus` (CF-AllergyStatus); absent = active | done | `status_precedence_and_defaults` | |
 | Reaction Observation `value`, `effectiveTime` | `reaction.manifestation`, `reaction.onset` | done | `drug_allergy_...` | |
 | Reaction `id` | `reaction.id` (IG: source value) | skipped: an element id cannot carry root+extension | | |
@@ -157,7 +157,7 @@ See `docs/decisions/0007-results.md`.
 | `referenceRange` | `referenceRange` (normal only) | done | `only_normal_reference_ranges_are_kept` | |
 | Category from LOINC class | `category` | done with a caller-supplied LOINC table (ADR 0061); laboratory assumed and reported without one | `a_loinc_table_sets_the_category_from_the_class`, golden | |
 | `author` | `performer` + Provenance | done | golden | |
-| Specimen, specimen collection procedure | Specimen | done (ADR 0018) | golden `location_and_specimen` | |
+| Specimen, specimen collection procedure | Specimen | done (ADR 0018) | golden `location-specimen` | |
 
 ## Procedures (Procedure Activity Procedure / Act) to Procedure
 
@@ -174,7 +174,7 @@ See `docs/decisions/0008-procedures.md`.
 | Indication | `reasonCode` | done | golden | |
 | Act variant | Procedure | done | `the_act_variant_maps_the_same_way` | |
 | `methodCode`, `priorityCode`, approach | not supported (IG) | reported | | |
-| Service Delivery Location | `location` | done (ADR 0018) | golden `location_and_specimen` | |
+| Service Delivery Location | `location` | done (ADR 0018) | golden `location-specimen` | |
 | Encounter link, comment | `encounter`, `note` | done (ADR 0025, 0034) | golden | |
 | Instruction (4.20) in a procedure | `followUp` (code and text) | done (ADR 0057; not in the IG) | `nested_instruction_becomes_follow_up`, golden `procedures` | |
 | Procedure Activity Observation | Observation | done (ADR 0008) | golden | |
@@ -311,7 +311,7 @@ See `docs/decisions/0016-care-team.md`.
 | Member effectiveTime | `participant.period` | done | same | |
 | Member role (the performer's role code) | `role` | done (ADR 0016) | `care_team` tests | |
 | `functionCode` (performer or act) | `role` (one; the specialty is the fallback) | done (ADR 0053) | `function_code_is_the_role_and_the_specialty_the_fallback`, golden `care-team` | |
-| Patient and related-person members | RelatedPerson | todo | | |
+| Patient as a care team member | (none) | not mapped | | A relative on the team is mapped below; the patient has no C-CDA pattern. |
 | PractitionerRole, Location | PractitionerRole, Location | done | golden `care_team` | |
 | `assignedPerson/sdtc:asPatientRelationship` (a relative on the team) | `RelatedPerson` (relationship = the sdtc code) | done (ADR 0063) | `relative_member_becomes_related_person`, golden `care-team` | The patient as a member has no C-CDA pattern; not mapped. |
 
@@ -340,7 +340,7 @@ See `docs/decisions/0018-location-and-specimen.md`.
 | C-CDA | FHIR | Status | Test | Validated |
 |---|---|---|---|---|
 | Service Delivery Location (4.32) | `Location` | done | `named_location_is_created_once` | |
-| Location on an encounter | `Encounter.location` | done | golden `location_and_specimen` | |
+| Location on an encounter | `Encounter.location` | done | golden `location-specimen` | |
 | Location on a procedure | `Procedure.location` | done | | |
 | `specimenRole` | `Specimen` | done | `name_only_specimen_gets_text_type_and_subject` | |
 | Specimen `desc`, `quantity` | `note`, `collection.quantity` | done | `description_becomes_a_note` | |
@@ -377,7 +377,7 @@ See `docs/decisions/0020-composition.md`.
 | `code` | `type` | done | `header_fields_and_sections` | |
 | `title` | `title` | done | same | |
 | `effectiveTime` | `date` | done | same | |
-| `author` | `author` (Practitioner) | done | `missing_author_means_no_composition` | |
+| `author` | `author` (Practitioner) | done | `missing_author_is_marked_absent_not_skipped` | |
 | `custodian` | `custodian` | done | `header_fields_and_sections` | |
 | `confidentialityCode` | `confidentiality` | done | `unknown_confidentiality_is_reported` | |
 | `languageCode` | `language` | done | `header_fields_and_sections` | |
@@ -453,8 +453,8 @@ See `docs/decisions/0029-scales-and-supplies.md`.
 
 | C-CDA | FHIR | Status | Test | Validated |
 |---|---|---|---|---|
-| Assessment Scale Observation (4.69) + Supporting Observation (4.86) | panel `Observation` + member `Observation`s (`ordinalValue`) | done | golden `scales_and_supplies` | |
-| Non-Medicinal Supply Activity (4.50) | `Device` + `DeviceUseStatement` | done | golden `scales_and_supplies` | |
+| Assessment Scale Observation (4.69) + Supporting Observation (4.86) | panel `Observation` + member `Observation`s (`ordinalValue`) | done | golden `scales-supplies` | |
+| Non-Medicinal Supply Activity (4.50) | `Device` + `DeviceUseStatement` | done | golden `scales-supplies` | |
 
 ## Header participants
 
@@ -491,6 +491,12 @@ code `entry.unmapped`, with the template OID). On the 29 sample documents in the
 small unit samples) nothing fails to convert and no entry is unmapped. Gaps it found earlier are now covered: Health Concerns,
 status assessments, planned medications, instructions, procedure observations, hospital-course wrappers, advance directives and
 the C-CDA 3.0 observations.
+
+CI also converts the 19 complete documents in `HL7/C-CDA-Examples` and validates the bundles with the HL7 validator (job
+"HL7 example corpus", `scripts/corpus_gate.py`). Every error kind it found is fixed except the few listed with reasons in
+`scripts/corpus-known-errors.txt` (CPT displays, source documents that misuse a code system, vital-sign codes the base FHIR
+profiles reject). Findings and decisions: ADR 0066.
+Remaining validator *warnings* come from the source data (inactive or retired codes, missing performers, value-set mismatches).
 
 ## Policy questions
 
