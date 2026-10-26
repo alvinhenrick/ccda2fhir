@@ -127,6 +127,17 @@
               }
             ]
           },
+          "followUp": [
+            {
+              "coding": [
+                {
+                  "code": "409073007",
+                  "system": "http://snomed.info/sct"
+                }
+              ],
+              "text": "Return in 10 days to have the stitches removed."
+            }
+          ],
           "id": "procedure-1",
           "identifier": [
             {

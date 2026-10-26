@@ -15,7 +15,7 @@ silently.
 
 - Supply request, authorization (4.123): the IG has no mapping for either (ADR 0056).
 - CarePlan and health concern `addresses`; Goal progress as an R4 achievement code (only the document's own wording is kept).
-- Procedure instruction (`followUp`); `reasonReference` to an Observation (only Conditions are linked).
+- `reasonReference` to an Observation (only Conditions are linked).
 - Coverage: plan name, authorizations, the member's period.
 - Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
@@ -178,7 +178,7 @@ See `docs/decisions/0008-procedures.md`.
 | `methodCode`, `priorityCode`, approach | not supported (IG) | reported | | |
 | Service Delivery Location | `location` | done (ADR 0018) | golden `location_and_specimen` | |
 | Encounter link, comment | `encounter`, `note` | done (ADR 0025, 0034) | golden | |
-| Instruction (`followUp`) | `followUp` | todo | | |
+| Instruction (4.20) in a procedure | `followUp` (code and text) | done (ADR 0057; not in the IG) | `nested_instruction_becomes_follow_up`, golden `procedures` | |
 | Procedure Activity Observation | Observation | done (ADR 0008) | golden | |
 | Planned procedure (mood INT/RQO/PRP) | ServiceRequest | done | `planned_procedure_becomes_a_plan` | |
 
