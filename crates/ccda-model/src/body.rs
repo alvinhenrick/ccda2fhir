@@ -367,6 +367,8 @@ pub struct Section {
     pub null_flavor: Option<String>,
     /// The narrative `text`, flattened to plain text.
     pub text: Option<String>,
+    /// The same narrative as FHIR-safe XHTML (a `div`), keeping paragraphs, lists and tables.
+    pub text_xhtml: Option<String>,
     pub entries: Vec<Entry>,
     pub sections: Vec<Section>,
 }
@@ -779,6 +781,7 @@ fn parse_section(node: &Node, depth: usize) -> Result<Section, ParseError> {
         title: child(node, "title").and_then(|n| text_of(&n)),
         null_flavor: attr(node, "nullFlavor"),
         text: child(node, "text").and_then(|n| text_of(&n)),
+        text_xhtml: child(node, "text").and_then(|n| crate::narrative::xhtml(&n)),
         entries,
         sections,
     })

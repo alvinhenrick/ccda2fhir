@@ -80,8 +80,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Colonoscopy, lipid panel and a follow-up visit are planned.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Colonoscopy, lipid panel and a follow-up visit are planned.</div>",
+                "status": "additional"
               },
               "title": "Plan of Treatment"
             }

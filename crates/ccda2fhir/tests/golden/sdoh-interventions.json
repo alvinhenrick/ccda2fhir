@@ -216,8 +216,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Food assistance enrollment completed; follow-up planned.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Food assistance enrollment completed; follow-up planned.</div>",
+                "status": "additional"
               },
               "title": "Interventions"
             },
@@ -236,8 +236,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Reliable access to food.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Reliable access to food.</div>",
+                "status": "additional"
               },
               "title": "Goals"
             }

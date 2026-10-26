@@ -216,8 +216,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Asthma and a risk of falls.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Asthma and a risk of falls.</div>",
+                "status": "additional"
               },
               "title": "Problems"
             },
@@ -239,8 +239,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Disability status unknown. Caregiver is the spouse.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Disability status unknown. Caregiver is the spouse.</div>",
+                "status": "additional"
               },
               "title": "Functional status"
             },
@@ -259,8 +259,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Follow-up visit booked.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Follow-up visit booked.</div>",
+                "status": "additional"
               },
               "title": "Plan of treatment"
             }

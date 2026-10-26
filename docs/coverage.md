@@ -18,7 +18,7 @@ silently.
 - Procedure instruction (`followUp`); `reasonReference` to an Observation (only Conditions are linked).
 - Coverage: plan name, authorizations, the member's period.
 - Patient and related-person members and `functionCode` of a care team; Specimen condition; Location status and organization.
-- Narrative `text/reference` as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
+- Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
 - Immunization dose range and reaction; Problem supporting observations (SPRT); software authors as Devices.
 - Advance directive verifier, witness and custodian participants.
 - Imaging, laboratory and pathology report narratives stay text.

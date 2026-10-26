@@ -11,4 +11,4 @@ Status: accepted. Source: IG page "CF-notes".
 
 ## Update (docs refresh)
 
-Still open: narrative references as XHTML (they are plain text today).
+Section narrative became XHTML in ADR 0052. A note's content from a narrative reference is still plain text.

@@ -71,7 +71,7 @@
               ],
               "text": {
                 "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Seen for follow-up. Doing well on current plan.</p></div>",
-                "status": "generated"
+                "status": "additional"
               },
               "title": "Notes"
             }

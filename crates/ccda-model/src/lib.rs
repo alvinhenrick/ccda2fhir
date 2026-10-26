@@ -6,6 +6,7 @@
 
 mod body;
 mod header;
+mod narrative;
 mod types;
 mod xml;
 

@@ -70,8 +70,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Start clindamycin; education on fever; ECG performed.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Start clindamycin; education on fever; ECG performed.</div>",
+                "status": "additional"
               },
               "title": "Plan of Treatment"
             }

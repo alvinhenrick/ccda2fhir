@@ -213,8 +213,8 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Food insecurity.</p></div>",
-                "status": "generated"
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Food insecurity.</div>",
+                "status": "additional"
               },
               "title": "Problems"
             }
