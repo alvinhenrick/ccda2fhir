@@ -305,8 +305,8 @@
           "code": {
             "coding": [
               {
-                "code": "8480-6",
-                "display": "Systolic blood pressure",
+                "code": "2345-7",
+                "display": "Glucose [Mass/volume] in Serum or Plasma",
                 "system": "http://loinc.org"
               }
             ]
@@ -325,13 +325,13 @@
             "reference": "urn:uuid:45f58917-8bea-546d-85c5-c1a63e9dfc32"
           },
           "text": {
-            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Systolic blood pressure</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-03-01</td></tr><tr><td>valueQuantity</td><td>152 mm[Hg]</td></tr></table></div>",
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>code</td><td>Glucose [Mass/volume] in Serum or Plasma</td></tr><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2024-03-01</td></tr><tr><td>valueQuantity</td><td>152 mg/dL</td></tr></table></div>",
             "status": "generated"
           },
           "valueQuantity": {
-            "code": "mm[Hg]",
+            "code": "mg/dL",
             "system": "http://unitsofmeasure.org",
-            "unit": "mm[Hg]",
+            "unit": "mg/dL",
             "value": 152
           }
         }
