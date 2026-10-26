@@ -46,6 +46,58 @@ pub fn map_immunizations(doc: &ClinicalDocument, ctx: &mut Context) -> Vec<Value
     out
 }
 
+/// A Reaction Observation (4.9) as an `Observation` referenced from `Immunization.reaction.detail`,
+/// as the IG recommends: the observation's value becomes `valueCodeableConcept`.
+fn reaction(s: &Statement, ctx: &mut Context) -> Option<Value> {
+    let value = match s.values.first() {
+        Some(Cv::Coded(c)) => map_codeable_concept(c, ctx.terminology, ctx.report),
+        _ => None,
+    };
+    let code = s
+        .code
+        .as_ref()
+        .filter(|c| c.code_system.as_deref() != Some("2.16.840.1.113883.5.4"))
+        .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report));
+    if value.is_none() && code.is_none() {
+        ctx.report.info(
+            "immunization.reaction.empty",
+            "a reaction to an immunization has no usable code or value and was not mapped",
+        );
+        return None;
+    }
+    let date = s
+        .effective_time
+        .as_ref()
+        .and_then(|t| {
+            t.value
+                .as_deref()
+                .or(t.low.as_ref().and_then(|p| p.value.as_deref()))
+        })
+        .and_then(|v| map_datetime(v, ctx.report));
+    let id = ctx.next_id("reaction");
+    let mut o = Map::new();
+    o.insert("resourceType".into(), json!("Observation"));
+    o.insert("id".into(), json!(id));
+    o.insert("status".into(), json!("final"));
+    // Observation.code is required; a reaction with only a value has no code to give.
+    o.insert("code".into(), code.unwrap_or_else(|| dar("NI", ctx)));
+    o.insert("subject".into(), json!({ "reference": ctx.patient }));
+    if let Some(d) = &date {
+        o.insert("effectiveDateTime".into(), json!(d));
+    }
+    if let Some(v) = value {
+        o.insert("valueCodeableConcept".into(), v);
+    }
+    let reference = ctx.reference("Observation", &id);
+    ctx.push_extra(Value::Object(o));
+    let mut entry = Map::new();
+    if let Some(d) = date {
+        entry.insert("date".into(), json!(d));
+    }
+    entry.insert("detail".into(), json!({ "reference": reference }));
+    Some(Value::Object(entry))
+}
+
 /// `CF-ImmunizationStatus` for a non-negated activity: v3 ActStatus to event-status.
 fn status_of(code: &str) -> Option<&'static str> {
     Some(match code {
@@ -219,6 +271,7 @@ fn map_activity(s: &Statement, ctx: &mut Context) -> Value {
 
     // Reasons: why it was not given, and why it was given.
     let mut reasons: Vec<Value> = Vec::new();
+    let mut reactions: Vec<Value> = Vec::new();
     for related in nested(s) {
         if related.has_template(NOT_GIVEN_REASON) {
             if let Some(c) = related
@@ -235,11 +288,13 @@ fn map_activity(s: &Statement, ctx: &mut Context) -> Value {
                 }
             }
         } else if related.has_template(REACTION) {
-            ctx.report.info(
-                "immunization.reaction.unsupported",
-                "a reaction to an immunization is not mapped yet",
-            );
+            if let Some(entry) = reaction(related, ctx) {
+                reactions.push(entry);
+            }
         }
+    }
+    if !reactions.is_empty() {
+        r.insert("reaction".into(), json!(reactions));
     }
 
     if !reasons.is_empty() {
@@ -514,7 +569,7 @@ mod tests {
     }
 
     #[test]
-    fn dose_range_and_reaction_are_reported() {
+    fn dose_range_and_an_empty_reaction_are_reported() {
         let body = format!(
             r#"<effectiveTime value="2020"/><doseQuantity><low value="1" unit="mL"/><high value="2" unit="mL"/></doseQuantity>{FLU}
 <entryRelationship typeCode="MFST" inversionInd="true"><observation classCode="OBS" moodCode="EVN">
@@ -525,6 +580,31 @@ mod tests {
         assert!(out[0].get("doseQuantity").is_none());
         let c = codes(&report);
         assert!(c.contains(&"immunization.dose.range-unsupported"));
-        assert!(c.contains(&"immunization.reaction.unsupported"));
+        assert!(c.contains(&"immunization.reaction.empty"));
+    }
+
+    #[test]
+    fn reaction_becomes_an_observation_referenced_from_the_immunization() {
+        let body = format!(
+            r#"<effectiveTime value="2020"/>{FLU}
+<entryRelationship typeCode="MFST" inversionInd="true"><observation classCode="OBS" moodCode="EVN">
+  <templateId root="2.16.840.1.113883.10.20.22.4.9"/>
+  <code code="ASSERTION" codeSystem="2.16.840.1.113883.5.4"/>
+  <effectiveTime value="20200102"/>
+  <value xsi:type="CD" code="247472004" codeSystem="2.16.840.1.113883.6.96"/>
+</observation></entryRelationship>"#
+        );
+        let (out, extra, _) = run(&document("", &body));
+        assert!(out[0]["reaction"][0]["detail"]["reference"].is_string());
+        assert_eq!(out[0]["reaction"][0]["date"], "2020-01-02");
+        let obs = extra
+            .iter()
+            .find(|r| r["resourceType"] == "Observation")
+            .unwrap();
+        assert_eq!(
+            obs["valueCodeableConcept"]["coding"][0]["code"],
+            "247472004"
+        );
+        assert!(obs["code"]["extension"][0]["valueCode"].is_string());
     }
 }

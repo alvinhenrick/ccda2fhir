@@ -144,6 +144,14 @@
               "doseNumberPositiveInt": 1
             }
           ],
+          "reaction": [
+            {
+              "date": "2020-01-02",
+              "detail": {
+                "reference": "urn:uuid:772c89cb-7896-55d7-a932-597b1fda4b99"
+              }
+            }
+          ],
           "recorded": "2024-10-10T10:15:00-05:00",
           "resourceType": "Immunization",
           "route": {
@@ -312,6 +320,39 @@
           "text": {
             "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>PractitionerRole</p></div>",
             "status": "generated"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:772c89cb-7896-55d7-a932-597b1fda4b99",
+        "resource": {
+          "code": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown"
+              }
+            ]
+          },
+          "effectiveDateTime": "2020-01-02",
+          "id": "reaction-1",
+          "resourceType": "Observation",
+          "status": "final",
+          "subject": {
+            "reference": "urn:uuid:890211ee-48a4-547d-b71c-dda32434d6ee"
+          },
+          "text": {
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Observation</p><table><tr><td>status</td><td>final</td></tr><tr><td>effectiveDateTime</td><td>2020-01-02</td></tr><tr><td>valueCodeableConcept</td><td>Hives</td></tr></table></div>",
+            "status": "generated"
+          },
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "code": "247472004",
+                "display": "Hives",
+                "system": "http://snomed.info/sct"
+              }
+            ]
           }
         }
       },
