@@ -34,3 +34,7 @@ mapped when the observation has none.
 ## Not done
 `PractitionerRole` (specialty from `assignedAuthor/code`), author telecom/address, and Provenance for
 non-author participants (informants, performers). Tracked in docs/coverage.md.
+
+## Update (docs refresh)
+
+Software authors are Devices and Provenance agents since ADR 0058.

@@ -19,7 +19,7 @@ silently.
 - Coverage: plan name, authorizations, the member's period.
 - Patient and related-person members of a care team; Location organization (see ADR 0054: C-CDA has no source for it).
 - Note content from a narrative reference as XHTML rather than plain text; a source `DocumentReference`; `reference/externalDocument`.
-- Problem supporting observations (SPRT); software authors as Devices.
+
 - Advance directive verifier, witness and custodian participants.
 - Imaging, laboratory and pathology report narratives stay text.
 
@@ -72,7 +72,7 @@ silently.
 | `representedOrganization` | Organization, `Provenance.agent.onBehalfOf` | done | `organization_is_shared_and_linked_with_on_behalf_of` | |
 | `author/time` | `recordedDate` (earliest), `Provenance.recorded` | done | `recorder_is_latest_and_recorded_date_is_earliest` | |
 | `assignedAuthor/code` (role/specialty) | PractitionerRole | done | goldens `care_team`, `problems`, others | |
-| `assignedAuthoringDevice` | Device | reported | `software_authors_are_noted_not_mapped` | |
+| `assignedAuthoringDevice` | Device, as a Provenance agent (never `recorder`) | done (ADR 0058) | `software_author_is_a_provenance_agent_but_never_the_recorder`, golden `goals` | |
 | Author telecom, address | Practitioner.telecom, address | done | golden `header_participants` | |
 
 ## Immunizations (Immunization Activity, mood EVN) to Immunization

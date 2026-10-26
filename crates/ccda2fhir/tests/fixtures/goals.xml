@@ -48,6 +48,10 @@
       <statusCode code="completed"/>
       <effectiveTime value="20240601"/>
       <value xsi:type="ST">Walk 30 minutes a day</value>
+      <author><time value="20240601090000-0500"/><assignedAuthor>
+        <id root="1.3.6.1.4.1.22812.12.7" extension="EHR-1"/>
+        <assignedAuthoringDevice><softwareName>Example EHR 4.2</softwareName></assignedAuthoringDevice>
+      </assignedAuthor></author>
     </observation></entry>
   </section></component>
   <component><section>
