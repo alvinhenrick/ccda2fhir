@@ -54,6 +54,48 @@ fn relationship(code: &str) -> &'static str {
     }
 }
 
+/// The policy holder as a `RelatedPerson`, when the document gives a name.
+fn related_person(p: &Participant, ctx: &mut Context) -> Option<String> {
+    let name = p
+        .person_name
+        .as_ref()
+        .and_then(crate::patient::human_name)?;
+    let id = ctx.next_id("relatedperson");
+    let mut r = Map::new();
+    r.insert("resourceType".into(), json!("RelatedPerson"));
+    r.insert("id".into(), json!(id));
+    r.insert("active".into(), json!(true));
+    r.insert("patient".into(), json!({ "reference": ctx.patient }));
+    r.insert("name".into(), json!([name]));
+    let identifiers: Vec<Value> = p
+        .ids
+        .iter()
+        .filter_map(|i| map_identifier(i, ctx.terminology, ctx.report))
+        .collect();
+    if !identifiers.is_empty() {
+        r.insert("identifier".into(), json!(identifiers));
+    }
+    let telecoms: Vec<Value> = p
+        .telecoms
+        .iter()
+        .filter_map(crate::patient::telecom)
+        .collect();
+    if !telecoms.is_empty() {
+        r.insert("telecom".into(), json!(telecoms));
+    }
+    let addresses: Vec<Value> = p
+        .addresses
+        .iter()
+        .filter_map(crate::patient::address)
+        .collect();
+    if !addresses.is_empty() {
+        r.insert("address".into(), json!(addresses));
+    }
+    let reference = ctx.reference("RelatedPerson", &id);
+    ctx.push_extra(Value::Object(r));
+    Some(reference)
+}
+
 fn map_policy(s: &Statement, ctx: &mut Context) -> Value {
     let mut r = Map::new();
     r.insert("resourceType".into(), json!("Coverage"));
@@ -99,6 +141,18 @@ fn map_policy(s: &Statement, ctx: &mut Context) -> Value {
         .find_map(|id| id.extension.clone());
     if let Some(v) = subscriber {
         r.insert("subscriberId".into(), json!(v));
+    }
+
+    // The subscriber: the patient when the covered party is the policy holder, otherwise the
+    // policy holder as a RelatedPerson when the document names them.
+    let is_self = covered
+        .and_then(|p| p.role_code.as_ref())
+        .and_then(|c| c.code.as_deref())
+        == Some("SELF");
+    if is_self {
+        r.insert("subscriber".into(), json!({ "reference": ctx.patient }));
+    } else if let Some(reference) = holder.and_then(|h| related_person(h, ctx)) {
+        r.insert("subscriber".into(), json!({ "reference": reference }));
     }
 
     match covered
@@ -261,5 +315,25 @@ mod tests {
         assert_eq!(relationship("SPS"), "spouse");
         assert_eq!(relationship("NCHILD"), "child");
         assert_eq!(relationship("XYZ"), "other");
+    }
+
+    #[test]
+    fn self_subscriber_is_the_patient() {
+        let (out, _) = run(FULL);
+        assert_eq!(out[0]["subscriber"], out[0]["beneficiary"]);
+    }
+
+    #[test]
+    fn named_policy_holder_becomes_a_related_person() {
+        let body = r#"
+  <participant typeCode="COV"><participantRole><templateId root="2.16.840.1.113883.10.20.22.4.89"/>
+    <id root="1.2.3.4" extension="MEMBER-9"/><code code="CHILD" codeSystem="2.16.840.1.113883.5.111"/></participantRole></participant>
+  <participant typeCode="HLD"><participantRole><templateId root="2.16.840.1.113883.10.20.22.4.90"/>
+    <id root="1.2.3.4" extension="SUB-7"/>
+    <playingEntity><name><given>Pat</given><family>Holder</family></name></playingEntity></participantRole></participant>"#;
+        let xml_doc = run(body);
+        let c = &xml_doc.0[0];
+        assert!(c["subscriber"]["reference"].is_string());
+        assert_ne!(c["subscriber"], c["beneficiary"]);
     }
 }
