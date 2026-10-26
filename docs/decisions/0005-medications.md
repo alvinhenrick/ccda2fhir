@@ -6,8 +6,7 @@ Status: accepted. Source: IG page `CF-medications`, `CCDA-FHIR MedicationRequest
 - Status map (active, suspended to on-hold, aborted to stopped, completed, nullified to entered-in-error, cancelled).
   Anything else becomes `unknown` with a warning.
 - Intent: moodCode INT is `order`, EVN is `plan`. The EVN choice reads oddly (a recorded, taken medication is a plan?),
-  but it is the IG's published rule, and `intent` is required, so we follow it and revisit with the validator and
-  Medplum/Microsoft comparison.
+  but it is the IG's published rule, and `intent` is required, so we follow it and revisit with the validator.
 - `repeatNumber` is `timing.repeat.count` for INT only; on EVN it has no element and is reported.
 - Author is `requester`, with Provenance; first performer is `performer` (R4 allows one).
 - Drug vehicle, administrationUnitCode, supply order and dispense are reported, not mapped.
