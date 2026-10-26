@@ -201,6 +201,19 @@ const BUILTIN: &[(&str, &str)] = &[
     // CDC's own OID for CVX; real documents use both.
     ("2.16.840.1.113883.6.59", "http://hl7.org/fhir/sid/cvx"),
     (
+        "2.16.840.1.113883.5.110",
+        "http://terminology.hl7.org/CodeSystem/v3-RoleClass",
+    ),
+    (
+        "2.16.840.1.113883.5.112",
+        "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
+    ),
+    (
+        "2.16.840.1.113883.12.443",
+        "http://terminology.hl7.org/CodeSystem/v2-0443",
+    ),
+    ("2.16.840.1.113883.6.13", "http://www.ada.org/cdt"),
+    (
         "2.16.840.1.113883.6.101",
         "http://nucc.org/provider-taxonomy",
     ),
@@ -310,6 +323,14 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
         },
         "http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation" => match code {
             "1013" => Some("Christian (non-Catholic, non-specific)"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration" => match code {
+            "IM" => Some("Injection, intramuscular"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v2-0443" => match code {
+            "PP" => Some("Primary Care Provider"),
             _ => None,
         },
         _ => None,

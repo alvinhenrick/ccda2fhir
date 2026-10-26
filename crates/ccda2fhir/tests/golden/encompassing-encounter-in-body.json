@@ -85,7 +85,7 @@
                 ]
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Walk daily. Recheck blood pressure in two weeks &amp; review diet.</div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\" xml:lang=\"en-US\">Walk daily. Recheck blood pressure in two weeks &amp; review diet.</div>",
                 "status": "additional"
               },
               "title": "Plan of Treatment"
@@ -116,7 +116,7 @@
             "reference": "urn:uuid:b4503985-9b8b-5673-a2f4-012be85edb39"
           },
           "text": {
-            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Composition</p><table><tr><td>type</td><td>Summary of Episode Note</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Continuity of Care Document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
+            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\" xml:lang=\"en-US\"><p>Composition</p><table><tr><td>type</td><td>Summary of Episode Note</td></tr><tr><td>status</td><td>final</td></tr><tr><td>title</td><td>Continuity of Care Document</td></tr><tr><td>date</td><td>2025-01-02T12:00:00-05:00</td></tr></table></div>",
             "status": "generated"
           },
           "title": "Continuity of Care Document",

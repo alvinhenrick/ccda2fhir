@@ -29,17 +29,24 @@ def main():
         if line.strip() and not line.startswith("#")
     ]
     seen = collections.defaultdict(set)
+    warned = collections.defaultdict(set)
     for path in sorted(glob.glob(f"{directory}/*.validation.txt")):
         doc = path.split("/")[-1].split(".")[0]
         for line in open(path, errors="replace"):
             m = re.match(r"\s*Error @ (.*)", line)
             if m and "dom-6" not in line:
                 seen[normalise(m.group(1).rstrip())].add(doc)
+            w = re.match(r"\s*Warning @ (.*)", line)
+            if w and "dom-6" not in line:
+                warned[normalise(w.group(1).rstrip())].add(doc)
     unknown = {t: d for t, d in seen.items() if not any(k.search(t) for k in known)}
     print(f"## HL7 example corpus: {len(seen)} distinct error kinds, {len(unknown)} not known", file=out)
     for label, group in (("New", unknown), ("Known", {t: d for t, d in seen.items() if t not in unknown})):
         for t, docs in sorted(group.items(), key=lambda kv: -len(kv[1])):
             print(f"- {label} ({len(docs)} docs: {', '.join(sorted(docs))}) `{t[:380]}`", file=out)
+    print(f"## Warnings: {len(warned)} distinct kinds", file=out)
+    for t, docs in sorted(warned.items(), key=lambda kv: -len(kv[1]))[:70]:
+        print(f"- Warning ({len(docs)} docs) `{t[:230]}`", file=out)
     return 1 if unknown else 0
 
 
