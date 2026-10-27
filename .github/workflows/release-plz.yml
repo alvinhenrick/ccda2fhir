@@ -1,0 +1,57 @@
+name: Release-plz
+
+# On every push to main:
+#   release     publishes any crate version that is not on crates.io yet, then tags and creates the
+#               GitHub release. In practice that happens when a release pull request is merged.
+#   release-pr  opens or updates the release pull request (version bump and changelog).
+#
+# One-time setup: the CARGO_REGISTRY_TOKEN secret, and Settings > Actions > General > Workflow
+# permissions > "Allow GitHub Actions to create and approve pull requests".
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'alvinhenrick' }}
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: release-plz/action@v0.5
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  release-pr:
+    name: release pull request
+    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'alvinhenrick' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

@@ -1,0 +1,26 @@
+# Automated versioning and releases (https://release-plz.dev). See docs/releasing.md.
+#
+# The workspace shares one version. A pull request titled `feat:` or `fix:` (or with `!` or a
+# `BREAKING CHANGE`) on main makes release-plz open a "release" pull request that bumps the version and
+# updates CHANGELOG.md. Merging that pull request publishes the crates to crates.io and creates the
+# `vX.Y.Z` tag and GitHub release.
+
+[workspace]
+# One changelog and one tag/release for the whole workspace, owned by the `ccda2fhir` package.
+changelog_update = false
+git_tag_enable = false
+git_release_enable = false
+
+[[package]]
+name = "ccda2fhir"
+changelog_update = true
+changelog_path = "./CHANGELOG.md"
+git_tag_enable = true
+git_tag_name = "v{{ version }}"
+git_release_enable = true
+git_release_name = "v{{ version }}"
+
+# A build artefact for the browser, not a crate to publish.
+[[package]]
+name = "ccda2fhir-wasm"
+release = false

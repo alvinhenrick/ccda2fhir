@@ -18,5 +18,13 @@ Thanks for helping. A few rules keep a clinical-data converter trustworthy.
 - Keep the core crates free of I/O and global state.
 - Small PRs, one concern each.
 
-## Commits
-Short imperative subject line. Explain the why in the body when it is not obvious.
+## Commits and pull request titles
+Pull requests are squash-merged, so the **PR title is the commit message** and drives releases
+(see `docs/releasing.md`). Start it with a type:
+
+- `feat:` new behaviour (a minor bump while the version is 0.x)
+- `fix:` a bug fix (a patch bump)
+- `docs:`, `test:`, `chore:`, `ci:`, `refactor:`, `perf:` no release by themselves
+- add `!` (`feat!:`) or a `BREAKING CHANGE:` line in the body for an incompatible change
+
+Then a short imperative summary. Explain the why in the body when it is not obvious.

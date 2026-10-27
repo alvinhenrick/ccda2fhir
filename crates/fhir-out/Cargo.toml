@@ -2,6 +2,7 @@
 name = "fhir-out"
 description = "FHIR R4 output building blocks (Bundle) kept separate from C-CDA parsing and mapping"
 version.workspace = true
+readme = "README.md"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
