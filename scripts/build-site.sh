@@ -45,7 +45,7 @@ cp -r docs LESSONS "$src/"
   echo
   echo "# Reference"
   echo
-  for f in docs/uscdi.md docs/coverage.md docs/benchmarks.md; do
+  for f in docs/uscdi.md docs/coverage.md docs/benchmarks.md docs/releasing.md; do
     [ -f "$f" ] || continue
     echo "- [$(head -n 1 "$f" | sed 's/^# *//')]($f)"
   done
