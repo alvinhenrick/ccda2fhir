@@ -2,6 +2,7 @@
 name = "ccda-map"
 description = "Maps the typed C-CDA model to FHIR R4 resources and reports anything lossy"
 version.workspace = true
+readme = "README.md"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true

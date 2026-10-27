@@ -2,6 +2,7 @@
 name = "ccda-terminology"
 description = "Code system helpers for C-CDA to FHIR conversion (OID to URI mapping)"
 version.workspace = true
+readme = "README.md"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true

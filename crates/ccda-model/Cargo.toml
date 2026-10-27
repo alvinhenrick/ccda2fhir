@@ -2,6 +2,7 @@
 name = "ccda-model"
 description = "Typed, version-neutral model and safe parser for C-CDA documents"
 version.workspace = true
+readme = "README.md"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true

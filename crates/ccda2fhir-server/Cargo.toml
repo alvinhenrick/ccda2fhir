@@ -2,6 +2,7 @@
 name = "ccda2fhir-server"
 description = "Command line tool and HTTP service for the C-CDA to FHIR converter"
 version.workspace = true
+readme = "README.md"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
