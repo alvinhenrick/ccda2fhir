@@ -29,3 +29,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: EmbarkStudios/cargo-deny-action@v2
+
+  wasm:
+    name: WebAssembly build and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Install wasm-bindgen CLI (the version Cargo.lock pins)
+        run: |
+          want="$(awk '/^name = "wasm-bindgen"$/{getline; gsub(/[version= "]/,""); print; exit}' Cargo.lock)"
+          cargo install wasm-bindgen-cli --locked --version "$want"
+      # Each step copies the tail of its output into an annotation, so a failure can be read without
+      # downloading the job log.
+      - name: Build for Node
+        run: |
+          set +e
+          scripts/build-wasm.sh nodejs > build.log 2>&1
+          code=$?
+          cat build.log
+          if [ $code -ne 0 ]; then echo "::error title=wasm build::$(tail -n 25 build.log | tr '\n' '|' | cut -c1-3000)"; fi
+          exit $code
+      - name: Smoke test in Node
+        run: |
+          set +e
+          node scripts/wasm-smoke.cjs target/wasm-nodejs > smoke.log 2>&1
+          code=$?
+          cat smoke.log
+          if [ $code -ne 0 ]; then echo "::error title=wasm smoke::$(tail -n 25 smoke.log | tr '\n' '|' | cut -c1-3000)"; fi
+          exit $code
+      - name: Build for the browser
+        run: |
+          scripts/build-wasm.sh web
+          size=$(stat -c %s target/wasm-web/ccda2fhir_wasm_bg.wasm)
+          echo "Browser module: $((size / 1024)) KiB (.wasm, uncompressed)" >> "$GITHUB_STEP_SUMMARY"

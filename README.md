@@ -68,6 +68,24 @@ docker compose --profile validate down -v      # tear everything down
 
 The default input is the repository's synthetic fixtures. A normal `docker compose up` does not start it.
 
+### In the browser or Node (WebAssembly)
+
+The same converter compiles to WebAssembly, so a document can be converted without leaving the machine.
+
+```
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli --locked --version <the version in Cargo.lock>
+scripts/build-wasm.sh web        # or: nodejs
+```
+
+```js
+import init, { convert_ccda } from "./ccda2fhir_wasm.js";
+await init();
+const result = JSON.parse(convert_ccda(xmlText, "us-core"));   // { status, issues, bundle, report }
+```
+
+CI checks that the WebAssembly build produces bundles identical to the native goldens. See ADR 0069.
+
 ### Command line
 
 ```

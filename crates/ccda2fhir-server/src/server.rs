@@ -251,62 +251,33 @@ async fn convert_handler(
     // Conversion is CPU work; keep it off the async threads.
     let result = tokio::task::spawn_blocking(move || {
         convert(&body, &options).map(|c| {
-            let issues = c.report.issues.len();
-            let warnings = c
-                .report
-                .issues
-                .iter()
-                .filter(|i| i.severity == ccda_map::Severity::Warning)
-                .count();
-            let report: Vec<Value> = c
-                .report
-                .issues
-                .iter()
-                .map(|i| {
-                    json!({
-                        "severity": format!("{:?}", i.severity).to_lowercase(),
-                        "code": i.code,
-                        "message": i.message,
-                    })
-                })
-                .collect();
-            (c.bundle.to_json(), report, issues, warnings)
+            let payload = if with_report {
+                c.to_response_json()
+            } else {
+                c.bundle.to_json()
+            };
+            (payload, c.status(), c.report.issues.len())
         })
     })
     .await;
 
     match result {
-        Ok(Ok((bundle, report, issues, warnings))) => {
-            // `complete`: nothing was dropped, defaulted or approximated. `partial`: at least one
-            // warning says something was (see the report for which).
-            let status = if warnings == 0 { "complete" } else { "partial" };
-            let payload = if with_report {
-                json!({
-                    "status": status,
-                    "issues": { "total": issues, "warnings": warnings },
-                    "bundle": bundle,
-                    "report": report,
-                })
-            } else {
-                bundle
-            };
-            (
-                StatusCode::OK,
-                [
-                    (header::CONTENT_TYPE, HeaderValue::from_static(FHIR_JSON)),
-                    (
-                        header::HeaderName::from_static("x-ccda2fhir-issues"),
-                        HeaderValue::from(issues),
-                    ),
-                    (
-                        header::HeaderName::from_static("x-ccda2fhir-status"),
-                        HeaderValue::from_static(status),
-                    ),
-                ],
-                Json(payload),
-            )
-                .into_response()
-        }
+        Ok(Ok((payload, status, issues))) => (
+            StatusCode::OK,
+            [
+                (header::CONTENT_TYPE, HeaderValue::from_static(FHIR_JSON)),
+                (
+                    header::HeaderName::from_static("x-ccda2fhir-issues"),
+                    HeaderValue::from(issues),
+                ),
+                (
+                    header::HeaderName::from_static("x-ccda2fhir-status"),
+                    HeaderValue::from_static(status),
+                ),
+            ],
+            Json(payload),
+        )
+            .into_response(),
         Ok(Err(e)) => outcome(StatusCode::BAD_REQUEST, "invalid", &e.to_string()),
         Err(_) => outcome(
             StatusCode::INTERNAL_SERVER_ERROR,

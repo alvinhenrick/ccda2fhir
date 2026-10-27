@@ -1,0 +1,30 @@
+[package]
+name = "ccda2fhir-wasm"
+description = "WebAssembly build of the C-CDA to FHIR converter, for the browser and Node"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ccda2fhir = { path = "../ccda2fhir", version = "0.1.0" }
+ccda-map.workspace = true
+serde_json.workspace = true
+wasm-bindgen = "0.2"
+
+# The workspace forbids `unsafe`, but the code `wasm-bindgen` generates for the JavaScript boundary
+# contains it, and `forbid` cannot be lifted for generated code. Everything we write here is safe;
+# the rest of the lints are the workspace's.
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+dbg_macro = "warn"
+todo = "warn"
