@@ -43,10 +43,24 @@ jobs:
         run: |
           want="$(awk '/^name = "wasm-bindgen"$/{getline; gsub(/[version= "]/,""); print; exit}' Cargo.lock)"
           cargo install wasm-bindgen-cli --locked --version "$want"
-      - name: Build for Node and run the smoke test
+      # Each step copies the tail of its output into an annotation, so a failure can be read without
+      # downloading the job log.
+      - name: Build for Node
         run: |
-          scripts/build-wasm.sh nodejs
-          node scripts/wasm-smoke.cjs target/wasm-nodejs
+          set +e
+          scripts/build-wasm.sh nodejs > build.log 2>&1
+          code=$?
+          cat build.log
+          if [ $code -ne 0 ]; then echo "::error title=wasm build::$(tail -n 25 build.log | tr '\n' '|' | cut -c1-3000)"; fi
+          exit $code
+      - name: Smoke test in Node
+        run: |
+          set +e
+          node scripts/wasm-smoke.cjs target/wasm-nodejs > smoke.log 2>&1
+          code=$?
+          cat smoke.log
+          if [ $code -ne 0 ]; then echo "::error title=wasm smoke::$(tail -n 25 smoke.log | tr '\n' '|' | cut -c1-3000)"; fi
+          exit $code
       - name: Build for the browser
         run: |
           scripts/build-wasm.sh web
