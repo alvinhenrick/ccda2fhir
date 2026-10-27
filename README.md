@@ -111,6 +111,10 @@ Error and report messages never contain document content, so they are safe to lo
 
 ## Documentation
 
+Start with the user guide: [getting started](docs/guide/getting-started.md), [using the library](docs/guide/library.md),
+[the command line and service](docs/guide/cli-and-service.md), [concepts](docs/guide/concepts.md) and
+[security and deployment](docs/guide/deployment.md).
+
 The documentation site (API reference, coverage tables, design decisions, lessons and a live in-browser demo) is built by
 `scripts/build-site.sh` and published to GitHub Pages from `main` (`https://alvinhenrick.github.io/ccda2fhir/`). To preview it
 locally: `scripts/build-wasm.sh web && scripts/build-site.sh`, then serve `target/site`. Pass `SKIP_DEMO=1` to leave the demo out.
