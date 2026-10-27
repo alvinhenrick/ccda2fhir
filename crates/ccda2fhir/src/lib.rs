@@ -43,6 +43,53 @@ pub struct Conversion {
     pub report: Report,
 }
 
+impl Conversion {
+    /// How many report entries are warnings: data that was dropped, defaulted or approximated.
+    #[must_use]
+    pub fn warnings(&self) -> usize {
+        self.report
+            .issues
+            .iter()
+            .filter(|i| i.severity == ccda_map::Severity::Warning)
+            .count()
+    }
+
+    /// `complete` when nothing was dropped, defaulted or approximated; `partial` when at least
+    /// one warning says something was (the report says which).
+    #[must_use]
+    pub fn status(&self) -> &'static str {
+        if self.warnings() == 0 {
+            "complete"
+        } else {
+            "partial"
+        }
+    }
+
+    /// The bundle with its status and report, as the service returns it with `?report=true`:
+    /// `{ status, issues: { total, warnings }, bundle, report: [{ severity, code, message }] }`.
+    #[must_use]
+    pub fn to_response_json(&self) -> serde_json::Value {
+        let report: Vec<serde_json::Value> = self
+            .report
+            .issues
+            .iter()
+            .map(|i| {
+                serde_json::json!({
+                    "severity": format!("{:?}", i.severity).to_lowercase(),
+                    "code": i.code,
+                    "message": i.message,
+                })
+            })
+            .collect();
+        serde_json::json!({
+            "status": self.status(),
+            "issues": { "total": self.report.issues.len(), "warnings": self.warnings() },
+            "bundle": self.bundle.to_json(),
+            "report": report,
+        })
+    }
+}
+
 /// Failures that stop a conversion. Data problems are reported in [`Report`] instead.
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum ConvertError {
@@ -191,6 +238,17 @@ mod tests {
             .iter()
             .all(|i| i.code.starts_with("composition.")
                 || i.code == "provenance.derivation.unavailable"));
+    }
+
+    #[test]
+    fn the_response_json_has_status_counts_bundle_and_report() {
+        let c = convert(SAMPLE.as_bytes(), &Options::default()).unwrap();
+        let r = c.to_response_json();
+        assert_eq!(r["status"], c.status());
+        assert_eq!(r["issues"]["total"], c.report.issues.len());
+        assert_eq!(r["issues"]["warnings"], c.warnings());
+        assert_eq!(r["bundle"]["resourceType"], "Bundle");
+        assert_eq!(r["report"].as_array().unwrap().len(), c.report.issues.len());
     }
 
     #[test]

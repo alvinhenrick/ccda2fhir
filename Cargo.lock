@@ -208,6 +208,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ccda2fhir-wasm"
+version = "0.1.0"
+dependencies = [
+ "ccda-map",
+ "ccda2fhir",
+ "serde_json",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"

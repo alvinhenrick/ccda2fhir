@@ -29,3 +29,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: EmbarkStudios/cargo-deny-action@v2
+
+  wasm:
+    name: WebAssembly build and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Install wasm-bindgen CLI (the version Cargo.lock pins)
+        run: |
+          want="$(awk '/^name = "wasm-bindgen"$/{getline; gsub(/[version= "]/,""); print; exit}' Cargo.lock)"
+          cargo install wasm-bindgen-cli --locked --version "$want"
+      - name: Build for Node and run the smoke test
+        run: |
+          scripts/build-wasm.sh nodejs
+          node scripts/wasm-smoke.cjs target/wasm-nodejs
+      - name: Build for the browser
+        run: |
+          scripts/build-wasm.sh web
+          size=$(stat -c %s target/wasm-web/ccda2fhir_wasm_bg.wasm)
+          echo "Browser module: $((size / 1024)) KiB (.wasm, uncompressed)" >> "$GITHUB_STEP_SUMMARY"
