@@ -11,7 +11,22 @@ const root = path.resolve(__dirname, '..', 'crates', 'ccda2fhir', 'tests');
 
 assert.match(wasm.version(), /^\d+\.\d+\.\d+/);
 
+// The first place two JSON values differ, as a path with both sides (short).
+function firstDifference(a, b, at = '$') {
+  if (a === b) return null;
+  if (typeof a !== typeof b || a === null || b === null || typeof a !== 'object') {
+    return at + ': wasm=' + JSON.stringify(a)?.slice(0, 80) + ' native=' + JSON.stringify(b)?.slice(0, 80);
+  }
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const k of keys) {
+    const d = firstDifference(a[k], b[k], at + '.' + k);
+    if (d) return d;
+  }
+  return null;
+}
+
 let checked = 0;
+const mismatches = [];
 for (const name of fs.readdirSync(path.join(root, 'fixtures')).sort()) {
   if (!name.endsWith('.xml')) continue;
   const stem = name.slice(0, -4);
@@ -20,10 +35,12 @@ for (const name of fs.readdirSync(path.join(root, 'fixtures')).sort()) {
   const xml = fs.readFileSync(path.join(root, 'fixtures', name), 'utf8');
   const result = JSON.parse(wasm.convert_ccda(xml, undefined));
   const golden = JSON.parse(fs.readFileSync(goldenPath, 'utf8'));
-  assert.deepStrictEqual(result.bundle, golden.bundle, stem + ': bundle differs from the native golden');
+  const diff = firstDifference(result.bundle, golden.bundle);
+  if (diff) { mismatches.push(stem + ' -> ' + diff); continue; }
   assert.ok(['complete', 'partial'].includes(result.status), stem);
   checked++;
 }
+assert.deepStrictEqual(mismatches, [], 'bundles differ from the native goldens');
 assert.ok(checked >= 10, 'expected many fixtures, checked ' + checked);
 
 // profiles=none declares no profile; a bad document throws without echoing it.
