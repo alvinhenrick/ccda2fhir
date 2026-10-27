@@ -37,6 +37,12 @@ cp -r docs LESSONS "$src/"
   echo "[Security](SECURITY.md)"
   echo "[Contributing](CONTRIBUTING.md)"
   echo
+  echo "# User guide"
+  echo
+  for f in getting-started library cli-and-service concepts deployment; do
+    echo "- [$(head -n 1 "docs/guide/$f.md" | sed 's/^# *//')](docs/guide/$f.md)"
+  done
+  echo
   echo "# Reference"
   echo
   for f in docs/uscdi.md docs/coverage.md docs/benchmarks.md; do

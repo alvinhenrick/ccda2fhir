@@ -16,9 +16,10 @@ use ccda_map::{
     map_encounters, map_family_history, map_goals, map_health_concerns, map_imaging,
     map_immunizations, map_medications, map_notes, map_patient, map_problems, map_procedures,
     map_results, map_service_requests, map_social_history, map_unstructured, map_vitals,
-    mark_narrative_language, report_unmapped, tag_sdoh, Context, Profiles, Report,
+    mark_narrative_language, report_unmapped, tag_sdoh, Context, Report,
 };
-use ccda_model::Limits;
+pub use ccda_map::{Issue, Profiles, Severity};
+pub use ccda_model::Limits;
 use ccda_terminology::BuiltinTerminology;
 use fhir_out::Bundle;
 use thiserror::Error;
