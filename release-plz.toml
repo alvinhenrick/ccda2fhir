@@ -24,3 +24,4 @@ git_release_name = "v{{ version }}"
 [[package]]
 name = "ccda2fhir-wasm"
 release = false
+publish = false
