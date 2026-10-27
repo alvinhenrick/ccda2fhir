@@ -1,0 +1,56 @@
+name: Documentation site
+
+# Builds the site (API reference, book, live demo) on every pull request so it cannot break, and
+# publishes it to GitHub Pages from main. One-time setup: Settings > Pages > Source: GitHub Actions.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build the site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: mdbook
+      - name: Install wasm-bindgen CLI (the version Cargo.lock pins)
+        run: |
+          want="$(awk '/^name = "wasm-bindgen"$/{getline; gsub(/[version= "]/,""); print; exit}' Cargo.lock)"
+          cargo install wasm-bindgen-cli --locked --version "$want"
+      - name: Build the WebAssembly module for the browser
+        run: scripts/build-wasm.sh web
+      - name: Build the site
+        run: scripts/build-site.sh
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/site
+
+  deploy:
+    name: publish to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

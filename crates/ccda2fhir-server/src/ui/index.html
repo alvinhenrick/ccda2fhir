@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ccda2fhir</title>
-<link rel="stylesheet" href="/ui/app.css">
+<link rel="stylesheet" href="ui/app.css">
 </head>
 <body>
 <header>
   <h1>ccda2fhir</h1>
-  <p class="sub">C-CDA to FHIR R4. Your document goes only to this server and is not stored or logged.</p>
+  <p class="sub" id="sub">C-CDA to FHIR R4. Your document goes only to this server and is not stored or logged.</p>
 </header>
 <main>
   <section class="panel" aria-labelledby="in-h">
@@ -26,7 +26,7 @@
           <option value="none">None</option>
         </select>
       </label>
-      <label>Bearer token <span class="hint">(only if the server needs one)</span>
+      <label id="token-label">Bearer token <span class="hint">(only if the server needs one)</span>
         <input type="password" id="token" autocomplete="off" placeholder="not stored">
       </label>
     </div>
@@ -70,6 +70,6 @@
     </div>
   </section>
 </main>
-<script src="/ui/app.js"></script>
+<script src="ui/app.js"></script>
 </body>
 </html>
