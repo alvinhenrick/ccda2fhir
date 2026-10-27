@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ccda2fhir: C-CDA to FHIR R4</title>
+<meta name="description" content="An open source C-CDA to FHIR R4 converter in Rust. A pure library, a CLI, an HTTP service and a WebAssembly build.">
+<style>
+:root { --bg:#f6f7f9; --panel:#fff; --text:#1b1f24; --muted:#5b6672; --line:#d9dee4; --accent:#0b5fd6; }
+@media (prefers-color-scheme: dark) { :root { --bg:#12161b; --panel:#1b2128; --text:#e6e9ed; --muted:#9aa5b1; --line:#2c3540; --accent:#5b9bff; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 system-ui, sans-serif; }
+main { max-width: 920px; margin: 0 auto; padding: 48px 16px; }
+h1 { font-size: 34px; margin: 0 0 8px; }
+.lead { color: var(--muted); font-size: 18px; margin: 0 0 32px; max-width: 640px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 40px; }
+.card { display: block; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; color: inherit; text-decoration: none; }
+.card:hover, .card:focus-visible { border-color: var(--accent); outline: none; }
+.card strong { display: block; color: var(--accent); margin-bottom: 4px; }
+.card span { color: var(--muted); font-size: 14px; }
+h2 { font-size: 20px; margin: 32px 0 8px; }
+ul { padding-left: 20px; } li { margin: 4px 0; }
+pre { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow: auto; font-size: 13px; }
+footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>ccda2fhir</h1>
+  <p class="lead">Convert C-CDA documents to FHIR R4, written in Rust. A pure library first, with a command line tool, an HTTP service and a WebAssembly build on top.</p>
+
+  <div class="cards">
+    <a class="card" href="demo/"><strong>Live demo</strong><span>Drop a C-CDA file and see the FHIR bundle. It runs in your browser; nothing is uploaded.</span></a>
+    <a class="card" href="book/"><strong>Documentation</strong><span>Coverage by element, USCDI status, design decisions, lessons and the changelog.</span></a>
+    <a class="card" href="api/ccda2fhir/"><strong>API reference</strong><span>Rust documentation for the library crates.</span></a>
+    <a class="card" href="https://github.com/alvinhenrick/ccda2fhir"><strong>Source on GitHub</strong><span>MIT licensed. Issues and pull requests welcome.</span></a>
+  </div>
+
+  <h2>What it does</h2>
+  <ul>
+    <li>Maps USCDI v1 and v3 data classes to FHIR R4 (4.0.1) and claims US Core 6.1.0 profiles only where the required data exists.</li>
+    <li>Never invents values and never drops data silently: every judgment call is listed in a report with a stable code.</li>
+    <li>Deterministic output, checked against the HL7 validator in CI on synthetic fixtures and the HL7 C-CDA examples.</li>
+    <li>Optional JWT authentication on the service; a strict Content-Security-Policy on the built-in page.</li>
+  </ul>
+
+  <h2>Use it</h2>
+  <pre>cargo run --release -p ccda2fhir-server -- convert ccd.xml &gt; bundle.json
+cargo run --release -p ccda2fhir-server -- serve --bind 127.0.0.1:8080   # web page at /, API at POST /convert</pre>
+
+  <footer>Use synthetic or de-identified data only until your own security and compliance review is done. See the Security page in the documentation.</footer>
+</main>
+</body>
+</html>

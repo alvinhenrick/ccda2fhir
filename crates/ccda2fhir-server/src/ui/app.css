@@ -57,3 +57,4 @@ th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line
 td.code-cell { font-family: ui-monospace, monospace; font-size: 12px; word-break: break-all; }
 .sev { font-size: 12px; font-weight: 600; }
 .sev.warning { color: var(--warn); } .sev.error { color: var(--err); } .sev.info { color: var(--muted); }
+[hidden] { display: none !important; }

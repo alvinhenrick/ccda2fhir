@@ -3,6 +3,30 @@
   var $ = function (id) { return document.getElementById(id); };
   var state = { bundle: null, filter: null };
 
+  // `server`: POST the document to /convert. `wasm`: convert in this page with the WebAssembly
+  // build (the hosted demo); the document never leaves the browser.
+  var engineMeta = document.querySelector('meta[name=engine]');
+  var engine = engineMeta && engineMeta.content === 'wasm' ? 'wasm' : 'server';
+  var wasmReady = null;
+  function loadWasm() {
+    if (!wasmReady) {
+      wasmReady = import('./wasm/ccda2fhir_wasm.js').then(function (m) {
+        return m.default().then(function () { return m; });
+      });
+    }
+    return wasmReady;
+  }
+  function convertLocal(xml) {
+    return loadWasm().then(function (m) {
+      try { render(JSON.parse(m.convert_ccda(xml, $('profiles').value))); }
+      catch (e) { showError(String((e && e.message) || e)); }
+    }, function () { showError('Could not load the converter module.'); });
+  }
+  if (engine === 'wasm') {
+    $('token-label').hidden = true;
+    $('sub').textContent = 'C-CDA to FHIR R4, running entirely in your browser. Your document is never uploaded.';
+  }
+
   function setBusy(on) { $('go').disabled = on; $('busy').hidden = !on; }
   function showError(text) {
     $('empty').hidden = true; $('result').hidden = true;
@@ -101,6 +125,7 @@
     var xml = $('xml').value.trim();
     if (!xml) { showError('Choose a file or paste a C-CDA document first.'); return; }
     setBusy(true);
+    if (engine === 'wasm') { convertLocal(xml).then(function () { setBusy(false); }); return; }
     var headers = { 'Content-Type': 'application/xml' };
     var token = $('token').value.trim();
     if (token) headers.Authorization = 'Bearer ' + token;
