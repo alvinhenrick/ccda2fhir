@@ -3,7 +3,7 @@ FROM rust:1-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY crates ./crates
-RUN cargo build --release --locked -p ccda2fhir-server
+RUN cargo build --release --locked -p ccda2fhir-server --features otel
 
 # Run: small image, non-root, no shell
 FROM gcr.io/distroless/cc-debian12:nonroot

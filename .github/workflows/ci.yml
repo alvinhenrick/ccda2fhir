@@ -22,6 +22,7 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
+      - run: cargo clippy -p ccda2fhir-server --features otel --all-targets -- -D warnings
 
   deny:
     name: licenses and advisories
