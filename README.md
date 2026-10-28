@@ -3,6 +3,10 @@
 Convert C-CDA documents to FHIR R4, written in Rust. A pure library first; CLI, web service and web UI are
 thin layers on top.
 
+**Website: <https://alvinhenrick.github.io/ccda2fhir/>**
+
+[Live demo](https://alvinhenrick.github.io/ccda2fhir/demo/) (runs in your browser, nothing is uploaded) · [Documentation](https://alvinhenrick.github.io/ccda2fhir/book/) · [API reference](https://alvinhenrick.github.io/ccda2fhir/api/ccda2fhir/)
+
 **Status: 0.1.0** (see [`CHANGELOG.md`](CHANGELOG.md)). Most USCDI v1 and v3 data classes are converted and checked with the HL7
 validator in CI; the remaining gaps are listed in [`docs/uscdi.md`](docs/uscdi.md) and
 [`docs/coverage.md`](docs/coverage.md); [`docs/benchmarks.md`](docs/benchmarks.md) has throughput numbers. See [`DESIGN.md`](DESIGN.md) for the plan.

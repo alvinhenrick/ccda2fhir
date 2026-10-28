@@ -6,7 +6,7 @@ module. They all run the same converter.
 
 ## Try it without installing anything
 
-Open the [live demo](../../demo/), drop a C-CDA file on it and read the result. The conversion happens in your
+Open the [live demo](https://alvinhenrick.github.io/ccda2fhir/demo/), drop a C-CDA file on it and read the result. The conversion happens in your
 browser and the document is not uploaded. Use synthetic or de-identified documents only.
 
 ## Install
