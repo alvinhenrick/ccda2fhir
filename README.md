@@ -59,6 +59,21 @@ A bad or missing token is a 401 with a `WWW-Authenticate` challenge; the token i
 with `AUTH_ISSUER` or `AUTH_AUDIENCE` but no key set is an error, so a typo cannot silently leave the service open.
 See [ADR 0067](docs/decisions/0067-jwt-authentication.md).
 
+#### Observability (OpenTelemetry, optional)
+
+The container image exports traces over OTLP/HTTP when you point it at a collector. Nothing is sent otherwise.
+
+| Variable | Meaning |
+| --- | --- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Your collector, for example `http://otel-collector:4318`. Turns trace export on. |
+| `OTEL_SERVICE_NAME` | Service name on the traces (default `ccda2fhir`). |
+| `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_SDK_DISABLED` | The standard OpenTelemetry settings, read as usual. |
+
+Each request is a span (method, path, status, latency) with a `converted` event holding the status word, the issue
+count and the document size in bytes. Document content, patient data and headers are never recorded. A binary built
+without the feature (`cargo build -p ccda2fhir-server --features otel` adds it) warns at start if the variable is set.
+See [ADR 0070](docs/decisions/0070-opentelemetry.md).
+
 ### Check your own documents with the HL7 validator
 
 An opt-in test rig starts the service and the official HL7 validator, converts every `.xml` in a folder and

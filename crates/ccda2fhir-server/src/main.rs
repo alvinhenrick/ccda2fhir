@@ -2,6 +2,7 @@
 
 mod auth;
 mod server;
+mod telemetry;
 
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpStream};
@@ -276,12 +277,7 @@ fn run_convert(
 }
 
 fn run_serve(bind: SocketAddr, config: server::Config) -> ExitCode {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .init();
+    let guard = telemetry::init();
     let runtime = match tokio::runtime::Runtime::new() {
         Ok(r) => r,
         Err(e) => {
@@ -302,6 +298,7 @@ fn run_serve(bind: SocketAddr, config: server::Config) -> ExitCode {
             .with_graceful_shutdown(shutdown_signal())
             .await
     });
+    drop(guard);
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {

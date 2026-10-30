@@ -25,6 +25,7 @@ Sensible production settings:
 - `REQUEST_TIMEOUT_SECS` just above your slowest conversion.
 - `DISABLE_UI=1` if you want an API only.
 - `AUTH_JWKS_URL`, `AUTH_ISSUER`, `AUTH_AUDIENCE` and `AUTH_REQUIRED_SCOPE` so only your own clients can convert.
+- `OTEL_EXPORTER_OTLP_ENDPOINT` (and `OTEL_SERVICE_NAME`) to send traces to your collector. See the README's observability section.
 
 ## The browser module
 

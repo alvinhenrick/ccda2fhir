@@ -19,7 +19,11 @@ use ccda_map::Profiles;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tower::limit::ConcurrencyLimitLayer;
-use tower_http::{limit::RequestBodyLimitLayer, timeout::TimeoutLayer, trace::TraceLayer};
+use tower_http::{
+    limit::RequestBodyLimitLayer,
+    timeout::TimeoutLayer,
+    trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
+};
 
 /// Service settings.
 #[derive(Debug, Clone)]
@@ -117,7 +121,13 @@ pub fn router(config: &Config) -> Router {
             config.request_timeout,
         ))
         .layer(ConcurrencyLimitLayer::new(config.max_concurrency))
-        .layer(TraceLayer::new_for_http())
+        .layer(
+            // INFO so the request span is exported with the default filter. The span has the method,
+            // path and (once done) the status and latency, never the body.
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::new().level(tracing::Level::INFO))
+                .on_response(DefaultOnResponse::new().level(tracing::Level::INFO)),
+        )
 }
 
 pub(crate) fn outcome(status: StatusCode, code: &str, diagnostics: &str) -> Response {
@@ -247,6 +257,7 @@ async fn convert_handler(
         ..Options::default()
     };
     let with_report = query.report.unwrap_or(false);
+    let size = body.len();
 
     // Conversion is CPU work; keep it off the async threads.
     let result = tokio::task::spawn_blocking(move || {
@@ -262,22 +273,26 @@ async fn convert_handler(
     .await;
 
     match result {
-        Ok(Ok((payload, status, issues))) => (
-            StatusCode::OK,
-            [
-                (header::CONTENT_TYPE, HeaderValue::from_static(FHIR_JSON)),
-                (
-                    header::HeaderName::from_static("x-ccda2fhir-issues"),
-                    HeaderValue::from(issues),
-                ),
-                (
-                    header::HeaderName::from_static("x-ccda2fhir-status"),
-                    HeaderValue::from_static(status),
-                ),
-            ],
-            Json(payload),
-        )
-            .into_response(),
+        Ok(Ok((payload, status, issues))) => {
+            // Only counts and the stable status word: never document content.
+            tracing::info!(status, issues, bytes = size, "converted");
+            (
+                StatusCode::OK,
+                [
+                    (header::CONTENT_TYPE, HeaderValue::from_static(FHIR_JSON)),
+                    (
+                        header::HeaderName::from_static("x-ccda2fhir-issues"),
+                        HeaderValue::from(issues),
+                    ),
+                    (
+                        header::HeaderName::from_static("x-ccda2fhir-status"),
+                        HeaderValue::from_static(status),
+                    ),
+                ],
+                Json(payload),
+            )
+                .into_response()
+        }
         Ok(Err(e)) => outcome(StatusCode::BAD_REQUEST, "invalid", &e.to_string()),
         Err(_) => outcome(
             StatusCode::INTERNAL_SERVER_ERROR,
