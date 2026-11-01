@@ -13,7 +13,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-ccda2fhir = { path = "../ccda2fhir", version = "0.1.0" }
+ccda2fhir = { path = "../ccda2fhir", version = "0.1.1" }
 ccda-map.workspace = true
 serde_json.workspace = true
 wasm-bindgen = "0.2"

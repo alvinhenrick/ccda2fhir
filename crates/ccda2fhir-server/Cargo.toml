@@ -20,7 +20,7 @@ path = "src/main.rs"
 otel = ["dep:opentelemetry", "dep:opentelemetry_sdk", "dep:opentelemetry-otlp", "dep:tracing-opentelemetry"]
 
 [dependencies]
-ccda2fhir = { path = "../ccda2fhir", version = "0.1.0" }
+ccda2fhir = { path = "../ccda2fhir", version = "0.1.1" }
 ccda-map.workspace = true
 ccda-terminology.workspace = true
 axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "json", "query"] }
