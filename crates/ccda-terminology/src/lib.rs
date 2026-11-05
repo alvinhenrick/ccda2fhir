@@ -322,6 +322,7 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
             "88" => Some("influenza, unspecified formulation"),
             "106" => Some("DTaP, 5 pertussis antigens"),
             "113" => Some("Td (adult), 5 Lf tetanus toxoid, preservative free, adsorbed"),
+            "118" => Some("HPV, bivalent"),
             "121" => Some("zoster live"),
             "133" => Some("Pneumococcal conjugate PCV 13"),
             "139" => Some("Td(adult) unspecified formulation"),
@@ -365,6 +366,10 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
         },
         "http://terminology.hl7.org/CodeSystem/v3-ActReason" => match code {
             "PATOBJ" => Some("patient objection"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation" => match code {
+            "N" => Some("Normal"),
             _ => None,
         },
         "http://terminology.hl7.org/CodeSystem/v3-RoleCode" => match code {
@@ -412,6 +417,7 @@ fn icd10cm_display(code: &str) -> Option<&'static str> {
         "T86.10" => "Unspecified complication of kidney transplant",
         "T86.11" => "Kidney transplant rejection",
         "Z00.00" => "Encounter for general adult medical examination without abnormal findings",
+        "Z68.27" => "Body mass index [BMI] 27.0-27.9, adult",
         "Z78.9" => "Other specified health status",
         _ => return None,
     })
@@ -615,6 +621,11 @@ mod tests {
                 "http://hl7.org/fhir/sid/icd-10-cm",
                 "I10",
                 "Essential (primary) hypertension",
+            ),
+            (
+                "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "N",
+                "Normal",
             ),
             (
                 "http://nucc.org/provider-taxonomy",
