@@ -314,6 +314,66 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
             "09" => Some("Td (adult), 2 Lf tetanus toxoid, preservative free, adsorbed"),
             "111" => Some("Influenza, live, trivalent, intranasal, PF"),
             "141" => Some("Influenza, split virus, trivalent, preservative"),
+            "03" => Some("MMR"),
+            "21" => Some("varicella"),
+            "45" => Some("Hep B, unspecified formulation"),
+            "48" => Some("Hib (PRP-T)"),
+            "83" => Some("Hep A, ped/adol, 2 dose"),
+            "88" => Some("influenza, unspecified formulation"),
+            "106" => Some("DTaP, 5 pertussis antigens"),
+            "113" => Some("Td (adult), 5 Lf tetanus toxoid, preservative free, adsorbed"),
+            "118" => Some("HPV, bivalent"),
+            "121" => Some("zoster live"),
+            "133" => Some("Pneumococcal conjugate PCV 13"),
+            "139" => Some("Td(adult) unspecified formulation"),
+            "150" => Some("Influenza, split virus, quadrivalent, PF"),
+            "166" => Some("influenza, intradermal, quadrivalent, preservative free"),
+            _ => None,
+        },
+        "http://hl7.org/fhir/sid/icd-10-cm" => icd10cm_display(code),
+        "urn:oid:2.16.840.1.113883.6.238" => match code {
+            "2106-3" => Some("White"),
+            "2108-9" => Some("European"),
+            "2135-2" => Some("Hispanic or Latino"),
+            "2186-5" => Some("Not Hispanic or Latino"),
+            _ => None,
+        },
+        "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html" => match code {
+            "1117-1" => Some("Family Medicine Clinic"),
+            "1118-9" => Some("Gastrointestinal Clinic"),
+            "1120-5" => Some("Medical Clinic"),
+            "1160-1" => Some("Urgent Care Center"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-NullFlavor" => match code {
+            "ASKU" => Some("asked but unknown"),
+            "UNK" => Some("unknown"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus" => match code {
+            "S" => Some("Never Married"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-LanguageAbilityMode" => match code {
+            "RWR" => Some("Received written"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-ParticipationFunction" => match code {
+            "ADMPHYS" => Some("admitting physician"),
+            "ATTPHYS" => Some("attending physician"),
+            "PCP" => Some("primary care physician"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-ActReason" => match code {
+            "PATOBJ" => Some("patient objection"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation" => match code {
+            "N" => Some("Normal"),
+            _ => None,
+        },
+        "http://terminology.hl7.org/CodeSystem/v3-RoleCode" => match code {
+            "GRPRN" => Some("grandparent"),
             _ => None,
         },
         "http://snomed.info/sct" => match code {
@@ -337,9 +397,43 @@ pub fn official_display(system: &str, code: &str) -> Option<&'static str> {
     }
 }
 
+/// ICD-10-CM: documents often shorten or reword the official title.
+fn icd10cm_display(code: &str) -> Option<&'static str> {
+    Some(match code {
+        "D50.9" => "Iron deficiency anemia, unspecified",
+        "D63.1" => "Anemia in chronic kidney disease",
+        "E03.8" => "Other specified hypothyroidism",
+        "E03.9" => "Hypothyroidism, unspecified",
+        "I10" => "Essential (primary) hypertension",
+        "J17" => "Pneumonia in diseases classified elsewhere",
+        "J18.9" => "Pneumonia, unspecified organism",
+        "J45.20" => "Mild intermittent asthma, uncomplicated",
+        "J45.909" => "Unspecified asthma, uncomplicated",
+        "J84.9" => "Interstitial pulmonary disease, unspecified",
+        "N18.9" => "Chronic kidney disease, unspecified",
+        "R41.3" => "Other amnesia",
+        "R50.9" => "Fever, unspecified",
+        "T23.179A" => "Burn of first degree of unspecified wrist, initial encounter",
+        "T86.10" => "Unspecified complication of kidney transplant",
+        "T86.11" => "Kidney transplant rejection",
+        "Z00.00" => "Encounter for general adult medical examination without abnormal findings",
+        "Z68.27" => "Body mass index [BMI] 27.0-27.9, adult",
+        "Z78.9" => "Other specified health status",
+        _ => return None,
+    })
+}
+
 /// NUCC taxonomy: documents tend to write "classification; specialization".
 fn nucc_display(code: &str) -> Option<&'static str> {
     Some(match code {
+        "111NR0200X" => "Radiology Chiropractor",
+        "1223G0001X" => "General Practice Dentistry",
+        "207Q00000X" => "Family Medicine Physician",
+        "207R00000X" => "Internal Medicine Physician",
+        "208M00000X" => "Hospitalist Physician",
+        "246YC3302X" => "Physician Office Based Coding Specialist",
+        "261QE0002X" => "Emergency Care Clinic/Center",
+        "332B00000X" => "Durable Medical Equipment & Medical Supplies",
         "163W00000X" => "Registered Nurse",
         "2085R0202X" => "Diagnostic Radiology Physician",
         "207KA0200X" => "Allergy Physician",
@@ -360,6 +454,8 @@ fn nci_display(code: &str) -> Option<&'static str> {
         "C28161" => "INTRAMUSCULAR",
         "C38276" => "INTRAVENOUS",
         "C38288" => "ORAL",
+        "C38192" => "AURICULAR (OTIC)",
+        "C48623" => "NOT APPLICABLE",
         _ => return None,
     })
 }
@@ -494,6 +590,59 @@ mod tests {
     fn identifier_systems_all_have_uris() {
         for oid in IDENTIFIER_SYSTEMS {
             assert!(BuiltinTerminology.oid_to_uri(oid).is_some(), "{oid}");
+        }
+    }
+
+    #[test]
+    fn displays_the_validator_asked_for() {
+        for (system, code, display) in [
+            (
+                "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+                "ASKU",
+                "asked but unknown",
+            ),
+            (
+                "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+                "S",
+                "Never Married",
+            ),
+            (
+                "http://terminology.hl7.org/CodeSystem/v3-ParticipationFunction",
+                "PCP",
+                "primary care physician",
+            ),
+            ("urn:oid:2.16.840.1.113883.6.238", "2108-9", "European"),
+            (
+                "http://hl7.org/fhir/sid/cvx",
+                "88",
+                "influenza, unspecified formulation",
+            ),
+            (
+                "http://hl7.org/fhir/sid/icd-10-cm",
+                "I10",
+                "Essential (primary) hypertension",
+            ),
+            (
+                "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "N",
+                "Normal",
+            ),
+            (
+                "http://nucc.org/provider-taxonomy",
+                "207R00000X",
+                "Internal Medicine Physician",
+            ),
+            (
+                "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+                "1160-1",
+                "Urgent Care Center",
+            ),
+        ] {
+            assert_eq!(
+                official_display(system, code),
+                Some(display),
+                "{system}#{code}"
+            );
         }
     }
 

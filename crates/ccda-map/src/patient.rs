@@ -3,7 +3,7 @@
 use ccda_model::{
     Address, ClinicalDocument, Code, PersonName, StatementKind, Telecom, Value as Cv,
 };
-use ccda_terminology::Terminology;
+use ccda_terminology::{official_display, Terminology};
 use serde_json::{json, Map, Value};
 
 use crate::{hl7_date_to_fhir_date, map_codeable_concept, map_identifier, Report};
@@ -26,21 +26,22 @@ const DECEASED_OBSERVATION: &str = "2.16.840.1.113883.10.20.22.4.79";
 const BIRTH_SEX_TEMPLATE: &str = "2.16.840.1.113883.10.20.22.4.200";
 const GENDER_IDENTITY_TEMPLATE: &str = "2.16.840.1.113883.10.20.34.3.45";
 
-/// The OMB categories and their names (the extension's `text` needs one when the document gives none).
+/// The OMB categories and their official displays (also the extension's `text` when the document
+/// gives no wording). UNK and ASKU are spelled as the v3 NullFlavor code system spells them.
 const RACE_OMB: [(&str, &str); 7] = [
     ("1002-5", "American Indian or Alaska Native"),
     ("2028-9", "Asian"),
     ("2054-5", "Black or African American"),
     ("2076-8", "Native Hawaiian or Other Pacific Islander"),
     ("2106-3", "White"),
-    ("UNK", "Unknown"),
-    ("ASKU", "Asked but no answer"),
+    ("UNK", "unknown"),
+    ("ASKU", "asked but unknown"),
 ];
 const ETHNICITY_OMB: [(&str, &str); 4] = [
     ("2135-2", "Hispanic or Latino"),
     ("2186-5", "Not Hispanic or Latino"),
-    ("UNK", "Unknown"),
-    ("ASKU", "Asked but no answer"),
+    ("UNK", "unknown"),
+    ("ASKU", "asked but unknown"),
 ];
 
 /// The `id` of the one Patient a document describes. Other resources refer to it.
@@ -430,7 +431,8 @@ fn category_extension(
     max_omb: usize,
     report: &mut Report,
 ) -> Option<Value> {
-    let mut categories: Vec<(String, String)> = Vec::new();
+    // (code, official display, the document's wording or the official display)
+    let mut categories: Vec<(String, String, String)> = Vec::new();
     let mut detailed: Vec<(String, Option<String>)> = Vec::new();
     for c in codes {
         let value = match (&c.code, &c.null_flavor) {
@@ -447,9 +449,9 @@ fn category_extension(
         }
         match omb.iter().find(|(k, _)| *k == value) {
             Some((k, name)) => {
-                let display = c.display_name.clone().unwrap_or_else(|| (*name).to_owned());
-                if !categories.iter().any(|(code, _)| code == k) {
-                    categories.push(((*k).to_owned(), display));
+                let wording = c.display_name.clone().unwrap_or_else(|| (*name).to_owned());
+                if !categories.iter().any(|(code, _, _)| code == k) {
+                    categories.push(((*k).to_owned(), (*name).to_owned(), wording));
                 }
             }
             None => {
@@ -468,7 +470,7 @@ fn category_extension(
     }
     let text = categories
         .first()
-        .map(|(_, d)| d.clone())
+        .map(|(_, _, w)| w.clone())
         .or_else(|| detailed.iter().find_map(|(_, d)| d.clone()))
         .or_else(|| detailed.first().map(|(c, _)| c.clone()))?;
     let coding = |code: &str, display: Option<&str>| {
@@ -486,11 +488,13 @@ fn category_extension(
         c
     };
     let mut ext: Vec<Value> = Vec::new();
-    for (code, display) in &categories {
+    // The codings carry the official display; the document's own wording survives in `text`.
+    for (code, display, _) in &categories {
         ext.push(json!({ "url": "ombCategory", "valueCoding": coding(code, Some(display)) }));
     }
     for (code, display) in &detailed {
-        ext.push(json!({ "url": "detailed", "valueCoding": coding(code, display.as_deref()) }));
+        let display = official_display(CDC_RACE_SYSTEM, code).or(display.as_deref());
+        ext.push(json!({ "url": "detailed", "valueCoding": coding(code, display) }));
     }
     ext.push(json!({ "url": "text", "valueString": text }));
     Some(json!({ "url": url, "extension": ext }))
@@ -1055,6 +1059,25 @@ mod tests {
         assert!(r.get("extension").is_none());
         assert!(report.issues.is_empty());
         assert_eq!(report2.issues[0].code, "patient.race.system");
+    }
+
+    #[test]
+    fn race_codings_use_the_official_display_and_text_keeps_the_wording() {
+        let (r, _) = parse_doc(
+            r#"<patient>
+  <raceCode code="2106-3" displayName="Caucasian White" codeSystem="2.16.840.1.113883.6.238"/>
+  <sdtc:raceCode code="2108-9" displayName="White European" codeSystem="2.16.840.1.113883.6.238"/>
+  <ethnicGroupCode nullFlavor="ASKU"/>
+</patient>"#,
+            "",
+        );
+        let race = &r["extension"][0]["extension"];
+        assert_eq!(race[0]["valueCoding"]["display"], "White");
+        assert_eq!(race[1]["valueCoding"]["display"], "European");
+        assert_eq!(race[2]["valueString"], "Caucasian White");
+        let eth = &r["extension"][1]["extension"];
+        assert_eq!(eth[0]["valueCoding"]["code"], "ASKU");
+        assert_eq!(eth[0]["valueCoding"]["display"], "asked but unknown");
     }
 
     #[test]
