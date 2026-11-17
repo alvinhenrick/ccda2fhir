@@ -34,7 +34,10 @@ for (const name of fs.readdirSync(path.join(root, 'fixtures')).sort()) {
   if (!fs.existsSync(goldenPath)) continue;
   const xml = fs.readFileSync(path.join(root, 'fixtures', name), 'utf8');
   // The goldens hold a placeholder where the converter's own version appears (software Device).
-  const result = JSON.parse(wasm.convert_ccda(xml, undefined).split(wasm.version()).join('<crate-version>'));
+  // Replace only a value that is exactly the version. A text replace also hits OIDs that contain it
+  // (version 0.1.1 sits inside 2.16.840.1.113883).
+  const version = wasm.version();
+  const result = JSON.parse(wasm.convert_ccda(xml, undefined), (_k, v) => (v === version ? '<crate-version>' : v));
   const golden = JSON.parse(fs.readFileSync(goldenPath, 'utf8'));
   const diff = firstDifference(result.bundle, golden.bundle);
   if (diff) { mismatches.push(stem + ' -> ' + diff); continue; }
