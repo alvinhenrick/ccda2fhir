@@ -212,7 +212,7 @@ fn map_activity(s: &Statement, ctx: &mut Context, out: &mut Vec<Value>) {
         .and_then(|c| map_codeable_concept(c, ctx.terminology, ctx.report))
     {
         let used = class.as_ref().and_then(|(_, v)| v.clone());
-        if let Some(codings) = ty["coding"].as_array_mut() {
+        if let Some(codings) = ty.get_mut("coding").and_then(Value::as_array_mut) {
             codings.retain(|c| {
                 !(c["system"] == ACT_CODE_URI && used.as_deref() == c["code"].as_str())
             });
@@ -368,6 +368,13 @@ mod tests {
         let codings = out[0]["type"][0]["coding"].as_array().unwrap();
         assert_eq!(codings.len(), 1);
         assert_eq!(codings[0]["code"], "99213");
+    }
+
+    #[test]
+    fn null_code_with_original_text_has_no_null_coding() {
+        let code = r#"<code nullFlavor="UNK"><originalText>New Patient</originalText></code>"#;
+        let (out, _) = run(&doc(code, ""));
+        assert_eq!(out[0]["type"], json!([{ "text": "New Patient" }]));
     }
 
     #[test]
