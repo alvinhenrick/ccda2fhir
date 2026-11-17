@@ -108,6 +108,28 @@ pub(crate) fn register_organization(org: &AuthorOrganization, ctx: &mut Context)
     if !addresses.is_empty() {
         resource.insert("address".into(), json!(addresses));
     }
+    // FHIR R4 org-2 and org-3: an organization's address and telecom can never be of use "home".
+    // Some documents mark them H or HP anyway; the use is dropped and the value kept.
+    let mut dropped = false;
+    for key in ["address", "telecom"] {
+        for item in resource
+            .get_mut(key)
+            .and_then(Value::as_array_mut)
+            .into_iter()
+            .flatten()
+        {
+            if item["use"] == "home" {
+                item.as_object_mut().map(|o| o.remove("use"));
+                dropped = true;
+            }
+        }
+    }
+    if dropped {
+        ctx.report.warn(
+            "organization.home-use.dropped",
+            "an organization address or telecom was marked as home, which FHIR does not allow for an organization; the use was omitted",
+        );
+    }
     let reference = ctx.reference("Organization", &id);
     ctx.organizations.insert(key, reference.clone());
     ctx.push_extra(Value::Object(resource));
@@ -536,6 +558,38 @@ mod tests {
 
     fn of_type<'a>(extra: &'a [Value], t: &str) -> Vec<&'a Value> {
         extra.iter().filter(|r| r["resourceType"] == t).collect()
+    }
+
+    #[test]
+    fn organization_address_and_telecom_never_use_home() {
+        use ccda_model::{Address, Telecom};
+        let org = AuthorOrganization {
+            name: Some("Clinic".into()),
+            addresses: vec![Address {
+                use_code: Some("H".into()),
+                state: Some("WA".into()),
+                ..Address::default()
+            }],
+            telecoms: vec![Telecom {
+                use_code: Some("HP".into()),
+                value: Some("tel:555-0100".into()),
+            }],
+            ..AuthorOrganization::default()
+        };
+        let mut report = Report::default();
+        let mut ctx = Context::new(&BuiltinTerminology, &mut report, "doc");
+        register_organization(&org, &mut ctx).unwrap();
+        let extra = ctx.take_extra();
+        let o = of_type(&extra, "Organization")[0];
+        assert_eq!(o["address"], json!([{ "state": "WA" }]));
+        assert_eq!(
+            o["telecom"],
+            json!([{ "system": "phone", "value": "555-0100" }])
+        );
+        assert!(report
+            .issues
+            .iter()
+            .any(|i| i.code == "organization.home-use.dropped"));
     }
 
     #[test]
